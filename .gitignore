@@ -1,0 +1,22 @@
+# Xcode
+.DS_Store
+xcuserdata/
+DerivedData/
+build/
+*.pbxuser
+*.perspectivev3
+*.xcworkspace/xcuserdata/
+*.ipa
+
+# CocoaPods
+Pods/
+
+# Carthage
+Carthage/Build/
+
+# Swift Package Manager
+.build/
+
+# Other
+*.swp
+*.bak
