@@ -8,7 +8,7 @@
 import Foundation
 import SwiftData
 
-// Enum to categorize phrases as requested
+// Content tags (can add more in the future)
 enum PhraseCategory: String, Codable, CaseIterable, Hashable {
     case formal
     case informal

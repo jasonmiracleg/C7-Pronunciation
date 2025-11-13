@@ -7,7 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		2C775DC22EC5F14200B12CFA /* error_log.txt in Resources */ = {isa = PBXBuildFile; fileRef = 2C775DC12EC5F13B00B12CFA /* error_log.txt */; };
+		2CE6B0782EC6223F001986CD /* espeak-ng-data in Frameworks */ = {isa = PBXBuildFile; productRef = 2CE6B0772EC6223F001986CD /* espeak-ng-data */; };
+		2CE6B07A2EC6223F001986CD /* libespeak-ng in Frameworks */ = {isa = PBXBuildFile; productRef = 2CE6B0792EC6223F001986CD /* libespeak-ng */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -37,6 +38,9 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		2C775DBA2EC5E86C00B12CFA /* Resources */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			explicitFolders = (
+				"espeak-ng-data",
+			);
 			path = Resources;
 			sourceTree = "<group>";
 		};
@@ -62,6 +66,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2CE6B07A2EC6223F001986CD /* libespeak-ng in Frameworks */,
+				2CE6B0782EC6223F001986CD /* espeak-ng-data in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -125,6 +131,8 @@
 			);
 			name = "C7-Pronunciation";
 			packageProductDependencies = (
+				2CE6B0772EC6223F001986CD /* espeak-ng-data */,
+				2CE6B0792EC6223F001986CD /* libespeak-ng */,
 			);
 			productName = "C7-Pronunciation";
 			productReference = 6A7F0D7D2EC5687C003D503F /* C7-Pronunciation.app */;
@@ -208,6 +216,9 @@
 			);
 			mainGroup = 6A7F0D742EC5687C003D503F;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				2CE6B0762EC6223F001986CD /* XCRemoteSwiftPackageReference "espeak-ng-spm" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 6A7F0D7E2EC5687C003D503F /* Products */;
 			projectDirPath = "";
@@ -225,7 +236,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2C775DC22EC5F14200B12CFA /* error_log.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -592,6 +602,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		2CE6B0762EC6223F001986CD /* XCRemoteSwiftPackageReference "espeak-ng-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/espeak-ng/espeak-ng-spm.git";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		2CE6B0772EC6223F001986CD /* espeak-ng-data */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2CE6B0762EC6223F001986CD /* XCRemoteSwiftPackageReference "espeak-ng-spm" */;
+			productName = "espeak-ng-data";
+		};
+		2CE6B0792EC6223F001986CD /* libespeak-ng */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2CE6B0762EC6223F001986CD /* XCRemoteSwiftPackageReference "espeak-ng-spm" */;
+			productName = "libespeak-ng";
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 6A7F0D752EC5687C003D503F /* Project object */;
 }

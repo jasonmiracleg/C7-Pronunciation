@@ -48,8 +48,8 @@ class SwiftDataManager {
     }
     
     // MARK: - Add Operations
-    
-    // TODO: Convert text to phonemnes using espeak-ng
+        
+    /// Adds a new user-defined phrase to the database.
     func addPhrase(text: String, phonemes: String, category: PhraseCategory) {
         let newPhrase = Phrase(text: text, phonemes: phonemes, category: category)
         context.insert(newPhrase)
@@ -60,6 +60,26 @@ class SwiftDataManager {
         } catch {
             print("Failed to save new phrase: \(error)")
         }
+    }
+
+    // *** NEW FUNCTION ***
+    /// Converts text to phonemes using EspeakManager and saves it as a user-added phrase.
+    func addUserPhrase(_ text: String) {
+        // 1. Generate phonemes using your new manager
+        // Note: Your file comment indicated this returns [String], so we join them.
+        let phonemeArray = EspeakManager.shared.getPhonemes(for: text)
+        
+        // Handle potential failures (or empty results)
+        guard !phonemeArray.isEmpty else {
+            print("EspeakManager returned no phonemes for: \(text)")
+            return
+        }
+        
+        // 2. Convert array to a single string (e.g., "h ə l ˈ ə ʊ")
+        let phonemeString = phonemeArray.joined(separator: " ")
+        
+        // 3. Save to database
+        addPhrase(text: text, phonemes: phonemeString, category: .userAdded)
     }
     
     // MARK: - Fetch Operations
