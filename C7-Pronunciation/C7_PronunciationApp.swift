@@ -12,7 +12,7 @@ import SwiftData
 struct C7_PronunciationApp: App {
     var body: some Scene {
         WindowGroup {
-            DataBankTestView()
+            PronunciationView()
         }
         .modelContainer(SwiftDataManager.shared.modelContainer) // Added model context here
     }
