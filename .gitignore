@@ -22,3 +22,4 @@ Carthage/Build/
 *.bak
 
 *.mlpackage
+Resources/Wav2Vec2_Phoneme.mlpackage
