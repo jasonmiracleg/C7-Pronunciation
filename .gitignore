@@ -20,4 +20,5 @@ Carthage/Build/
 # Other
 *.swp
 *.bak
-error_log.txt
+
+*.mlpackage

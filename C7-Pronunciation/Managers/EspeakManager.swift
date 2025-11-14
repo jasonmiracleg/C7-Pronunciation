@@ -13,12 +13,20 @@ import libespeak_ng
 private func phonemeCallback(samples: UnsafeMutablePointer<Int16>?, num_samples: Int32, events: UnsafeMutablePointer<espeak_EVENT>?) -> Int32 {
     var evt = events
     while let e = evt?.pointee, e.type != espeakEVENT_LIST_TERMINATED {
+        
         if e.type == espeakEVENT_PHONEME {
             let phoneme = withUnsafeBytes(of: e.id.string) { rawPtr in
                 String(cString: rawPtr.bindMemory(to: CChar.self).baseAddress!)
             }
+            // Accumulate the phoneme character
             EspeakManager.shared.accumulate(phoneme: phoneme)
         }
+        
+        if e.type == espeakEVENT_WORD {
+            // We've hit the end of a word. Add a space.
+            EspeakManager.shared.accumulate(phoneme: " ")
+        }
+        
         evt = evt?.advanced(by: 1)
     }
     return 0

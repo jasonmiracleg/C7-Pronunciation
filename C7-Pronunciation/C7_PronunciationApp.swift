@@ -10,10 +10,17 @@ import SwiftData
 
 @main
 struct C7_PronunciationApp: App {
+    init() {
+        // Warm up the model in background during app launch
+        Task {
+            Wav2Vec2ModelManager.shared.initialize()
+        }
+    }
+    
     var body: some Scene {
         WindowGroup {
-            PronunciationView()
+            DataBankTestView()
         }
-        .modelContainer(SwiftDataManager.shared.modelContainer) // Added model context here
+        .modelContainer(SwiftDataManager.shared.modelContainer)
     }
 }

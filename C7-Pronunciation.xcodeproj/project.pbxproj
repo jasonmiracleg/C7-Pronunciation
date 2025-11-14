@@ -29,7 +29,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		2C775DC12EC5F13B00B12CFA /* error_log.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = error_log.txt; sourceTree = "<group>"; };
 		6A7F0D7D2EC5687C003D503F /* C7-Pronunciation.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "C7-Pronunciation.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6A7F0D8C2EC5687C003D503F /* C7-PronunciationTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "C7-PronunciationTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6A7F0D962EC5687C003D503F /* C7-PronunciationUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "C7-PronunciationUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -91,7 +90,6 @@
 		6A7F0D742EC5687C003D503F = {
 			isa = PBXGroup;
 			children = (
-				2C775DC12EC5F13B00B12CFA /* error_log.txt */,
 				2C775DBA2EC5E86C00B12CFA /* Resources */,
 				6A7F0D7F2EC5687C003D503F /* C7-Pronunciation */,
 				6A7F0D8F2EC5687C003D503F /* C7-PronunciationTests */,

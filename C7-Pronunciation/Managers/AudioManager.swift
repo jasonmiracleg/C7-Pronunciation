@@ -36,17 +36,34 @@ class AudioManager: NSObject, ObservableObject, AVAudioRecorderDelegate {
         }
     }
     
-    func startRecording() {
-        let fileName = "recording.m4a"
+    func startRecording(asWav: Bool = false) {
+        // 1. Choose filename based on format
+        let fileName = asWav ? "recording.wav" : "recording.m4a"
         let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         self.audioURL = documentsPath.appendingPathComponent(fileName)
         
-        let settings: [String: Any] = [
-            AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
-            AVSampleRateKey: 16000,
-            AVNumberOfChannelsKey: 1,
-            AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
-        ]
+        // 2. Define settings based on format
+        let settings: [String: Any]
+        
+        if asWav {
+            // Uncompressed WAV for CoreML (16kHz, 16-bit, Mono)
+            settings = [
+                AVFormatIDKey: Int(kAudioFormatLinearPCM),
+                AVSampleRateKey: 16000,
+                AVNumberOfChannelsKey: 1,
+                AVLinearPCMBitDepthKey: 16,
+                AVLinearPCMIsBigEndianKey: false,
+                AVLinearPCMIsFloatKey: false
+            ]
+        } else {
+            // Existing AAC settings for Network calls
+            settings = [
+                AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
+                AVSampleRateKey: 16000,
+                AVNumberOfChannelsKey: 1,
+                AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
+            ]
+        }
         
         do {
             audioSession.requestRecordPermission { [weak self] allowed in
