@@ -5,7 +5,7 @@
 //  Created by Savio Enoson on 14/11/25.
 //
 
-
+import Combine
 import SwiftUI
 
 struct PronunciationView: View { 
@@ -36,7 +36,7 @@ struct PronunciationView: View {
     
     private var inputSection: some View {
         Section("Target Text") {
-            TextEditor(text: $viewModel.targetText)
+            TextEditor(text: $viewModel.targetSentence)
                 .frame(height: 80)
                 .focused($isInputFocused)
             
@@ -83,14 +83,14 @@ struct PronunciationView: View {
                 .font(.caption)
         }
         
-        if let response = viewModel.scoreResponse {
+        if let response = viewModel.evalResults {
             Section("Results") {
                 VStack(alignment: .leading, spacing: 10) {
                     HStack {
                         Text("Score:")
-                        Text("\(response.overallScore, specifier: "%.0f")%")
+                        Text("\(response.totalScore*100, specifier: "%.0f")%")
                             .bold()
-                            .foregroundColor(scoreColor(response.overallScore))
+                            .foregroundColor(scoreColor(response.totalScore))
                     }
                     .font(.title2)
                     
@@ -100,7 +100,7 @@ struct PronunciationView: View {
                 }
                 .padding(.vertical)
                 
-                // Reuse your FlexibleFlowLayout here
+                // Individual word scores
                 FlexibleFlowLayout(data: response.wordScores) { word in
                     WordChip(word: word, color: scoreColor(word.score))
                         .onTapGesture {
@@ -110,14 +110,14 @@ struct PronunciationView: View {
             }
         }
     }
-    
-    private func scoreColor(_ score: Double) -> Color {
-        switch score {
-        case 85...100: return .green
-        case 70..<85: return .blue
-        case 50..<70: return .orange
-        default: return .red
-        }
+}
+
+private func scoreColor(_ score: Double) -> Color {
+    switch score*100 {
+    case 85...100: return .green
+    case 70..<85: return .blue
+    case 50..<70: return .orange
+    default: return .red
     }
 }
 
@@ -132,7 +132,7 @@ struct WordChip: View {
             Text(word.word)
                 .fontWeight(.medium)
                 .foregroundColor(color)
-            Text("\(Int(word.score))%")
+            Text("\(Int(word.score*100))%")
                 .font(.caption2)
                 .foregroundColor(color.opacity(0.8))
         }
@@ -143,7 +143,6 @@ struct WordChip: View {
     }
 }
 
-// Simple detail view
 struct WordDetailView: View {
     let word: WordScore
     let synthesizer: SpeechSynthesizer
@@ -157,10 +156,24 @@ struct WordDetailView: View {
                     .bold()
                 
                 VStack {
-                    Text("Phonemes")
+                    Text("Spoken Phonemes")
                         .font(.caption)
                         .foregroundColor(.secondary)
-                    Text(word.phonemes.joined(separator: " "))
+                    
+                    // MODIFICATION 2:
+                    // Instead of a single Text view, we now call a function
+                    // that builds a composite Text view with custom colors.
+                    buildSpokenPhonemesText()
+                        .font(.title2)
+                        .frame(maxWidth: .infinity, alignment: .leading) // Keep the layout
+                        .padding()
+                        .background(Color.gray.opacity(0.1))
+                        .cornerRadius(10)
+                    
+                    Text("Ideal Phonemes")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Text(word.allTargets()) // This one remains unchanged
                         .font(.title2)
                         .padding()
                         .background(Color.gray.opacity(0.1))
@@ -186,5 +199,30 @@ struct WordDetailView: View {
                 }
             }
         }
+    }
+    
+    private func buildSpokenPhonemesText() -> Text {
+        var combinedText = Text("")
+        
+        print("Building spoken card for word: \(self.word.word)")
+        print("Spoken phonemes: \(self.word.allActuals())")
+        
+        for phoneme in word.alignedPhonemes {
+            if let actualPhoneme = phoneme.actual {
+                print("\(actualPhoneme)")
+                
+                // Create a text view for this specific phoneme
+                var phonemeText = Text(actualPhoneme)
+                
+                // Check the score. We color it if it's "blue or below" (< 85)
+                if phoneme.score * 100 < 85 {
+                    phonemeText = phonemeText.foregroundColor(scoreColor(phoneme.score))
+                }
+                
+                // Add this phoneme and a space to the main text
+                combinedText = Text("\(combinedText)\(phonemeText) ")            }
+        }
+        
+        return combinedText
     }
 }

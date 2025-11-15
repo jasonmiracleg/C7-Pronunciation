@@ -68,15 +68,51 @@ struct CTCDecoder {
     /// Decode multiple chunks and concatenate results
     /// - Parameter logitsArray: Array of logits from multiple chunks
     /// - Returns: Concatenated phoneme string
-    func decodeChunks(_ logitsArray: [[[Float]]]) -> String {
-        let decodedChunks = logitsArray.map { decode(logits: $0) }
+    
+    // DEBUG: TEST OUTPUTTING PhonemePrediction Objects. OLD FUNC BELOW:
+    // func decodeChunks(_ logitsArray: [[[Float]]]) -> String {
+    func decodeChunks(_ logitsArray: [[[Float]]]) -> [[PhonemePrediction]] {
+//        let decodedChunks = logitsArray.map { decode(logits: $0) }
+        let decodedChunks = logitsArray.map { decodeWithConfidence(logits: $0) }
         
-        // Join chunks with space separator
-        // Note: This is a simple concatenation. For better results,
-        // you might want to implement overlap handling or beam search.
-//        print(decodedChunks) = ["ɡ ə d iː v n ɪ ŋ ɛ v ɹ i w ʌ n"]
         return decodedChunks
             .filter { !$0.isEmpty }
-            .joined(separator: " ")
+//            .joined(separator: " ")
+    }
+    
+    func decodeWithConfidence(logits: [[Float]]) -> [PhonemePrediction] {
+        var results: [PhonemePrediction] = []
+        
+        for timeStep in logits {
+            // Get top 3 predictions
+            let top3 = timeStep.enumerated()
+                .sorted { $0.element > $1.element }
+                .prefix(4)
+            
+            let topIndex = top3[0].offset
+            let topValue = top3[0].element
+            
+            // Convert logits to probabilities using softmax
+            let maxLogit = timeStep.max() ?? 0
+            let expSum = timeStep.reduce(0) { $0 + exp($1 - maxLogit) }
+            let topProb = exp(topValue - maxLogit) / expSum
+            
+            let alternatives = Array(top3.dropFirst()).map { idx, val in
+                let prob = exp(val - maxLogit) / expSum
+                return PhonemeScore(phoneme: vocabulary.token(for: idx) ?? "", score: Double(prob))
+            }
+            
+            if topIndex != 0 { // Skip blank
+                let topScore = Double(topProb)
+                let result = PhonemePrediction(
+                    topPrediction: PhonemeScore(phoneme: vocabulary.token(for: topIndex) ?? "", score: topScore),
+                    score: topScore,
+                    top3: alternatives
+                )
+                results.append(result)
+            }
+        }
+        
+        return results
     }
 }

@@ -11,9 +11,9 @@ import SwiftData
 @main
 struct C7_PronunciationApp: App {
     init() {
-        // Warm up the model in background during app launch
+        // Warm up the model in background during app launch. COMMENT OUT TO IMPROVE LOAD SPEED IF NOT USING IT YEAH !
         Task {
-            Wav2Vec2ModelManager.shared.initialize()
+            AudioManager.initialize()
         }
     }
     
@@ -21,6 +21,6 @@ struct C7_PronunciationApp: App {
         WindowGroup {
             DataBankTestView()
         }
-        .modelContainer(SwiftDataManager.shared.modelContainer)
+        .modelContainer(DataBankManager.shared.modelContainer)
     }
 }

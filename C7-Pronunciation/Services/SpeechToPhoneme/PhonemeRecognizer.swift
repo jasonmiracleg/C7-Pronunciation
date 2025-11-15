@@ -62,7 +62,7 @@ class PhonemeRecognizer {
     /// Recognize phonemes from audio file
     /// - Parameter audioURL: URL to audio file
     /// - Returns: Phoneme string
-    func recognize(audioURL: URL) throws -> String {
+    func recognize(audioURL: URL) throws -> [[PhonemePrediction]] {
         // Load and preprocess audio
         let samples = try AudioPreprocessor.loadAudio(from: audioURL)
         
@@ -92,7 +92,7 @@ class PhonemeRecognizer {
     /// Recognize phonemes from audio samples (for streaming)
     /// - Parameter samples: Audio samples (any length, will be chunked automatically)
     /// - Returns: Phoneme string
-    func recognize(samples: [Float]) throws -> String {
+    func recognize(samples: [Float]) throws -> [[PhonemePrediction]] {
         print("Processing \(samples.count) samples (\(Double(samples.count)/16000.0)s)")
         
         // Split into chunks
@@ -163,16 +163,16 @@ class PhonemeRecognizer {
         let shape = mlArray.shape.map { $0.intValue }
         
         // Expected shape: [1, timeSteps, vocabSize] or [timeSteps, vocabSize]
-        let batchSize: Int
+//        let batchSize: Int
         let timeSteps: Int
         let vocabSize: Int
         
         if shape.count == 3 {
-            batchSize = shape[0]
+//            batchSize = shape[0]
             timeSteps = shape[1]
             vocabSize = shape[2]
         } else if shape.count == 2 {
-            batchSize = 1
+//            batchSize = 1
             timeSteps = shape[0]
             vocabSize = shape[1]
         } else {

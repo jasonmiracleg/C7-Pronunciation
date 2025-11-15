@@ -6,14 +6,6 @@
 import AVFoundation
 import Accelerate
 
-enum AudioError: Error {
-    case fileNotFound
-    case loadFailed
-    case invalidFormat
-    case resamplingFailed
-    case silentAudio
-    case tooShort
-}
 
 struct AudioPreprocessor {
     static let targetSampleRate: Double = 16000
