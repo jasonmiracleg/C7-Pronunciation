@@ -145,6 +145,8 @@ public class EspeakManager {
             let specialTokens: Set<String> = ["<pad>", "<s>", "</s>", "<unk>"]
             validPhonemes = Set(vocab.tokenToId.keys.filter { !specialTokens.contains($0) })
             
+            print(validPhonemes)
+            
             // Build regex pattern (sort by length, longest first for greedy matching)
             let sortedPhonemes = validPhonemes.sorted { $0.count > $1.count }
             let pattern = sortedPhonemes.map { NSRegularExpression.escapedPattern(for: $0) }.joined(separator: "|")

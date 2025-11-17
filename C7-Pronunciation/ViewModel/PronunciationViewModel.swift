@@ -64,6 +64,7 @@ class PronunciationViewModel: ObservableObject {
             
             self.decodedPhonemes = result
             self.idealPhonemes = espeakManager.getPhonemesByWord(for: self.targetSentence)
+            print(self.idealPhonemes)
             self.isLoading = false
             
         } catch {
