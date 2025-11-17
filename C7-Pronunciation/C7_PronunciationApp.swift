@@ -10,6 +10,8 @@ import SwiftData
 
 @main
 struct C7_PronunciationApp: App {
+    @AppStorage("hasCompletedOnboarding") var hasCompletedOnboarding: Bool = false
+
     init() {
         // Warm up the model in background during app launch. COMMENT OUT TO IMPROVE LOAD SPEED IF NOT USING IT YEAH !
         Task {
@@ -19,7 +21,13 @@ struct C7_PronunciationApp: App {
     
     var body: some Scene {
         WindowGroup {
-            DataBankTestView()
+            if hasCompletedOnboarding {
+                HomeScreenView()
+            } else {
+                OnboardingView {
+                    self.hasCompletedOnboarding = true
+                }
+            }
         }
         .modelContainer(DataBankManager.shared.modelContainer)
     }
