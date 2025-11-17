@@ -9,6 +9,8 @@ import SwiftUI
 
 struct BeforeCustomView: View {
     @State private var isPresented: Bool = false
+    @State private var viewModel =  CustomViewModel()
+    
     var body: some View {
         VStack {
             Button("Custom Mode") {
@@ -16,7 +18,7 @@ struct BeforeCustomView: View {
             }
         }
         .fullScreenCover(isPresented: $isPresented) {
-            CustomMainView()
+            CustomMainView(viewModel: $viewModel)
         }
     }
 }

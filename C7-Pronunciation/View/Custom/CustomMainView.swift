@@ -9,11 +9,12 @@ import SwiftUI
 
 struct CustomMainView: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var isRecording: Bool = false
     @State private var isDone: Bool = false
     @State var text = ""
     @State var isEnable: Bool = true
     @State private var isPresented: Bool = false
+    
+    @Binding var viewModel: CustomViewModel
     
     var body: some View {
         NavigationStack {
@@ -35,7 +36,6 @@ struct CustomMainView: View {
                 if isDone {
                     HStack {
                         Button(action: {
-                            isRecording.toggle()
                             isEnable.toggle()
                             isDone.toggle()
                         }) {
@@ -59,14 +59,17 @@ struct CustomMainView: View {
 
                 } else {
                     Button(action: {
-                        if !isRecording {
-                            isRecording.toggle()
+                        if !viewModel.isRecording {
+                            viewModel.setTargetSentence(text)
+                            viewModel.toggleRecording()
+                            
                             isEnable.toggle()
                         } else {
+                            viewModel.toggleRecording()
                             isDone.toggle()
                         }
                     }) {
-                        Image(systemName: !isRecording ? "microphone.circle.fill" : "stop.circle.fill")
+                        Image(systemName: !viewModel.isRecording ? "microphone.circle.fill" : "stop.circle.fill")
                             .font(.system(size: 64))
                             .foregroundStyle(Color.interactive)
                             .padding()
@@ -76,6 +79,7 @@ struct CustomMainView: View {
             }
             .fullScreenCover(isPresented: $isPresented) {
                 EvaluationView()
+                    .environmentObject(viewModel)
             }
             .navigationTitle("Custom")
             .navigationBarTitleDisplayMode(.inline)
@@ -91,8 +95,4 @@ struct CustomMainView: View {
             }
         }
     }
-}
-
-#Preview {
-    CustomMainView()
 }
