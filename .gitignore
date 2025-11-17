@@ -23,3 +23,7 @@ Carthage/Build/
 
 *.mlpackage
 Resources/Wav2Vec2_Phoneme.mlpackage
+Resources/Wav2Vec2_Phoneme.mlpackage.zip.download/Wav2Vec2_Phoneme.mlpackage.zip
+Resources/Wav2Vec2_Phoneme/Data/com.apple.CoreML/model.mlmodel
+Resources/Wav2Vec2_Phoneme/Data/com.apple.CoreML/weights/weight.bin
+Resources/Wav2Vec2_Phoneme/Manifest.json
