@@ -228,7 +228,7 @@ public class PronunciationScorer {
         
         // Create word-level scores with word names
         let wordScoreResults: [WordScore]
-        wordScoreResults = wordScores.enumerated().map { WordScore(word: targetWords[$0.offset], score: $0.element, alignedPhonemes: groupedAlignedPhonemes[$0.offset]) }
+        wordScoreResults = wordScores.enumerated().map { WordScore(word: targetWords[$0.offset], alignedPhonemes: groupedAlignedPhonemes[$0.offset]) }
         
         return PronunciationEvalResult(
             totalScore: finalTotalScore,

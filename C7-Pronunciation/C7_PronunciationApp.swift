@@ -19,7 +19,7 @@ struct C7_PronunciationApp: App {
     
     var body: some Scene {
         WindowGroup {
-            DataBankTestView()
+            FlashcardPageView()
         }
         .modelContainer(DataBankManager.shared.modelContainer)
     }
