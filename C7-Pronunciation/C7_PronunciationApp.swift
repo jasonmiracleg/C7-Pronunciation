@@ -10,10 +10,17 @@ import SwiftData
 
 @main
 struct C7_PronunciationApp: App {
+    init() {
+        // Warm up the model in background during app launch. COMMENT OUT TO IMPROVE LOAD SPEED IF NOT USING IT YEAH !
+        Task {
+            AudioManager.initialize()
+        }
+    }
+    
     var body: some Scene {
         WindowGroup {
             DataBankTestView()
         }
-        .modelContainer(SwiftDataManager.shared.modelContainer) // Added model context here
+        .modelContainer(DataBankManager.shared.modelContainer)
     }
 }

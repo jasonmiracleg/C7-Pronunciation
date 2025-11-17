@@ -20,4 +20,6 @@ Carthage/Build/
 # Other
 *.swp
 *.bak
-error_log.txt
+
+*.mlpackage
+Resources/Wav2Vec2_Phoneme.mlpackage
