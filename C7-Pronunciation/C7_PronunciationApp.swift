@@ -12,6 +12,13 @@ import SwiftData
 struct C7_PronunciationApp: App {
     @AppStorage("hasCompletedOnboarding") var hasCompletedOnboarding: Bool = false
 
+    init() {
+        // Warm up the model in background during app launch. COMMENT OUT TO IMPROVE LOAD SPEED IF NOT USING IT YEAH !
+        Task {
+            AudioManager.initialize()
+        }
+    }
+    
     var body: some Scene {
         WindowGroup {
             if hasCompletedOnboarding {
@@ -22,5 +29,6 @@ struct C7_PronunciationApp: App {
                 }
             }
         }
+        .modelContainer(DataBankManager.shared.modelContainer)
     }
 }
