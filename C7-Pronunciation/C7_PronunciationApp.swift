@@ -10,23 +10,25 @@ import SwiftData
 
 @main
 struct C7_PronunciationApp: App {
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Item.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+    @AppStorage("hasCompletedOnboarding") var hasCompletedOnboarding: Bool = false
 
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
+    init() {
+        // Warm up the model in background during app launch. COMMENT OUT TO IMPROVE LOAD SPEED IF NOT USING IT YEAH !
+        Task {
+            AudioManager.initialize()
         }
-    }()
-
+    }
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            if hasCompletedOnboarding {
+                HomeScreenView()
+            } else {
+                OnboardingView {
+                    self.hasCompletedOnboarding = true
+                }
+            }
         }
-        .modelContainer(sharedModelContainer)
+        .modelContainer(DataBankManager.shared.modelContainer)
     }
 }
