@@ -10,10 +10,17 @@ import SwiftData
 
 @main
 struct C7_PronunciationApp: App {
+    @AppStorage("hasCompletedOnboarding") var hasCompletedOnboarding: Bool = false
+
     var body: some Scene {
         WindowGroup {
-            DataBankTestView()
+            if hasCompletedOnboarding {
+                HomeScreenView()
+            } else {
+                OnboardingView {
+                    self.hasCompletedOnboarding = true
+                }
+            }
         }
-        .modelContainer(SwiftDataManager.shared.modelContainer) // Added model context here
     }
 }
