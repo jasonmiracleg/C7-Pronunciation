@@ -12,17 +12,21 @@ struct CustomMainView: View {
     @State private var isRecording: Bool = false
     @State private var isDone: Bool = false
     @State var text = ""
+    @State var isEnable: Bool = true
+    @State private var isPresented: Bool = false
     
     var body: some View {
         NavigationStack {
-            VStack() {
+            VStack {
+                Spacer()
+                
                 Text("Write Anything on Your Mind Below")
                 Text("Hit Record to Check Your Pronunciation")
                 
                 Spacer()
                 
                 TextEditor(text: $text)
-                    .customStyleEditor(placeholder: "Write Here", userInput: $text)
+                    .customStyleEditor(placeholder: "Write Here", userInput: $text, isEnabled: isEnable)
                     .frame(height: 350)
                     .padding(.horizontal, 16)
                 
@@ -31,7 +35,9 @@ struct CustomMainView: View {
                 if isDone {
                     HStack {
                         Button(action: {
-
+                            isRecording.toggle()
+                            isEnable.toggle()
+                            isDone.toggle()
                         }) {
                             Image(systemName: "arrow.clockwise.circle.fill")
                                 .font(.system(size: 64))
@@ -42,7 +48,7 @@ struct CustomMainView: View {
                         Spacer()
                         
                         Button(action: {
-
+                            isPresented.toggle()
                         }) {
                             Image(systemName: "checkmark.circle.fill")
                                 .font(.system(size: 64))
@@ -55,6 +61,7 @@ struct CustomMainView: View {
                     Button(action: {
                         if !isRecording {
                             isRecording.toggle()
+                            isEnable.toggle()
                         } else {
                             isDone.toggle()
                         }
@@ -67,11 +74,13 @@ struct CustomMainView: View {
                 }
                 Spacer()
             }
-            .padding()
+            .fullScreenCover(isPresented: $isPresented) {
+                EvaluationView()
+            }
+            .navigationTitle("Custom")
+            .navigationBarTitleDisplayMode(.inline)
+            .padding(.horizontal)
             .toolbar {
-                ToolbarItem(placement: .title) {
-                    Text("Custom")
-                }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(action: {
                         dismiss()
