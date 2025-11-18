@@ -18,13 +18,13 @@ public class PronunciationScorer {
     /// - Parameters:
     ///   - decodedPhonemes: Array of detected phonemes from the model (as PhonemePrediction objects)
     ///   - idealPhonemes: Array of arrays representing target phonemes grouped by word
+    ///   - targetSentence: Original target sentence in string format
     ///   - words: Array of target words (optional, for word-level scoring)
     /// - Returns: PronunciationResult containing aligned scores, total score, and word scores
     func alignAndScore(
         decodedPhonemes: [PhonemePrediction],
         idealPhonemes: [[String]],
-        targetSentence: String,
-        words: [String]? = nil
+        targetSentence: String
     ) -> PronunciationEvalResult {
         // Split the sentence into individual target words
         var targetWords: [String] = []
@@ -216,15 +216,18 @@ public class PronunciationScorer {
         
         // Split aligned phonemes by word
         let groupedAlignedPhonemes = splitAlignedPhonemesByWord(alignedPhonemes: alignedScores, guide: idealPhonemes)
+  
+        // DEBUG PRINTS
+//        print("Unalligned Phonemes:")
+//        print(alignedScores.compactMap(\.actual).joined(separator: ", "))
+//        print("Guide:")
+//        print(idealPhonemes)
+//        print("Alignment results:")
+//        for group in groupedAlignedPhonemes {
+//            print(group.compactMap(\.actual).joined(separator: " "))
+//        }
         
-        print("Unalligned Phonemes:")
-        print(alignedScores.compactMap(\.actual).joined(separator: ", "))
-        print("Guide:")
-        print(idealPhonemes)
-        print("Alignment results:")
-        for group in groupedAlignedPhonemes {
-            print(group.compactMap(\.actual).joined(separator: " "))
-        }
+        print(targetWords)
         
         // Create word-level scores with word names
         let wordScoreResults: [WordScore]

@@ -19,30 +19,29 @@ struct OnboardingView: View {
     
     var body: some View {
         VStack(spacing: 20) {
-            ZStack {
+
+            TabView(selection: $viewModel.currentPageIndex) {
                 ForEach(Array(viewModel.pages.enumerated()), id: \.element.id) { index, page in
-                    if viewModel.currentPageIndex == index {
-                        OnboardingPageView(page: page)
-                            .transition(.asymmetric(
-                                insertion: .move(edge: .trailing),
-                                removal: .move(edge: .leading)
-                            ).combined(with: .opacity))
-                    }
+                    OnboardingPageView(page: page)
+                        .tag(index) // Associates the view with the index
                 }
             }
+            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never)) // Use paging style, hide default dots
+            
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .animation(.default, value: viewModel.currentPageIndex)
+            .animation(.default, value: viewModel.currentPageIndex) // Animate page changes
 
             PageIndicatorView(pageCount: viewModel.pages.count, currentPageIndex: $viewModel.currentPageIndex)
             
             Spacer()
 
             HStack {
+                // Button actions no longer need to track previousPageIndex
                 Button(action: viewModel.finishOnboarding) {
                     Text("SKIP")
                         .font(.headline)
                         .padding(16)
-                        .foregroundColor(Color(.systemGray)) // Changed to match screenshot
+                        .foregroundColor(Color(.systemGray))
                         .cornerRadius(12)
                 }
                 .opacity(viewModel.isLastPage ? 0 : 1)
@@ -51,7 +50,7 @@ struct OnboardingView: View {
                 Spacer()
                 
                 Button(action: viewModel.goToNextPage) {
-                    Text(viewModel.isLastPage ? "GET STARTED" : "NEXT")
+                    Text(viewModel.isLastPage ? "START" : "NEXT")
                         .font(.headline)
                         .padding(.vertical, 16)
                         .padding(.horizontal, 30)
@@ -68,10 +67,6 @@ struct OnboardingView: View {
     }
 }
 
-struct OnboardingView_Previews: PreviewProvider {
-    static var previews: some View {
-        OnboardingView(onOnboardingFinished: {
-            print("Preview: Onboarding finished.")
-        })
-    }
+#Preview {
+    OnboardingView(onOnboardingFinished: {})
 }
