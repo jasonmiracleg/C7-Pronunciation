@@ -21,6 +21,13 @@ struct EvaluationCardView: View {
         .background(RoundedRectangle(cornerRadius: 16).fill(Color(UIColor.systemGray6)))
     }
     
+    func clean(_ word: String) -> String {
+        word
+            .replacingOccurrences(of: "’", with: "'")
+            .trimmingCharacters(in: .punctuationCharacters)
+            .lowercased()
+    }
+    
     @ViewBuilder
     func interactiveUnderlinedText(
         fullText: String,
@@ -28,25 +35,35 @@ struct EvaluationCardView: View {
         onTap: @escaping (WordScore) -> Void
     ) -> some View {
 
-        let words = fullText.split(separator: " ").map { String($0) }
+        var indexedScores: [Int: WordScore] = [:]
+        var words: [String] = []
 
-        let scoreMap = Dictionary(uniqueKeysWithValues: wordScores.map {
-            ($0.word.lowercased(), $0)
-        })
+        let _ = {
+            words = fullText
+                .replacingOccurrences(of: "’", with: "'")
+                .split(separator: " ")
+                .map { String($0) }
 
-        FlexibleFlowLayout(data: words.map { WordItem(word: $0) }) { wordItem in
-            let cleaned = wordItem.word
-                .trimmingCharacters(in: .punctuationCharacters)
-                .lowercased()
+            let cleanedWords = words.map { clean($0) }
+            let cleanedScores = wordScores.map { clean($0.word) }
 
-            if let score = scoreMap[cleaned], score.score < 0.8 {
-                Text(wordItem.word + " ")
+            for (index, w) in cleanedWords.enumerated() {
+                if index < cleanedScores.count, cleanedScores[index] == w {
+                    indexedScores[index] = wordScores[index]
+                }
+            }
+        }()
+
+        FlexibleFlowLayout(
+            data: words.enumerated().map { WordItem(index: $0.offset, word: $0.element) }
+        ) { item in
+            if let score = indexedScores[item.index], score.score < 0.6 {
+                Text(item.word + " ")
                     .underline()
-                    .foregroundColor(.red)
+                    .foregroundColor(score.score < 0.4 ? .red : .orange)
                     .onTapGesture { onTap(score) }
             } else {
-                Text(wordItem.word + " ")
-                    .foregroundColor(.primary)
+                Text(item.word + " ")
             }
         }
     }
