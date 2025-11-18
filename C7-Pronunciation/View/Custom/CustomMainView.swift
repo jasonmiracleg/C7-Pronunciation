@@ -84,6 +84,8 @@ struct CustomMainView: View {
             .navigationTitle("Custom")
             .navigationBarTitleDisplayMode(.inline)
             .padding(.horizontal)
+            .scrollDismissesKeyboard(.interactively)   
+            .ignoresSafeArea(.keyboard, edges: .bottom)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button(action: {

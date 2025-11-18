@@ -47,10 +47,10 @@ struct EvaluationCardView: View {
         FlexibleFlowLayout(data: words.map { WordItem(word: $0) }) { wordItem in
             let cleaned = clean(wordItem.word)
 
-            if let score = scoreMap[cleaned], score.score < 0.8 {
+            if let score = scoreMap[cleaned], score.score < 0.6 {
                 Text(wordItem.word + " ")
                     .underline()
-                    .foregroundColor(.red)
+                    .foregroundColor(score.score < 0.4 ? .red : .orange)
                     .onTapGesture { onTap(score) }
             } else {
                 Text(wordItem.word + " ")
