@@ -18,7 +18,9 @@ struct PhonemeRecommendationScore {
     var score: Double = 0.5
     
     mutating func updateScore(evalScore: Double, learningRate: Double = 0.2){
-        let newScore = score * (1 - learningRate) + evalScore * learningRate
+        let evalScoreNormalized = evalScore/100
+        let newScore = score * (1 - learningRate) + evalScoreNormalized * learningRate
         attempts += 1
+        score = newScore
     }
 }

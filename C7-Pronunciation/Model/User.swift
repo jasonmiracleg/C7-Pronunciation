@@ -5,30 +5,43 @@
 //  Created by Gerald Gavin Lienardi on 17/11/25.
 //
 import Foundation
+import Combine
 
-class User {
+class User: ObservableObject {
     
-    var phonemeScores: [PhonemeRecommendationScore] = []
+    @Published var phonemeScores: [PhonemeRecommendationScore] = []
+    var successfullyLoadedPhonemes = true
     
     init(){
-        let vocab = Self.loadVocab()
+        let vocab = loadVocabulary()
+        if vocab.count == 0 { successfullyLoadedPhonemes = false }
         phonemeScores = vocab.map { PhonemeRecommendationScore(id: $0.id, phoneme: $0.phoneme) }
     }
     
-    private static func loadVocab() -> [VocabEntry] {
+    private func loadVocabulary() -> [VocabEntry] {
         guard let url = Bundle.main.url(forResource: "vocab", withExtension: "json") else {
-            print("vocab.json not found")
+            print("vocab.json not found in bundle")
             return []
         }
         
         do {
             let data = try Data(contentsOf: url)
-            return try JSONDecoder().decode([VocabEntry].self, from:data)
+            
+            let decoded = try JSONDecoder().decode(VocabularyFile.self, from: data)
+            
+            // token_to_id contains: token → id
+            let vocabList = decoded.token_to_id.map { token, id in
+                VocabEntry(id: id, phoneme: token)
+            }
+            
+            return vocabList
+            
         } catch {
             print("Failed to decode vocab.json: \(error)")
             return []
         }
     }
+
     
     // CALL THIS TO UPDATE GLOBAL PHONEME SCORES
     func updateScores(with phonemes: [AlignedPhoneme]) {
@@ -53,6 +66,18 @@ class User {
         }
     }
     
+    func updateScore(for phoneme: String, evalScore: Double){
+        // find the index of the phoneme
+        if let index = phonemeScores.firstIndex(where: { $0.phoneme == phoneme }) {
+            phonemeScores[index].updateScore(evalScore: evalScore)
+            print("Found the phoneme")
+            return
+        }
+        print("Did not find the phoneme")
+    }
+    
+    
+//    GETTING PHONEME SCORE SHIT AS A STRING ARRAY
     func getMixedUrgencyPhoneme(limit: Int = 3) -> [String]{
         let amountOfPhonemesBasedOnAttempt:Int = limit/3
         let amountOfPhonemesBasedOnScore:Int = limit - amountOfPhonemesBasedOnAttempt
@@ -64,23 +89,49 @@ class User {
         return mixedPhonemes
     }
     
-    private func getMostUrgentPhonemes(limit: Int = 3) -> [String]{
+    func getMostUrgentPhonemes(limit: Int = 3) -> [String]{
         return phonemeScores
             .sorted { $0.score < $1.score }
             .prefix(limit)
             .map { $0.phoneme }
     }
     
-    private func getLeastAttemptedPhonemes(limit: Int = 3) -> [String]{
+    func getLeastAttemptedPhonemes(limit: Int = 3) -> [String]{
         return phonemeScores
             .sorted { $0.attempts < $1.attempts }
             .prefix(limit)
             .map { $0.phoneme }
     }
+    
+    func getRawMostAttemptedPhonemes(limit: Int = 3) -> [PhonemeRecommendationScore]{
+        return Array(
+            phonemeScores
+                .sorted { $0.attempts > $1.attempts }
+                .prefix(limit)
+        )
+    }
+
+    func getRawHighestScoring(limit: Int = 3) -> [PhonemeRecommendationScore] {
+        return Array(
+            phonemeScores
+                .sorted { $0.score > $1.score }   // highest first
+                .prefix(limit)
+        )
+    }
+
 }
 
 // Im making this cz idk the one in Espeak Manager
 private struct VocabEntry: Codable {
     let id: Int
     let phoneme: String
+}
+
+private struct VocabularyFile: Codable {
+    let id_to_token: [String: String]
+    let token_to_id: [String: Int]
+}
+
+private struct VocabWrapper: Codable {
+    let vocab: [VocabEntry]
 }
