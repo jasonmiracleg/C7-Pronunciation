@@ -17,7 +17,7 @@ struct FlexibleFlowLayout<Data: RandomAccessCollection, Cell: View>: View where 
 
     @State private var totalHeight: CGFloat
 
-    init(data: Data, spacing: CGFloat = 8, alignment: HorizontalAlignment = .leading, @ViewBuilder cell: @escaping (Data.Element) -> Cell) {
+    init(data: Data, spacing: CGFloat = 2, alignment: HorizontalAlignment = .leading, @ViewBuilder cell: @escaping (Data.Element) -> Cell) {
         self.data = data
         self.spacing = spacing
         self.alignment = alignment
