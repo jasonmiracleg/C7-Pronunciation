@@ -51,7 +51,7 @@ class FlashcardViewModel: ObservableObject {
         
         // Generate Ideal Phonemes (The "Truth")
         // EspeakManager returns [[String]], e.g. [["h","ə","l","oʊ"], ["w","ɜː","l","d"]]
-        self.idealPhonemes = EspeakManager.shared.getPhonemesByWord(for: text)
+        self.idealPhonemes = EspeakManager.shared.getPhonemes(for: text)
         
         print("Target: \(text)")
         print("Ideal Phonemes: \(self.idealPhonemes)")

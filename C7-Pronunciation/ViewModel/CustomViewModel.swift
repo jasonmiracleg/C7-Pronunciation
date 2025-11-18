@@ -66,7 +66,7 @@ class CustomViewModel: ObservableObject {
             let result = try await audioManager.recognizePhonemes(from: audioURL)
             
             self.decodedPhonemes = result
-            self.idealPhonemes = espeakManager.getPhonemesByWord(for: self.targetSentence)
+            self.idealPhonemes = espeakManager.getPhonemes(for: self.targetSentence)
             self.isLoading = false
             
         } catch {
