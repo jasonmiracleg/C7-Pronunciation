@@ -35,27 +35,36 @@ struct EvaluationCardView: View {
         onTap: @escaping (WordScore) -> Void
     ) -> some View {
 
-        let words = fullText
-            .replacingOccurrences(of: "’", with: "'")
-            .split(separator: " ")
-            .map { String($0) }
+        var indexedScores: [Int: WordScore] = [:]
+        var words: [String] = []
 
-        let scoreMap = Dictionary(uniqueKeysWithValues:
-            wordScores.map { (clean($0.word), $0) }
-        )
+        let _ = {
+            words = fullText
+                .replacingOccurrences(of: "’", with: "'")
+                .split(separator: " ")
+                .map { String($0) }
 
-        FlexibleFlowLayout(data: words.map { WordItem(word: $0) }) { wordItem in
-            let cleaned = clean(wordItem.word)
+            let cleanedWords = words.map { clean($0) }
+            let cleanedScores = wordScores.map { clean($0.word) }
 
-            if let score = scoreMap[cleaned], score.score < 0.6 {
-                Text(wordItem.word + " ")
+            for (index, w) in cleanedWords.enumerated() {
+                if index < cleanedScores.count, cleanedScores[index] == w {
+                    indexedScores[index] = wordScores[index]
+                }
+            }
+        }()
+
+        FlexibleFlowLayout(
+            data: words.enumerated().map { WordItem(index: $0.offset, word: $0.element) }
+        ) { item in
+            if let score = indexedScores[item.index], score.score < 0.6 {
+                Text(item.word + " ")
                     .underline()
                     .foregroundColor(score.score < 0.4 ? .red : .orange)
                     .onTapGesture { onTap(score) }
             } else {
-                Text(wordItem.word + " ")
+                Text(item.word + " ")
             }
         }
     }
-
 }
