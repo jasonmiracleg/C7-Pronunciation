@@ -15,17 +15,11 @@ struct OnboardingPageView: View {
             Spacer() // Pushes content down from the top
 
             // Placeholder for the image
-            Rectangle()
-                .fill(Color(.systemGray5))
-                .frame(maxWidth: .infinity)
-                .frame(height: 300)
-                .cornerRadius(10)
-                .padding(.horizontal, 40)
-                .overlay(
-                    Text("Image")
-                        .font(.title)
-                        .foregroundColor(Color(.systemGray2))
-                )
+            Image(page.imageName)
+                .resizable()
+                .frame(width: .infinity, height: 200)
+                .scaledToFit()
+                .padding(.horizontal)
             
             // Text content
             VStack(spacing: 15) {
@@ -39,10 +33,10 @@ struct OnboardingPageView: View {
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
             }
-            .padding(.horizontal, 40) // Match padding
+            .padding(.horizontal, 40)
             
-            Spacer() // Pushes content up from the bottom
-            Spacer() // Adds more space at the bottom, pushing the block up
+            Spacer()
+            Spacer()
         }
     }
 }

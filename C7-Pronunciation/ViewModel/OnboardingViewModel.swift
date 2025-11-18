@@ -25,25 +25,34 @@ class OnboardingViewModel: ObservableObject {
         loadPages()
     }
     
-    /// Populates the `pages` array with the content from your design.
     func loadPages() {
         pages = [
             OnboardingPage(
-                imageName: "speaker.wave.2.fill",
-                title: "Speak Confidently at Workplace",
-                description: "Master your English pronunciation for your career, anytime and anywhere."
+                imageName: "Onboarding(1)",
+                title: "A Personal Speaking Tutor At Your Fingertips",
+                description: "Master your speaking skills with focused practice; anytime, anywhere."
             ),
             OnboardingPage(
-                imageName: "flame.fill", // Placeholder image
-                title: "Master Key Workplace Phrases",
-                description: "Practice common professional phrases with Flashcards. Listen, record, and get instant, word-level feedback."
+                imageName: "Onboarding(2)",
+                title: "Your First Step to Mastery",
+                description: """
+                Learn to say the key phrases for your career. Our intelligent system keeps track of specific pain points 
+                and caters your exercises to focus on exactly what you need.
+                """
             ),
             OnboardingPage(
-                imageName: "lightbulb.fill", // Placeholder image
-                title: "Practice Freely in the Sandbox",
-                description: "Have something on your mind? Type any text you want in the Sandbox, from a new idea to a daily thought and check your pronunciation instantly."
+                imageName: "Onboarding(3)",
+                title: "Practice What You Want, How You Want",
+                description: "Need to prepare for something? Add your own practice script, and save your signature phrases!"
             )
         ]
+    }
+    
+    /// Advances to the next page or finishes onboarding if on the last page.
+    func goToPreviousPage() {
+        if currentPageIndex != 0 {
+            currentPageIndex -= 1
+        }
     }
     
     /// Advances to the next page or finishes onboarding if on the last page.

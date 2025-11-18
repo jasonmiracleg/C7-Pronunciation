@@ -63,7 +63,8 @@ class PronunciationViewModel: ObservableObject {
             let result = try await audioManager.recognizePhonemes(from: audioURL)
             
             self.decodedPhonemes = result
-            self.idealPhonemes = espeakManager.getPhonemesByWord(for: self.targetSentence)
+            self.idealPhonemes = espeakManager.getPhonemes(for: self.targetSentence)
+            print(self.idealPhonemes)
             self.isLoading = false
             
         } catch {
