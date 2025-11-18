@@ -8,17 +8,27 @@
 import SwiftUI
 
 struct EvaluationCardView: View {
-    let sentence: String
-    let wordScores: [WordScore]
+    // Changed input to the result object
+    let result: PronunciationEvalResult
     var onTapWord: (WordScore) -> Void
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            
-            interactiveUnderlinedText(fullText: sentence, wordScores: wordScores, onTap: onTapWord)
+        VStack(alignment: .leading, spacing: 12) {
+            // Interactive Text
+            interactiveUnderlinedText(
+                fullText: result.sentenceText!,
+                wordScores: result.wordScores,
+                onTap: onTapWord
+            )
         }
         .padding()
         .background(RoundedRectangle(cornerRadius: 16).fill(Color(UIColor.systemGray6)))
+    }
+    
+    func getColor(score: Double) -> Color {
+        if score >= 85 { return .green }
+        if score >= 50 { return .orange }
+        return .red
     }
     
     func clean(_ word: String) -> String {
@@ -47,9 +57,15 @@ struct EvaluationCardView: View {
             let cleanedWords = words.map { clean($0) }
             let cleanedScores = wordScores.map { clean($0.word) }
 
+            // Logic to map scores to words; handles punctuation differences
+            var scoreIndex = 0
             for (index, w) in cleanedWords.enumerated() {
-                if index < cleanedScores.count, cleanedScores[index] == w {
-                    indexedScores[index] = wordScores[index]
+                if scoreIndex < cleanedScores.count {
+                     // Simple matching: checks if the cleaned words match
+                    if cleanedScores[scoreIndex] == w {
+                        indexedScores[index] = wordScores[scoreIndex]
+                        scoreIndex += 1
+                    }
                 }
             }
         }()

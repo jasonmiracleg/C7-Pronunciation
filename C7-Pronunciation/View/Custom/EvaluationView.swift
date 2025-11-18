@@ -20,21 +20,21 @@ struct EvaluationView: View {
                     .font(.subheadline)
                     .multilineTextAlignment(.center)
                     .foregroundStyle(Color(UIColor.systemGray2))
+                    .padding(.top)
                 
-                // Scrollable cards
+                // Scrollable cards list
                 ScrollView {
-                    VStack() {
-//                        ForEach(0..<10) { _ in
-                            EvaluationCardView(
-                                sentence: viewModel.targetSentence,
-                                wordScores: viewModel.evalResults?.wordScores ?? []
-                            ) { tapped in
+                    VStack(spacing: 20) {
+                        // Iterate over the sentence results array
+                        ForEach(viewModel.sentenceResults) { result in
+                            EvaluationCardView(result: result) { tapped in
                                 selectedWord = tapped
                                 showPopOver = true
                             }
-//                        }
+                        }
                     }
                     .padding(.horizontal)
+                    .padding(.bottom, 20)
                 }
             }
             .sheet(item: $selectedWord) { word in
