@@ -20,7 +20,7 @@ struct DataBankTestView: View {
     @State private var isGenerating: Bool = false
     
     // MARK: - Search Testing States
-    @State private var selectedTab: SearchTab = .randomPicks
+    @State private var selectedTab: SearchTab = .phonemeSearch
     
     // Text search
     @State private var textSearchTerms: [String] = []

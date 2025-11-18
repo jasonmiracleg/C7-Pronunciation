@@ -226,3 +226,7 @@ struct WordDetailView: View {
         return combinedText
     }
 }
+
+#Preview{
+    PronunciationView()
+}
