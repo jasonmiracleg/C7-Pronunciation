@@ -53,11 +53,19 @@ struct GavinTestView: View {
                     }
                     .buttonStyle(.borderedProminent)
                 }
-                Button("Search") {
-                    vm.performPhonemeSearch()
+                LazyHStack {
+                    Button("Search/ Generate") {
+                        vm.performPhonemeSearch()
+                        vm.user.addPhrasesToQueue()
+
+                    }
+                    .buttonStyle(.borderedProminent)
+                    Button("Next Card") {
+                        vm.progressQueue()
+                    }
+                    
+                    .buttonStyle(.borderedProminent)
                 }
-                
-                .buttonStyle(.borderedProminent)
 
                 
                 // RESULT TEXT
@@ -99,7 +107,45 @@ struct GavinTestView: View {
                     }
                 }
                 
-                Text("Phrases based on random phonemes")
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text("Phrase Queue")
+                        Spacer()
+                        Text("\(vm.user.phraseQueue.count) found")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.vertical, 4)
+                    
+                    if vm.grabbedPhrase != nil {
+                        Text("Current card: \(vm.grabbedPhrase?.text)")
+                    }
+
+                    if vm.user.phraseQueue.isEmpty {
+                        Text("Empty Queue.")
+                            .foregroundColor(.secondary)
+                            .italic()
+                    } else {
+                        ForEach(Array(vm.user.phraseQueue.prefix(3).enumerated()), id: \.element.id) { index, phrase in
+                            VStack(alignment: .leading, spacing: 4) {
+                                HStack {
+                                    Text("#\(index + 1)")
+                                        .font(.caption)
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 6)
+                                        .padding(.vertical, 2)
+                                        .background(Color.orange)
+                                        .cornerRadius(4)
+                                    Spacer()
+                                }
+                                PhraseRow(phrase: phrase)
+                            }
+                            .padding(.vertical, 6)
+                        }
+                    }
+                }
+                .padding(.vertical, 8)
+                
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
                         Text("Results")
@@ -115,7 +161,7 @@ struct GavinTestView: View {
                             .foregroundColor(.secondary)
                             .italic()
                     } else {
-                        ForEach(Array(vm.phonemeSearchResults.enumerated()), id: \.element.id) { index, phrase in
+                        ForEach(Array(vm.phonemeSearchResults.prefix(3).enumerated()), id: \.element.id) { index, phrase in
                             VStack(alignment: .leading, spacing: 4) {
                                 HStack {
                                     Text("#\(index + 1)")
@@ -157,6 +203,9 @@ class GavinTestViewModel: ObservableObject {
     @Published var lastUpdateText: String? = nil
     @Published var phonemeSearchTerms: [String] = []
     @Published var phonemeSearchResults: [Phrase] = []
+    
+    @Published var phonemeQueue: [Phrase] = []
+    @Published var grabbedPhrase: Phrase? = nil
 
     // easy display
     var currentPhonemeName: String {
@@ -211,6 +260,10 @@ class GavinTestViewModel: ObservableObject {
         phonemeSearchResults = DataBankManager.shared.getPhrasesContainingPhoneme(
             phonemeSearchTerms
         )
+    }
+    
+    func progressQueue() {
+        grabbedPhrase = user.nextCard()
     }
 }
 

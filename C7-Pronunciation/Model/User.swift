@@ -10,6 +10,7 @@ import Combine
 class User: ObservableObject {
     
     @Published var phonemeScores: [PhonemeRecommendationScore] = []
+    @Published var phraseQueue: [Phrase] = []
     var successfullyLoadedPhonemes = true
     
     init(){
@@ -76,6 +77,36 @@ class User: ObservableObject {
         print("Did not find the phoneme")
     }
     
+    func addPhrasesToQueue(basedOn: PhraseSearchType = .mixed){
+        var generatedPhrases: [Phrase] = []
+        switch basedOn {
+            case .urgency:
+                generatedPhrases = Array(
+                    DataBankManager.shared.getPhrasesContainingPhoneme(getMostUrgentPhonemes())
+                    .prefix(5)
+                )
+            case .attempts:
+                generatedPhrases = Array(
+                    DataBankManager.shared.getPhrasesContainingPhoneme(getLeastAttemptedPhonemes())
+                    .prefix(5)
+                )
+            case .mixed:
+                generatedPhrases = Array(
+                    DataBankManager.shared.getPhrasesContainingPhoneme(getMixedUrgencyPhoneme())
+                    .prefix(5)
+                )
+
+        }
+        phraseQueue.append(contentsOf: generatedPhrases)
+    }
+    
+    func nextCard() -> Phrase {
+        let newPhrase = phraseQueue.removeFirst()
+        if phraseQueue.count <= 2 {
+            addPhrasesToQueue()
+        }
+        return newPhrase
+    }
     
 //    GETTING PHONEME SCORE SHIT AS A STRING ARRAY
     func getMixedUrgencyPhoneme(limit: Int = 3) -> [String]{
@@ -134,4 +165,10 @@ private struct VocabularyFile: Codable {
 
 private struct VocabWrapper: Codable {
     let vocab: [VocabEntry]
+}
+
+enum PhraseSearchType: CaseIterable, Codable {
+    case urgency
+    case attempts
+    case mixed
 }
