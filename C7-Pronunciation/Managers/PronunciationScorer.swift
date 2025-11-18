@@ -227,6 +227,8 @@ public class PronunciationScorer {
 //            print(group.compactMap(\.actual).joined(separator: " "))
 //        }
         
+        print(targetWords)
+        
         // Create word-level scores with word names
         let wordScoreResults: [WordScore]
         wordScoreResults = wordScores.enumerated().map { WordScore(word: targetWords[$0.offset], score: $0.element, alignedPhonemes: groupedAlignedPhonemes[$0.offset]) }

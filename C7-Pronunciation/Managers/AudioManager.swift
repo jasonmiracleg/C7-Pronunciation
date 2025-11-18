@@ -145,7 +145,7 @@ class AudioManager: NSObject, ObservableObject, AVAudioRecorderDelegate {
     
     /// Start recording audio as WAV for phoneme recognition
     func startRecording() {
-        let fileName = "recording.wav"
+        let fileName = "recording_\(UUID().uuidString).wav"
         let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         self.audioURL = documentsPath.appendingPathComponent(fileName)
         
@@ -349,6 +349,13 @@ class AudioManager: NSObject, ObservableObject, AVAudioRecorderDelegate {
     
     private func loadAndPreprocessAudio(from url: URL) throws -> [Float] {
         let audioFile = try AVAudioFile(forReading: url)
+        
+        let minFrames: Int64 = 1600
+        if audioFile.length < minFrames {
+            print("✗ Audio file too short: \(audioFile.length) frames")
+            throw AudioError.tooShort
+        }
+        
         let format = audioFile.processingFormat
         
         guard let buffer = AVAudioPCMBuffer(
@@ -369,6 +376,11 @@ class AudioManager: NSObject, ObservableObject, AVAudioRecorderDelegate {
         
         normalize(&samples)
         
+        if samples.allSatisfy({ $0 == 0.0 }) {
+            print("✗ Audio file is silent.")
+            throw AudioError.silentAudio
+        }
+
         print("  Loaded: \(samples.count) samples (\(Double(samples.count)/16000.0)s)")
         
         return samples
