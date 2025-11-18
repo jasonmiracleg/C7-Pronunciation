@@ -21,7 +21,8 @@ struct C7_PronunciationApp: App {
     
     var body: some Scene {
         WindowGroup {
-            PronunciationView()
+//             FlashcardPageView()
+//             PronunciationView()
 //            if hasCompletedOnboarding {
 //                HomeScreenView()
 //            } else {
