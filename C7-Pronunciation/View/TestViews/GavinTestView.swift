@@ -15,47 +15,132 @@ struct GavinTestView: View {
     @StateObject private var vm = GavinTestViewModel()
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            
-            Text("Phoneme count: \(vm.user.phonemeScores.count)")
-            Text("Loaded: \(vm.user.successfullyLoadedPhonemes)")
-                .padding(.bottom, 8)
-            
-            // NEXT PHONEME
-            HStack {
-                Text("Next: \(vm.currentPhonemeName)")
-                    .font(.headline)
-                Spacer()
-                Text("Eval: \(vm.randomScore)")
-            }
-
-            // BUTTON
-            Button("Evaluate Random") {
-                vm.evaluateRandom()
-            }
-            .buttonStyle(.borderedProminent)
-
-            // RESULT TEXT
-            if let last = vm.lastUpdateText {
-                Text(last)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-            }
-
-            Divider()
-
-            // LIST OF SCORES
-            List(vm.user.getRawMostAttemptedPhonemes(), id: \.id) { item in
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                
+                Text("Phoneme count: \(vm.user.phonemeScores.count)")
+                Text("Loaded: \(vm.user.successfullyLoadedPhonemes)")
+                    .padding(.bottom, 8)
+                
+                // NEXT PHONEME
                 HStack {
-                    Text(item.phoneme)
+                    Text("Next: \(vm.currentPhonemeName)")
+                        .font(.headline)
                     Spacer()
-                    Text("A: \(item.attempts.description) S:")
-                    Text(String(format: "%.3f", Double(item.score)))
+                    Text("Eval: \(vm.randomScore)")
                 }
+                
+                // BUTTON
+                Button("Evaluate Random") {
+                    vm.evaluateRandom()
+                }
+                .buttonStyle(.borderedProminent)
+                
+                
+                // BUTTON
+                Button("Get 3 Random Phonemes") {
+                    vm.getRandomPhonemes()
+                }
+                .buttonStyle(.borderedProminent)
+
+                LazyHStack{
+                    Button("Least Attempted") {
+                        vm.getLeastAttemptedPhonemes()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    Button("Most Urgent") {
+                        vm.getMostUrgentPhonemes()
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+                Button("Search") {
+                    vm.performPhonemeSearch()
+                }
+                
+                .buttonStyle(.borderedProminent)
+
+                
+                // RESULT TEXT
+                if let last = vm.lastUpdateText {
+                    Text(last)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+                
+                Divider()
+                
+                // LIST OF SCORES
+                Text("Phonemes")
+                // replace List with lazy stack
+                LazyVStack {
+                    ForEach(vm.user.getRawMostAttemptedPhonemes(), id: \.id) { item in
+                        HStack {
+                            Text(item.phoneme)
+                            Spacer()
+                            Text("A: \(item.attempts)")
+                            Text("S: \(String(format: "%.3f", item.score))")
+                        }
+                        .padding(.vertical, 4)
+                    }
+                }
+
+                Text("Search Terms")
+                LazyVStack {
+                    ForEach(vm.phonemeSearchTerms, id: \.self) { phoneme in
+                        HStack {
+                            Text(phoneme)
+                                .font(.system(size: 16, design: .monospaced))
+                            Spacer()
+                        }
+                        .padding(.vertical, 2)
+                        .padding(.horizontal, 4)
+                        .background(Color.blue.opacity(0.2))
+                        .cornerRadius(4)
+                    }
+                }
+                
+                Text("Phrases based on random phonemes")
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text("Results")
+                        Spacer()
+                        Text("\(vm.phonemeSearchResults.count) found")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.vertical, 4)
+
+                    if vm.phonemeSearchResults.isEmpty {
+                        Text("No results. Add phonemes and tap Search.")
+                            .foregroundColor(.secondary)
+                            .italic()
+                    } else {
+                        ForEach(Array(vm.phonemeSearchResults.enumerated()), id: \.element.id) { index, phrase in
+                            VStack(alignment: .leading, spacing: 4) {
+                                HStack {
+                                    Text("#\(index + 1)")
+                                        .font(.caption)
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 6)
+                                        .padding(.vertical, 2)
+                                        .background(Color.orange)
+                                        .cornerRadius(4)
+                                    Spacer()
+                                }
+                                PhraseRow(phrase: phrase)
+                            }
+                            .padding(.vertical, 6)
+                        }
+                    }
+                }
+                .padding(.vertical, 8)
+
+                
             }
+            .padding()
         }
-        .padding()
     }
+    
 }
 
 #Preview {
@@ -70,6 +155,8 @@ class GavinTestViewModel: ObservableObject {
     @Published var randomIndex: Int = 0
     @Published var randomScore: Int = 0 // 0–100
     @Published var lastUpdateText: String? = nil
+    @Published var phonemeSearchTerms: [String] = []
+    @Published var phonemeSearchResults: [Phrase] = []
 
     // easy display
     var currentPhonemeName: String {
@@ -96,6 +183,34 @@ class GavinTestViewModel: ObservableObject {
 
         lastUpdateText =
             "\(phoneme)  old: \(String(format: "%.3f", oldScore)) → new: \(String(format: "%.3f", newScore))   Δ: \(String(format: "%.3f", delta))"
+    }
+    
+    func getRandomPhonemes() {
+        let a = Int.random(in: 0..<user.phonemeScores.count)
+        let b = Int.random(in: 0..<user.phonemeScores.count)
+        let c = Int.random(in: 0..<user.phonemeScores.count)
+        
+        let phoneme1 = user.phonemeScores[a].phoneme
+        let phoneme2 = user.phonemeScores[b].phoneme
+        let phoneme3 = user.phonemeScores[c].phoneme
+        
+        phonemeSearchTerms = [phoneme1, phoneme2, phoneme3]
+    }
+    
+    func getLeastAttemptedPhonemes() {
+        phonemeSearchTerms = user.getLeastAttemptedPhonemes()
+    }
+    
+    func getMostUrgentPhonemes() {
+        phonemeSearchTerms = user.getMostUrgentPhonemes()
+    }
+    
+    func performPhonemeSearch() {
+        guard !phonemeSearchTerms.isEmpty else { return }
+        
+        phonemeSearchResults = DataBankManager.shared.getPhrasesContainingPhoneme(
+            phonemeSearchTerms
+        )
     }
 }
 

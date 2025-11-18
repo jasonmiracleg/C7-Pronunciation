@@ -19,8 +19,8 @@ class User: ObservableObject {
     }
     
     private func loadVocabulary() -> [VocabEntry] {
-        guard let url = Bundle.main.url(forResource: "vocab", withExtension: "json") else {
-            print("vocab.json not found in bundle")
+        guard let url = Bundle.main.url(forResource: "vocab_gpt_cleansed", withExtension: "json") else {
+            print("vocab_gpt_cleansed.json not found in bundle")
             return []
         }
         
@@ -37,7 +37,7 @@ class User: ObservableObject {
             return vocabList
             
         } catch {
-            print("Failed to decode vocab.json: \(error)")
+            print("Failed to decode vocab_gpt_cleansed.json: \(error)")
             return []
         }
     }
