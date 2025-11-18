@@ -1,0 +1,77 @@
+//
+//  HomeScreen.swift
+//  C7-Pronunciation
+//
+//  Created by Abelito Faleyrio Visese on 14/11/25.
+//
+
+import SwiftUI
+
+struct HomeScreenView: View {
+    var body: some View {
+        NavigationStack {
+            VStack(alignment: .leading, spacing: 20) {
+                
+                Text("Welcome back!")
+                    .font(.title)
+                    .fontWeight(.bold)
+                
+                Text("How would you like to practice today?")
+                    .font(.headline)
+                    .foregroundColor(.secondary)
+                    .padding(.bottom, 10)
+                
+                NavigationCard(title: "Flash Cards", imgName: "Home Card_1", desc: "Short, bite-sized chunks of practice. Helps you get used to saying common phrases.", gradientColor: [Color("DarkBlue"), .accentColor])
+                
+                NavigationCard(title: "Custom Mode", imgName: "Home Card_2", desc: "Practice with your own script and get a comprehensive review of how you did.", gradientColor: [Color("DarkPurple"), Color("LightPurple")])
+                
+                Spacer()
+            }
+            .padding(.horizontal)
+            .padding(.top, 20)
+        }
+    }
+    
+    struct NavigationCard: View {   
+        let title: String
+        let imgName: String
+        let desc: String
+        let gradientColor: [Color]
+        
+        var body: some View {
+            HStack(spacing: 20) {
+                Image(imgName)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxHeight: 150)
+                    .frame(width: 120)
+                
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(title)
+                        .font(.title2)
+                        .bold()
+                    
+                    Text(desc)
+                        .font(.subheadline)
+                }
+                .padding(.trailing)
+                .padding(.vertical, 10)
+                .foregroundColor(Color.white)
+            }
+            .padding(.horizontal)
+            .frame(width: .infinity, height: 180)
+            .background(
+                LinearGradient(
+                    gradient: Gradient(colors: gradientColor),
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
+            .cornerRadius(15)
+        }
+    }
+}
+
+#Preview {
+    HomeScreenView()
+}

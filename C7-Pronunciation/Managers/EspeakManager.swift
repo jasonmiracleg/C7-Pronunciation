@@ -23,8 +23,8 @@ private func phonemeCallback(samples: UnsafeMutablePointer<Int16>?, num_samples:
         }
         
         if e.type == espeakEVENT_WORD {
-            // We've hit the end of a word. Add a word boundary marker.
-            EspeakManager.shared.markWordBoundary()
+            // We've hit the start of a word.
+            EspeakManager.shared.markWordBoundary(at: e.text_position, length: e.length)
         }
         
         evt = evt?.advanced(by: 1)
@@ -39,193 +39,200 @@ public class EspeakManager {
     // Internal storage for the current synthesis session
     private var currentPhonemes: [String] = []
     private var wordBoundaries: [Int] = []  // Indices where words end
-    private let queue = DispatchQueue(label: "espeak.manager.queue")
     
-    // Vocabulary filtering
+    /// Stores the end position of the last processed word event.
+    /// This is used to detect and merge contractions (e.g., "I'm").
+    private var lastWordEndPosition: Int = -1
+    
+    /// Loaded vocabulary for filtering phonemes.
     private var validPhonemes: Set<String> = []
-    private var phonemePattern: NSRegularExpression?
-
-    private init() {
-        setup()
-        loadVocabulary()
-    }
     
     // MARK: - Public API
-
-    /// Returns an array of phoneme strings (e.g. ["h", "ə", "l", "oʊ"])
-    public func getPhonemes(for text: String) -> [String] {
-        queue.sync {
-            currentPhonemes.removeAll()
-            wordBoundaries.removeAll()
-        }
-
-        // espeakCHARS_UTF8 = 1 (ensure text is treated as UTF8)
-        let textLen = text.utf8.count
-        espeak_ng_Synthesize(text, textLen, 0, POS_CHARACTER, 0, 1, nil, nil)
-        espeak_ng_Synchronize()
-
-        let rawPhonemes = queue.sync { return currentPhonemes }
-        
-        // Join and filter through vocabulary
-        let rawString = rawPhonemes.joined(separator: "")
-        return filterPhonemes(from: rawString)
-    }
-
-    /// Returns a single string of phonemes separated by spaces (e.g. "h ə l oʊ w ɜː l d")
-    public func getPhonemesAsString(for text: String) -> String {
-        let phonemesByWord = getPhonemesByWord(for: text)
-        
-        // TODO: Benerin processing yg di atas (ini duct-tape tpi aku mager hehe)
-        // Join each arr in a 2D array into a single string (it's now [String]); then join that array as well -> String
-        return phonemesByWord.map { $0.joined() }.joined(separator: " ")
-    }
     
-    /// Returns phonemes grouped by word (e.g. [["h", "ə", "l", "oʊ"], ["w", "ɜː", "l", "d"]])
-    /// Each inner array represents the phonemes for one word.
-    public func getPhonemesByWord(for text: String) -> [[String]] {
-        // Split text into words (same pattern as Python: word characters and apostrophes)
-        let pattern = "\\b[\\w']+\\b"
-        guard let regex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive]) else {
-            return []
+    /// Initializes the eSpeak-NG engine.
+    /// This constructor is private to enforce the singleton pattern.
+    private init() {
+        // 1. Find the 'espeak-ng-data' directory in our App's bundle
+        guard let bundlePath = Bundle.main.resourcePath else {
+            fatalError("EspeakManager: Failed to find app bundle path.")
         }
         
-        let nsText = text as NSString
-        let matches = regex.matches(in: text, options: [], range: NSRange(location: 0, length: nsText.length))
-        
-        var allWordsPhonemes: [[String]] = []
-        
-        for match in matches {
-            let word = nsText.substring(with: match.range).lowercased()
-            
-            if word.isEmpty {
-                continue
-            }
-            
-            // Get phonemes for this individual word
-            let wordPhonemes = getPhonemes(for: word)
-            
-            // Add to the main list (only if not empty)
-            if !wordPhonemes.isEmpty {
-                allWordsPhonemes.append(wordPhonemes)
-            }
+        // 2. Find the Documents directory (where we can write)
+        guard let docDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            fatalError("EspeakManager: Failed to find documents directory.")
         }
         
-//        print("Phonemes (by word): \(allWordsPhonemes)")
-        return allWordsPhonemes
-    }
-
-    // MARK: - Internal Helpers
-    
-    fileprivate func accumulate(phoneme: String) {
-        queue.async {
-            self.currentPhonemes.append(phoneme)
-        }
-    }
-    
-    fileprivate func markWordBoundary() {
-        queue.async {
-            self.wordBoundaries.append(self.currentPhonemes.count)
-        }
-    }
-    
-    // MARK: - Vocabulary Filtering
-    
-    /// Load the model's vocabulary and build a filtering pattern
-    private func loadVocabulary() {
-        guard let vocabURL = Bundle.main.url(forResource: "vocab", withExtension: "json") else {
-            print("EspeakManager Warning: vocab.json not found in Bundle. Phoneme filtering disabled.")
-            return
-        }
-        
-        do {
-            let data = try Data(contentsOf: vocabURL)
-            let vocab = try JSONDecoder().decode(Vocabulary.self, from: data)
-            
-            // Extract all valid phonemes (excluding special tokens)
-            let specialTokens: Set<String> = ["<pad>", "<s>", "</s>", "<unk>"]
-            validPhonemes = Set(vocab.tokenToId.keys.filter { !specialTokens.contains($0) })
-            
-            // Build regex pattern (sort by length, longest first for greedy matching)
-            let sortedPhonemes = validPhonemes.sorted { $0.count > $1.count }
-            let pattern = sortedPhonemes.map { NSRegularExpression.escapedPattern(for: $0) }.joined(separator: "|")
-            
-            phonemePattern = try? NSRegularExpression(pattern: pattern, options: [])
-            
-            print("EspeakManager: Loaded \(validPhonemes.count) valid phonemes from vocabulary")
-            
-        } catch {
-            print("EspeakManager Error: Failed to load vocabulary. \(error)")
-        }
-    }
-    
-    /// Filter raw eSpeak output to only include phonemes in the model's vocabulary
-    /// This removes stress markers (ˈ, ˌ) and other symbols not in the vocabulary
-    private func filterPhonemes(from rawOutput: String) -> [String] {
-        guard let pattern = phonemePattern else {
-            // Fallback: if no vocab loaded, return raw output split by common delimiters
-            print("EspeakManager Warning: No vocabulary loaded, returning unfiltered phonemes")
-            return rawOutput.components(separatedBy: CharacterSet.whitespaces)
-                .filter { !$0.isEmpty }
-        }
-        
-        let nsString = rawOutput as NSString
-        let matches = pattern.matches(in: rawOutput, options: [], range: NSRange(location: 0, length: nsString.length))
-        
-        var phonemes: [String] = []
-        for match in matches {
-            let phoneme = nsString.substring(with: match.range)
-            phonemes.append(phoneme)
-        }
-        
-        return phonemes
-    }
-
-    // MARK: - Setup Logic
-    
-    private func setup() {
-        // 1. Locate source data in the App Bundle
-        guard let bundleDataURL = Bundle.main.url(forResource: "espeak-ng-data", withExtension: nil) else {
-            print("EspeakManager Error: 'espeak-ng-data' folder not found in Bundle.")
-            return
-        }
-        
-        // 2. Define destination in Documents (Required for write access)
-        let fileManager = FileManager.default
-        let docDir = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
-        let destDataURL = docDir.appendingPathComponent("espeak-ng-data")
-        
-        // 3. Copy if needed
-        if !fileManager.fileExists(atPath: destDataURL.path) {
-            do {
-                try fileManager.copyItem(at: bundleDataURL, to: destDataURL)
-            } catch {
-                print("EspeakManager Error: Failed to copy data. \(error)")
-                return
-            }
-        }
+        // 3. Set the path for espeak-ng data
+        // The espeak_Initialize function needs the *parent* directory of "espeak-ng-data".
+        // In this setup, we assume "espeak-ng-data" is at the root of the bundle.
+        let dataPath = bundlePath
         
         // 4. Initialize Library
-        // Point to the parent directory of 'espeak-ng-data'
-        espeak_ng_InitializePath(docDir.path)
-        espeak_ng_Initialize(nil)
+        espeak_ng_InitializePath(dataPath)
+        let status = espeak_ng_Initialize(nil)
+        if status != ENS_OK {
+            fatalError("EspeakManager: Failed to initialize eSpeak-NG. Status: \(status)")
+        }
         
-        // 5. Set Synchronous Mode
-        espeak_ng_InitializePath(docDir.path)
-        espeak_ng_Initialize(nil)
+        // 5. Set Synchronous Mode (Retrieval Mode)
+        // This makes espeak_ng_Synthesize block until all phonemes are generated
+        // and all callbacks have returned.
         espeak_ng_InitializeOutput(ENOUTPUT_MODE_SYNCHRONOUS, 0, nil)
         
         // 6. Configuration
         espeak_ng_SetVoiceByName("en")
+        
+        // Set pitch range to 0 to get a more monotonic (robotic) voice,
+        // which is better for phoneme analysis.
+        espeak_ng_SetParameter(espeakRANGE, 0, 0)
         
         // Enable Phoneme Events with IPA output
         // 1 = Enable Events
         // 2 = espeakPHONEMES_IPA (Output IPA Unicode chars)
         espeak_ng_SetPhonemeEvents(1, 2)
         
-        // Register Callback
+        // Register our global C function as the callback
         espeak_SetSynthCallback(phonemeCallback)
         
         print("EspeakManager: Initialized successfully with IPA output.")
+    }
+    
+    /// Returns a single string of phonemes separated by spaces (e.g. "h ə l oʊ w ɜː l d")
+    public func getPhonemesAsString(for text: String) -> String {
+        let phonemesByWord = getPhonemes(for: text)
+        return phonemesByWord.map { $0.joined() }.joined(separator: " ")
+    }
+    
+    /// Generates phonemes for a given line of text.
+    public func getPhonemes(for text: String) -> [[String]] {
+        // 1. Clear previous state
+        clear()
+        
+        // 2. Synthesize the text
+        // This is a synchronous call. It will trigger the `phonemeCallback`
+        // function multiple times before returning.
+        text.withCString { cText in
+            espeak_ng_Synthesize(cText, strlen(cText) + 1, 0, POS_CHARACTER, 0, UInt32(espeakCHARS_UTF8), nil, nil)
+        }
+        
+        // 3. Process the results
+        // The `currentPhonemes` and `wordBoundaries` arrays are now populated.
+        // We need to split the flat phoneme list into a 2D word list.
+        var result: [[String]] = []
+        
+        // If no boundaries were found (e.g., empty text), return empty.
+        if wordBoundaries.isEmpty {
+            return result
+        }
+        
+        // Iterate over the boundary indices
+        for i in 0..<wordBoundaries.count {
+            let startIndex = wordBoundaries[i]
+            
+            // Determine the end index
+            let endIndex: Int
+            if i == wordBoundaries.count - 1 {
+                // This is the last word, so go to the end of the phonemes list
+                endIndex = currentPhonemes.count
+            } else {
+                // This is not the last word, so end at the start of the next word
+                endIndex = wordBoundaries[i + 1]
+            }
+            
+            // Slice the array and add it to our results
+            if startIndex < endIndex { // Ensure we don't add empty arrays
+                let wordPhonemes = Array(currentPhonemes[startIndex..<endIndex])
+                result.append(wordPhonemes)
+            }
+        }
+        
+        return result
+    }
+    
+    // MARK: - Internal Callback Handlers
+    
+    /// (Called by C callback) Appends a phoneme to the internal list.
+    internal func accumulate(phoneme: String) {
+        // 1. Filter out known separators (which are sent as their own events)
+        if phoneme.isEmpty || phoneme == " " || phoneme == "_" {
+            return
+        }
+        
+        // 2. Clean stress markers, which are prefixed to phonemes
+        // (e.g., "ˈə" becomes "ə")
+        let cleanedPhoneme = phoneme
+            .replacingOccurrences(of: "ˈ", with: "")
+            .replacingOccurrences(of: "ˌ", with: "")
+        
+        // 3. If the string was *only* a marker, it's now empty. Don't append.
+        if cleanedPhoneme.isEmpty {
+            return
+        }
+        
+        // 4. Append the cleaned, valid phoneme
+        currentPhonemes.append(cleanedPhoneme)
+    }
+    
+    /// (Called by C callback) Decides whether to mark a new word boundary.
+    internal func markWordBoundary(at textPosition: Int32, length: Int32) {
+        let currentWordStartPosition = Int(textPosition)
+        
+        // Calculate the end position of this word event in the original text
+        let currentWordEndPosition = currentWordStartPosition + Int(length)
+        
+        // Check if this "word" event starts exactly where the last one ended.
+        // e.g., "I" (pos 0, len 1) ends at 1. "'m" (pos 1, len 2) starts at 1.
+        // This detects a contraction split.
+        if currentWordStartPosition == self.lastWordEndPosition {
+            // This is part of a contraction (e.g., the "'m" part of "I'm").
+            // We DO NOT add a new word boundary, as we want to merge
+            // the phonemes with the previous word.
+            // We just update the "final" end position to track the end of *this* fragment.
+            self.lastWordEndPosition = currentWordEndPosition
+        } else {
+            // This is a new, separate word.
+            // Add a word boundary at the current phoneme list index.
+            self.wordBoundaries.append(self.currentPhonemes.count)
+            
+            // Store the end position of this new word.
+            self.lastWordEndPosition = currentWordEndPosition
+        }
+    }
+    
+    /// Resets the internal state for a new synthesis task.
+    private func clear() {
+        currentPhonemes = []
+        wordBoundaries = []
+        lastWordEndPosition = -1 // Reset the contraction detector
+    }
+    
+    /// Loads and decodes the vocab.json file.
+    private func loadVocabulary() {
+        guard let url = Bundle.main.url(forResource: "vocab", withExtension: "json") else {
+            print("EspeakManager: WARNING - vocab.json not found. Phoneme filtering will be disabled.")
+            return
+        }
+        
+        do {
+            let data = try Data(contentsOf: url)
+            // Decode the vocabulary file
+            let vocab = try JSONDecoder().decode(Vocabulary.self, from: data)
+            
+            // Build a set of the special tokens from the decoded struct
+            let specialTokens = Set([
+                vocab.specialTokens.pad,
+                vocab.specialTokens.unk,
+                vocab.specialTokens.bos,
+                vocab.specialTokens.eos
+            ])
+            
+            // Filter the vocab keys to get only valid phonemes (excluding special tokens)
+            self.validPhonemes = Set(vocab.tokenToId.keys.filter { !specialTokens.contains($0) })
+            
+            print("EspeakManager: Successfully loaded \(self.validPhonemes.count) valid phonemes. Filtering enabled.")
+        } catch {
+            print("EspeakManager: ERROR - Failed to load or decode vocab.json: \(error). Filtering disabled.")
+        }
     }
 }
 
