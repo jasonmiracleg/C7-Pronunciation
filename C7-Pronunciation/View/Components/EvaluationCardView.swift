@@ -21,6 +21,13 @@ struct EvaluationCardView: View {
         .background(RoundedRectangle(cornerRadius: 16).fill(Color(UIColor.systemGray6)))
     }
     
+    func clean(_ word: String) -> String {
+        word
+            .replacingOccurrences(of: "’", with: "'")
+            .trimmingCharacters(in: .punctuationCharacters)
+            .lowercased()
+    }
+    
     @ViewBuilder
     func interactiveUnderlinedText(
         fullText: String,
@@ -28,16 +35,17 @@ struct EvaluationCardView: View {
         onTap: @escaping (WordScore) -> Void
     ) -> some View {
 
-        let words = fullText.split(separator: " ").map { String($0) }
+        let words = fullText
+            .replacingOccurrences(of: "’", with: "'")
+            .split(separator: " ")
+            .map { String($0) }
 
-        let scoreMap = Dictionary(uniqueKeysWithValues: wordScores.map {
-            ($0.word.lowercased(), $0)
-        })
+        let scoreMap = Dictionary(uniqueKeysWithValues:
+            wordScores.map { (clean($0.word), $0) }
+        )
 
         FlexibleFlowLayout(data: words.map { WordItem(word: $0) }) { wordItem in
-            let cleaned = wordItem.word
-                .trimmingCharacters(in: .punctuationCharacters)
-                .lowercased()
+            let cleaned = clean(wordItem.word)
 
             if let score = scoreMap[cleaned], score.score < 0.8 {
                 Text(wordItem.word + " ")
@@ -46,8 +54,8 @@ struct EvaluationCardView: View {
                     .onTapGesture { onTap(score) }
             } else {
                 Text(wordItem.word + " ")
-                    .foregroundColor(.primary)
             }
         }
     }
+
 }

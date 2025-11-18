@@ -11,23 +11,6 @@ struct EvaluationView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var viewModel: CustomViewModel
 
-    let dummyWordScores: [WordScore] = [
-
-        WordScore(
-            word: "simultaneously",
-            score: 0.52,  // ❌ will be underlined red
-            alignedPhonemes: [
-                AlignedPhoneme(
-                    type: .replace,
-                    target: "ˌsaɪ.məlˈteɪ.ni.əs.li",
-                    actual: "sa.məl.te.ni.li",
-                    score: 0.5,
-                    note: "Mispronounced vowel"
-                )
-            ]
-        ),
-    ]
-
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
@@ -42,7 +25,7 @@ struct EvaluationView: View {
 //                        ForEach(0..<10) { _ in
                             EvaluationCardView(
                                 sentence: viewModel.targetSentence,
-                                wordScores: dummyWordScores
+                                wordScores: viewModel.evalResults?.wordScores ?? []
                             ) { selectedWord in
                                 print("Tapped: \(selectedWord.word)")
                             }
