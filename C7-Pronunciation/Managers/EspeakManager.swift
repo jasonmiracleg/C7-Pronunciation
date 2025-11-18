@@ -48,7 +48,7 @@ public class EspeakManager {
         }
         
         // 2. Find the Documents directory (where we can write)
-        guard let docDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+        guard FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first != nil else {
             fatalError("EspeakManager: Failed to find documents directory.")
         }
         
@@ -72,8 +72,7 @@ public class EspeakManager {
         // 6. Configuration
         espeak_ng_SetVoiceByName("en")
         
-        // Set pitch range to 0 to get a more monotonic (robotic) voice,
-        // which is better for phoneme analysis.
+        // Set pitch range to 0 to get a more monotonic (robotic) voice, typically is better for phoneme analysis.
         espeak_ng_SetParameter(espeakRANGE, 0, 0)
         
         // Enable Phoneme Events with IPA output

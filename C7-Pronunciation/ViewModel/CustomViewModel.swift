@@ -41,7 +41,15 @@ class CustomViewModel: ObservableObject {
         } else {
             isRecording = true
             resetResults()
-            audioManager.startRecording()
+            do {
+                // 2. Try to start, catch failure
+                try audioManager.startRecording()
+            } catch {
+                print("Start failed: \(error)")
+                // 3. Revert UI immediately if start failed
+                self.isRecording = false
+                self.errorMessage = "Could not access microphone"
+            }
         }
     }
     
@@ -76,7 +84,7 @@ class CustomViewModel: ObservableObject {
         }
         
         self.isLoading = false
-        self.evalResults = scorer.alignAndScore(decodedPhonemes: decodedPhonemes.flatMap { $0 }, idealPhonemes: idealPhonemes, targetSentence: self.targetSentence)
+        self.evalResults = scorer.alignAndScore(decodedPhonemes: decodedPhonemes.flatMap { $0 }, targetSentence: self.targetSentence)
         
         print("Total Score: \(self.evalResults!.totalScore)")
         print("\nWord Scores:")
