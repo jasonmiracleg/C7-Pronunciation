@@ -9,5 +9,6 @@ import Foundation
 
 struct WordItem: Identifiable {
     let id = UUID()
+    let index: Int
     let word: String
 }
