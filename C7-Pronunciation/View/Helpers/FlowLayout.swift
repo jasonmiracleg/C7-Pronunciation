@@ -18,9 +18,27 @@ struct FlowLayout: Layout {
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
         let rows = computeRows(proposal: proposal, subviews: subviews)
+        
         for row in rows {
+            // MARK: - Centering Logic
+            // 1. Calculate the actual width occupied by items in this row
+            let lastElement = row.elements.last
+            let lastElementWidth = lastElement?.subview.sizeThatFits(.unspecified).width ?? 0
+            let rowContentWidth = (lastElement?.x ?? 0) + lastElementWidth
+            
+            // 2. Calculate the offset needed to center the content
+            // (Available Width - Content Width) / 2
+            let offset = (bounds.width - rowContentWidth) / 2
+            
             for element in row.elements {
-                element.subview.place(at: CGPoint(x: bounds.minX + element.x, y: bounds.minY + row.y), proposal: .unspecified)
+                // 3. Apply the offset to the X position
+                element.subview.place(
+                    at: CGPoint(
+                        x: bounds.minX + element.x + max(0, offset), // Prevent negative offset
+                        y: bounds.minY + row.y
+                    ),
+                    proposal: .unspecified
+                )
             }
         }
     }
@@ -34,6 +52,7 @@ struct FlowLayout: Layout {
         for subview in subviews {
             let size = subview.sizeThatFits(.unspecified)
             
+            // Check if adding this item exceeds the max width
             if x + size.width > maxWidth && !currentRow.elements.isEmpty {
                 rows.append(currentRow)
                 currentRow = Row(y: currentRow.maxY + spacing, elements: [])

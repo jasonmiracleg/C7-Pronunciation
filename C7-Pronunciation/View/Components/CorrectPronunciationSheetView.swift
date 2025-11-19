@@ -25,10 +25,10 @@ struct CorrectPronunciationSheetView: View {
                     speak(text: wordScore.word.lowercased())
                 }) {
                     Image(systemName: "speaker.wave.2.circle.fill")
-                        .resizable()
-                        .frame(width: 36, height: 36)
-                        .foregroundColor(.blue)
+                        .font(.system(size: 36))
+                        .foregroundColor(.white)
                 }
+                .glassEffect( .regular.tint(Color.interactive))
             }
             .frame(maxWidth: .infinity)
             .navigationTitle("Correct Pronunciation")

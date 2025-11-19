@@ -149,7 +149,7 @@ class FlashcardViewModel: ObservableObject {
     private func scoreColor(_ score: Double) -> Color {
         let percentage = score * 100
         switch percentage {
-        case 70...100: return .black
+        case 70...100: return Color.primary
         case 50..<70: return .orange
         default: return .red
         }

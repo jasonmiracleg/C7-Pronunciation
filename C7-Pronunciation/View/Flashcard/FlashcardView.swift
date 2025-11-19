@@ -17,7 +17,7 @@ struct FlashcardView: View {
         ZStack(alignment: .topTrailing) {
             // Card Background
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
+                .fill(Color(UIColor.tertiarySystemBackground))
                 .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 5)
             
             // Content
@@ -31,7 +31,6 @@ struct FlashcardView: View {
                         ForEach(viewModel.targetSentence.split(separator: " ").map(String.init), id: \.self) { word in
                             Text(word)
                                 .font(.system(size: 28, weight: .medium))
-                                .foregroundColor(.black)
                         }
                     } else {
                         // Render Evaluated/Scored words
@@ -46,58 +45,26 @@ struct FlashcardView: View {
             }
             .frame(maxWidth: .infinity)
             
-            // Speaker
+            // Speaker            
             Button(action: onPlayAudio) {
-                Image(systemName: "speaker.wave.2.fill")
-                    .font(.title2)
-                    .foregroundColor(.blue)
-                    .padding(24)
+                Image(systemName: "speaker.wave.2.circle.fill")
+                    .font(.system(size: 36))
+                    .foregroundColor(.white)
             }
-        }
-    }
-    
-    // MARK: - Coloring Logic
-    @ViewBuilder
-    private func textFlow(words: [WordScore]) -> some View {
-        if words.isEmpty {
-            Text(viewModel.targetSentence)
-                .font(.system(size: 28, weight: .medium))
-                .foregroundColor(.black)
-        } else {
-            // Concatenate Text views to allow wrapping
-            words.reduce(Text("")) { (result, wordScore) -> Text in
-                let separator = result == Text("") ? "" : " "
-                
-                var textSegment = Text(wordScore.word)
-                    .font(.system(size: 28, weight: .medium))
-                
-                if wordScore.isEvaluated {
-                    // Use the color set by the ViewModel based on score ranges
-                    // 85-100% = green, 70-85% = blue, 50-70% = orange, <50% = red
-                    textSegment = textSegment.foregroundColor(wordScore.color)
-                    
-                    // Optionally add underline for really poor scores (below 50%)
-                    if wordScore.score < 0.5 {
-                        textSegment = textSegment.underline(true, color: wordScore.color)
-                    }
-                } else {
-                    // Not yet evaluated - show in neutral black
-                    textSegment = textSegment.foregroundColor(.black)
-                }
-                
-                return result + Text(separator) + textSegment
-            }
+            .glassEffect( .regular.tint(Color.interactive))
+            .padding(16)
+//            .glassEffect( .regular.tint(Color.interactive))
         }
     }
     
     @ViewBuilder
     private func wordView(for wordScore: WordScore) -> some View {
-        let isLowScore = wordScore.score < 0.6
+        let isLowScore = wordScore.score <= 0.7
         
         Text(wordScore.word)
             .font(.system(size: 28, weight: .medium))
             // Color logic: If evaluated, use score color. If low score, ensure it's visible.
-            .foregroundColor(wordScore.isEvaluated ? wordScore.color : .black)
+            .foregroundColor(Color.primary)
             // Underline logic: Only if evaluated and score is bad
             .underline(wordScore.isEvaluated && isLowScore, color: wordScore.color)
             // Interaction logic: Only tappable if evaluated and score is bad
