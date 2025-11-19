@@ -46,7 +46,7 @@ struct CustomMainView: View {
                                     .font(.system(size: 64))
                                     .foregroundStyle(Color.white)
                             }
-                            .glassEffect( .regular.tint(Color.interactive))
+                            .glassEffect( .regular.tint(Color.accentColor))
                             
                             Spacer()
                             
@@ -57,37 +57,11 @@ struct CustomMainView: View {
                                     .font(.system(size: 64))
                                     .foregroundStyle(.white)
                             }
-                            .glassEffect( .regular.tint(Color.interactive))
+                            .glassEffect( .regular.tint(Color.accentColor))
                         }
                         .padding(.horizontal)
 
                     } else {
-                        
-                        Button(action: {
-                            if !viewModel.isRecording {
-                                viewModel.setTargetSentence(text)
-                                viewModel.toggleRecording()
-                                
-                                isEnable.toggle()
-                            } else {
-                                viewModel.toggleRecording()
-                                isDone.toggle()
-                            }
-                        }) {
-                            Image(systemName: !viewModel.isRecording ? "microphone.circle.fill" : "stop.circle.fill")
-                                .font(.system(size: 64))
-                                .foregroundColor(.white)
-                                .opacity(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0.4 : 1)
-                        }
-                        .glassEffect(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?  .regular.tint(Color.secondary) : .regular.tint(Color.interactive))
-                        .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                    }
-                    Spacer()
-
-                } else {
-                    // Encapsulate Mic and Waveform in a VStack
-                    VStack(spacing: 16) {
-                        
                         // Show waveform only when recording
                         if viewModel.isRecording {
                             WaveformView(levels: viewModel.audioLevels)
@@ -111,12 +85,13 @@ struct CustomMainView: View {
                         }) {
                             Image(systemName: !viewModel.isRecording ? "microphone.circle.fill" : "stop.circle.fill")
                                 .font(.system(size: 64))
-                                .foregroundStyle(Color.accentColor)
-                                .padding()
+                                .foregroundColor(.white)
                                 .opacity(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0.4 : 1)
                         }
+                        .glassEffect(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?  .regular.tint(Color.secondary) : .regular.tint(Color.accentColor))
                         .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     }
+                    Spacer()
                 }
             }
             .onTapGesture {

@@ -153,7 +153,7 @@ struct FlashcardPageView: View {
                             .font(.system(size: 64))
                             .foregroundStyle(.white)
                     }
-                    .glassEffect( .regular.tint(Color.interactive))
+                    .glassEffect( .regular.tint(Color.accent))
                 }
                 .frame(width: 120, height: 120)
             }
