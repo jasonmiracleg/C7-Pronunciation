@@ -64,13 +64,6 @@ struct FlashcardPageView: View {
                         if newValue == true {
                             isEvaluated = true
                         }
-                        .padding(.top, 10)
-
-                        Spacer()
-
-                        // MARK: - Microphone Button
-                        recordingButton
-                            .padding(.bottom, 40)
                     }
                 }
 
@@ -242,7 +235,7 @@ struct FlashcardPageView: View {
                             .font(.system(size: 64))
                             .foregroundStyle(.white)
                     }
-                    .glassEffect( .regular.tint(Color.interactive))
+                    .glassEffect( .regular.tint(Color.accent))
                 }
                 .frame(width: 120, height: 120)
             }
@@ -258,7 +251,7 @@ struct FlashcardPageView: View {
 
         }
         // Disable interaction if loading
-        .glassEffect( .regular.tint(Color.interactive))
+        .glassEffect( .regular.tint(Color.accent))
         .disabled(viewModel.isLoading)
         
         
@@ -270,7 +263,7 @@ struct FlashcardPageView: View {
                 .font(.system(size: 36))
                 .foregroundColor(.white)
         }
-        .glassEffect( .regular.tint(Color.interactive))
+        .glassEffect( .regular.tint(Color.accent))
         .disabled(viewModel.isLoading)
     }
 

@@ -51,9 +51,8 @@ struct FlashcardView: View {
                     .font(.system(size: 36))
                     .foregroundColor(.white)
             }
-            .glassEffect( .regular.tint(Color.interactive))
+            .glassEffect( .regular.tint(Color.accent))
             .padding(16)
-//            .glassEffect( .regular.tint(Color.interactive))
         }
     }
     

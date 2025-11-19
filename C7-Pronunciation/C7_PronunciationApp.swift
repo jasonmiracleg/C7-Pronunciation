@@ -16,13 +16,12 @@ struct C7_PronunciationApp: App {
 
     var body: some Scene {
         WindowGroup {
-            FlashcardPageView()
-                .environmentObject(user)
             ZStack {
                 if isModelLoaded {
                     Group {
                         if hasCompletedOnboarding {
                             HomeScreenView()
+                                .environmentObject(user)
                         } else {
                             OnboardingView {
                                 self.hasCompletedOnboarding = true

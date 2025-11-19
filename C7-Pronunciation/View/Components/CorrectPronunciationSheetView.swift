@@ -46,7 +46,7 @@ struct CorrectPronunciationSheetView: View {
                         .font(.system(size: 36))
                         .foregroundColor(.white)
                 }
-                .glassEffect( .regular.tint(Color.interactive))
+                .glassEffect( .regular.tint(Color.accent))
             }
             .navigationTitle("Evaluation")
             .navigationBarTitleDisplayMode(.inline)

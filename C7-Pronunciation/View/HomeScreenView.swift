@@ -10,6 +10,7 @@ import SwiftUI
 struct HomeScreenView: View {
     @State private var isCustomPresented = false
     @State private var isFlashCardPresented = false
+    @EnvironmentObject var user: User
     
     var body: some View {
         NavigationStack {
@@ -74,7 +75,7 @@ struct HomeScreenView: View {
                 onTap?()
             }
             .padding(.horizontal)
-            .frame(width: .infinity, height: 180)
+            .frame(height: 180)
             .background(
                 LinearGradient(
                     gradient: Gradient(colors: gradientColor),
