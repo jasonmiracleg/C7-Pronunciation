@@ -31,10 +31,16 @@ struct GavinTestView: View {
                 }
                 
                 // BUTTON
-                Button("Evaluate Random") {
-                    vm.evaluateRandom()
+                LazyHStack {
+                    Button("Evaluate Random") {
+                        vm.evaluateRandom()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    Button("x100") {
+                        vm.evaluateRandomMore()
+                    }
+                    .buttonStyle(.borderedProminent)
                 }
-                .buttonStyle(.borderedProminent)
                 
                 
                 // BUTTON
@@ -232,6 +238,12 @@ class GavinTestViewModel: ObservableObject {
 
         lastUpdateText =
             "\(phoneme)  old: \(String(format: "%.3f", oldScore)) → new: \(String(format: "%.3f", newScore))   Δ: \(String(format: "%.3f", delta))"
+    }
+    
+    func evaluateRandomMore(){
+        for _ in 0...100 {
+            evaluateRandom()
+        }
     }
     
     func getRandomPhonemes() {
