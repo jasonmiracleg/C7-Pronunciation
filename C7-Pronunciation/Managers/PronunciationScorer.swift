@@ -288,11 +288,7 @@ public class PronunciationScorer {
             }
         }
         
-        // IMPORTANT FIX: Finalize the last word if we have pending scores
-        if currentWordPhonemeCount > 0 {
-            finalizeCurrentWord()
-        }
-        
+
         let finalTotalScore = scoreCount > 0 ? totalScore / Double(scoreCount) : 0.0
         
         // Split with Greedy logic
