@@ -82,6 +82,7 @@ class AudioManager: NSObject, ObservableObject, AVAudioRecorderDelegate {
     
     /// Indicates if phoneme recognition is ready
     private(set) var isPhonemeRecognitionReady = false
+    private var permissionGranted = false
     
     // MARK: - Initialization
     
@@ -89,6 +90,20 @@ class AudioManager: NSObject, ObservableObject, AVAudioRecorderDelegate {
         super.init()
         setupAudioSession()
         initializePhonemeRecognition()
+        
+        // Check permission status immediately
+        switch AVAudioApplication.shared.recordPermission {
+        case .granted:
+            self.permissionGranted = true
+        case .denied:
+            self.permissionGranted = false
+        case .undetermined:
+            AVAudioApplication.requestRecordPermission { allowed in
+                self.permissionGranted = allowed
+            }
+        @unknown default:
+            self.permissionGranted = false
+        }
     }
     
     // MARK: - Audio Session Setup
@@ -144,12 +159,31 @@ class AudioManager: NSObject, ObservableObject, AVAudioRecorderDelegate {
     // MARK: - Recording Methods
     
     /// Start recording audio as WAV for phoneme recognition
-    func startRecording() {
-        let fileName = "recording.wav"
+    func startRecording() throws {
+        // 1. Safety: If a recorder instance still exists (even if isRecording is false), kill it.
+        if let existing = audioRecorder {
+            existing.stop()
+            self.audioRecorder = nil
+        }
+        
+        if isRecording { return }
+        
+        // Permission check
+        if !permissionGranted {
+            AVAudioApplication.requestRecordPermission { [weak self] allowed in
+                self?.permissionGranted = allowed
+                if allowed {
+                    DispatchQueue.main.async { try? self?.startRecording() }
+                }
+            }
+            return
+        }
+
+        // Use fixed filename
+        let fileName = "user_recording.wav"
         let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         self.audioURL = documentsPath.appendingPathComponent(fileName)
         
-        // Uncompressed WAV optimized for CoreML (16kHz, 16-bit, Mono)
         let settings: [String: Any] = [
             AVFormatIDKey: Int(kAudioFormatLinearPCM),
             AVSampleRateKey: 16000,
@@ -159,28 +193,48 @@ class AudioManager: NSObject, ObservableObject, AVAudioRecorderDelegate {
             AVLinearPCMIsFloatKey: false
         ]
         
-        AVAudioApplication.requestRecordPermission { [weak self] allowed in
-            guard let self = self, allowed else { return }
+        // 2. Session Setup: DO NOT deactivate the session. Just enforce the category and activate.
+        do {
+            try audioSession.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetoothHFP])
+            try audioSession.setActive(true)
+        } catch {
+            print("⚠️ Session activation warning: \(error)")
+            // Continue anyway; sometimes it's already active, which is fine.
+        }
+        
+        // 3. Clean up file
+        if FileManager.default.fileExists(atPath: audioURL!.path) {
+            try? FileManager.default.removeItem(at: audioURL!)
+        }
+        
+        // 4. Create and Record
+        do {
+            let newRecorder = try AVAudioRecorder(url: self.audioURL!, settings: settings)
+            newRecorder.delegate = self
+            newRecorder.isMeteringEnabled = true
             
-            DispatchQueue.main.async {
-                do {
-                    self.audioRecorder = try AVAudioRecorder(url: self.audioURL!, settings: settings)
-                    self.audioRecorder?.delegate = self
-                    self.audioRecorder?.isMeteringEnabled = true
-                    self.audioRecorder?.record()
-                    self.isRecording = true
-                    print("✓ Recording started: \(fileName)")
-                } catch {
-                    print("Could not start recording: \(error)")
-                }
+            // Critical Step: Warm up the hardware before recording
+            if !newRecorder.prepareToRecord() {
+                print("⚠️ Prepare to record failed, attempting to record anyway...")
             }
+            
+            if newRecorder.record() {
+                self.audioRecorder = newRecorder
+                self.isRecording = true
+                print("✓ Recording started")
+            } else {
+                // If we fail here, it's usually because the session is invalid.
+                throw NSError(domain: "Audio", code: 500, userInfo: [NSLocalizedDescriptionKey: "Microphone failed to start"])
+            }
+        } catch {
+            print("Could not start recording: \(error)")
+            throw error
         }
     }
     
     /// Stop recording audio
     func stopRecording() {
         audioRecorder?.stop()
-        audioRecorder = nil
         isRecording = false
         print("✓ Recording stopped")
     }
@@ -205,8 +259,13 @@ class AudioManager: NSObject, ObservableObject, AVAudioRecorderDelegate {
     // MARK: - AVAudioRecorderDelegate
     
     func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
+        // Clean up the recorder after it finishes
+        audioRecorder = nil
+        
         if !flag {
-            print("Recording failed.")
+            print("⚠️ Recording failed or was interrupted.")
+        } else {
+            print("✓ Recording finished successfully")
         }
     }
     
@@ -278,7 +337,7 @@ class AudioManager: NSObject, ObservableObject, AVAudioRecorderDelegate {
     // MARK: - Private Recognition Methods
     
     // DEBUG: TEST OUTPUTTING PREDICTIONS WITH CONFIDENCE INTERVALS
-//    private func recognizePhonemesSync(from url: URL) throws -> String {
+    //    private func recognizePhonemesSync(from url: URL) throws -> String {
     private func recognizePhonemesSync(from url: URL) throws -> [[PhonemePrediction]] {
         DispatchQueue.main.async { [weak self] in
             self?.isProcessingPhonemes = true
@@ -346,14 +405,22 @@ class AudioManager: NSObject, ObservableObject, AVAudioRecorderDelegate {
     }
     
     // MARK: - Audio Processing Helpers
-    
+
     private func loadAndPreprocessAudio(from url: URL) throws -> [Float] {
         let audioFile = try AVAudioFile(forReading: url)
         let format = audioFile.processingFormat
+        let fileLength = audioFile.length
+        
+        // FIX: Handle empty or extremely short files (Immediate Stop)
+        // Instead of crashing, we return a buffer of silence matching the model's chunk size
+        if fileLength == 0 {
+            print("⚠️ Audio file is empty. Returning padded silence.")
+            return [Float](repeating: 0, count: chunkSize)
+        }
         
         guard let buffer = AVAudioPCMBuffer(
             pcmFormat: format,
-            frameCapacity: AVAudioFrameCount(audioFile.length)
+            frameCapacity: AVAudioFrameCount(fileLength)
         ) else {
             throw AudioError.audioLoadFailed
         }
@@ -362,15 +429,18 @@ class AudioManager: NSObject, ObservableObject, AVAudioRecorderDelegate {
         
         var samples = convertToMono(buffer: buffer)
         
+        // Resample if necessary
         if format.sampleRate != 16000 {
-            print("  Resampling to 16kHz...")
             samples = try resample(samples: samples, fromRate: format.sampleRate, toRate: 16000)
         }
         
         normalize(&samples)
         
-        print("  Loaded: \(samples.count) samples (\(Double(samples.count)/16000.0)s)")
-        
+        // Safety catch: if samples became empty during processing
+        if samples.isEmpty {
+             return [Float](repeating: 0, count: chunkSize)
+        }
+
         return samples
     }
     
@@ -402,6 +472,8 @@ class AudioManager: NSObject, ObservableObject, AVAudioRecorderDelegate {
     }
     
     private func resample(samples: [Float], fromRate: Double, toRate: Double) throws -> [Float] {
+        if samples.isEmpty { return [] }
+        
         let ratio = toRate / fromRate
         let outputLength = Int(Double(samples.count) * ratio)
         var outputSamples = [Float](repeating: 0, count: outputLength)
@@ -434,14 +506,20 @@ class AudioManager: NSObject, ObservableObject, AVAudioRecorderDelegate {
     }
     
     private func splitIntoChunks(samples: [Float]) -> [[Float]] {
-        if samples.count <= chunkSize {
+        // If audio is shorter than chunk size, pad it to chunk size
+        if samples.count < chunkSize {
             var chunk = samples
-            if chunk.count < chunkSize {
-                chunk.append(contentsOf: [Float](repeating: 0, count: chunkSize - chunk.count))
-            }
+            chunk.append(contentsOf: [Float](repeating: 0, count: chunkSize - chunk.count))
+            print("  ℹ️ Padded short audio from \(samples.count) to \(chunkSize) samples")
             return [chunk]
         }
         
+        // If exactly chunk size, return as-is
+        if samples.count == chunkSize {
+            return [samples]
+        }
+        
+        // For longer audio, use overlapping chunks
         let overlap = 8000 // 0.5 seconds
         let stride = chunkSize - overlap
         
@@ -452,10 +530,7 @@ class AudioManager: NSObject, ObservableObject, AVAudioRecorderDelegate {
             let endIndex = min(startIndex + chunkSize, samples.count)
             var chunk = Array(samples[startIndex..<endIndex])
             
-            if chunk.count < chunkSize / 2 {
-                break
-            }
-            
+            // Pad the last chunk if needed
             if chunk.count < chunkSize {
                 chunk.append(contentsOf: [Float](repeating: 0, count: chunkSize - chunk.count))
             }

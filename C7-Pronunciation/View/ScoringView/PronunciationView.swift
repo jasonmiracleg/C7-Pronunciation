@@ -160,9 +160,6 @@ struct WordDetailView: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
                     
-                    // MODIFICATION 2:
-                    // Instead of a single Text view, we now call a function
-                    // that builds a composite Text view with custom colors.
                     buildSpokenPhonemesText()
                         .font(.title2)
                         .frame(maxWidth: .infinity, alignment: .leading) // Keep the layout
@@ -197,6 +194,11 @@ struct WordDetailView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }
                 }
+            }
+        }
+        .task {
+            for alignedPhoneme in word.alignedPhonemes {
+                print("Type: \(alignedPhoneme.type) | Actual: \(alignedPhoneme.actual ?? "?") | Target: \(alignedPhoneme.target) | Score: \(alignedPhoneme.score) | Note: \(alignedPhoneme.note ?? "None")")
             }
         }
     }

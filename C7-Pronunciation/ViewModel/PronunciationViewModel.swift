@@ -14,12 +14,10 @@ class PronunciationViewModel: ObservableObject {
     
     // Dependencies
     private let audioManager = AudioManager.shared
-    private let espeakManager = EspeakManager.shared
     private let scorer = PronunciationScorer.shared
     
-    @Published var targetSentence: String = "Good morning. My name is Jason."
+    @Published var targetSentence: String = "Good morning. My name is Jason and I like older women."
     @Published var decodedPhonemes: [[PhonemePrediction]] = [[]]
-    @Published var idealPhonemes: [[String]] = [[]]
     @Published var evalResults: PronunciationEvalResult?
     
     // State vars
@@ -28,17 +26,29 @@ class PronunciationViewModel: ObservableObject {
     @Published var isRecording = false
     
     func toggleRecording() {
-        if audioManager.isRecording {
-            isRecording = false
+        // 1. Check SELF.isRecording (User Intention), not audioManager.isRecording
+        if self.isRecording {
+            // STOP LOGIC
+            self.isRecording = false
             audioManager.stopRecording()
-            // Automatically submit after stopping
+            
             Task {
                 await submitRecording()
             }
         } else {
-            isRecording = true
+            // START LOGIC
+            self.isRecording = true // Optimistic UI update
             resetResults()
-            audioManager.startRecording()
+            
+            do {
+                // 2. Try to start, catch failure
+                try audioManager.startRecording()
+            } catch {
+                print("Start failed: \(error)")
+                // 3. Revert UI immediately if start failed
+                self.isRecording = false
+                self.errorMessage = "Could not access microphone"
+            }
         }
     }
     
@@ -48,37 +58,43 @@ class PronunciationViewModel: ObservableObject {
             return
         }
         
-        self.isLoading = true
+        // Verify file exists and has content
+        guard FileManager.default.fileExists(atPath: audioURL.path) else {
+            self.errorMessage = "Recording file not found. Please try again."
+            return
+        }
         
-        // GET INFERED PHONEMES FROM MODEL; GET IDEAL PHONEMES FROM ESPEAK
+        self.isLoading = true
+        self.errorMessage = nil // Clear previous errors
+        
         do {
-            // Check if AudioManager is ready
             guard audioManager.isPhonemeRecognitionReady else {
                 throw NSError(domain: "Test", code: 0, userInfo: [NSLocalizedDescriptionKey: "AudioManager is not ready. Check model/vocab."])
             }
             
-            print("Found test file: \(audioURL.lastPathComponent)")
+            print("Processing file: \(audioURL.lastPathComponent)")
             
-            // 2. Call the new test method on AudioManager
             let result = try await audioManager.recognizePhonemes(from: audioURL)
             
             self.decodedPhonemes = result
-            self.idealPhonemes = espeakManager.getPhonemesByWord(for: self.targetSentence)
+            
+            self.evalResults = scorer.alignAndScore(
+                decodedPhonemes: decodedPhonemes.flatMap { $0 },
+                targetSentence: self.targetSentence
+            )
+            
+            print("Total Score: \(self.evalResults!.totalScore)")
+            print("\nWord Scores:")
+            for wordScore in self.evalResults!.wordScores {
+                print("  \(wordScore.word): \(wordScore.score)")
+            }
+            
             self.isLoading = false
             
         } catch {
-            self.errorMessage = error.localizedDescription
+            self.errorMessage = "Processing failed: \(error.localizedDescription)"
             self.isLoading = false
-            print("✗ Test failed: \(error.localizedDescription)")
-        }
-        
-        self.isLoading = false
-        self.evalResults = scorer.alignAndScore(decodedPhonemes: decodedPhonemes.flatMap { $0 }, idealPhonemes: idealPhonemes, targetSentence: self.targetSentence)
-        
-        print("Total Score: \(self.evalResults!.totalScore)")
-        print("\nWord Scores:")
-        for wordScore in self.evalResults!.wordScores {
-            print("  \(wordScore.word): \(wordScore.score)")
+            print("✗ Processing failed: \(error.localizedDescription)")
         }
     }
     
