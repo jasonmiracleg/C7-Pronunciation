@@ -45,7 +45,15 @@ class CustomViewModel: ObservableObject {
         } else {
             isRecording = true
             resetResults()
-            audioManager.startRecording()
+            do {
+                // 2. Try to start, catch failure
+                try audioManager.startRecording()
+            } catch {
+                print("Start failed: \(error)")
+                // 3. Revert UI immediately if start failed
+                self.isRecording = false
+                self.errorMessage = "Could not access microphone"
+            }
         }
     }
     
@@ -73,9 +81,10 @@ class CustomViewModel: ObservableObject {
         }
         
         self.isLoading = false
+        self.evalResults = scorer.alignAndScore(decodedPhonemes: decodedPhonemes.flatMap { $0 }, targetSentence: self.targetSentence)
         
         // 1. Get the master list of WordScores for the whole text
-        let masterResult = scorer.alignAndScore(decodedPhonemes: decodedPhonemes.flatMap { $0 }, idealPhonemes: idealPhonemes, targetSentence: self.targetSentence)
+        let masterResult = scorer.alignAndScore(decodedPhonemes: decodedPhonemes.flatMap { $0 }, targetSentence: self.targetSentence)
         
         // 2. Process into sentences
         processSentences(fullText: self.targetSentence, allWordScores: masterResult.wordScores)
