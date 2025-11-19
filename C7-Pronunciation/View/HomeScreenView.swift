@@ -10,7 +10,6 @@ import SwiftUI
 struct HomeScreenView: View {
     @State private var isCustomPresented = false
     @State private var isFlashCardPresented = false
-    @State private var customViewModel = CustomViewModel()
     
     var body: some View {
         NavigationStack {
@@ -36,7 +35,7 @@ struct HomeScreenView: View {
             .padding(.horizontal)
             .padding(.top, 20)
             .fullScreenCover(isPresented: $isCustomPresented) {
-                CustomMainView(viewModel: $customViewModel)
+                CustomMainView(viewModel: CustomViewModel())
             }
             .fullScreenCover(isPresented: $isFlashCardPresented) {
                 FlashcardPageView()

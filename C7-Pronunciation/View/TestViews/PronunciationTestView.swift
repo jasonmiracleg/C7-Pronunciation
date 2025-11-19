@@ -196,11 +196,12 @@ struct WordDetailView: View {
                 }
             }
         }
-        .task {
-            for alignedPhoneme in word.alignedPhonemes {
-                print("Type: \(alignedPhoneme.type) | Actual: \(alignedPhoneme.actual ?? "?") | Target: \(alignedPhoneme.target) | Score: \(alignedPhoneme.score) | Note: \(alignedPhoneme.note ?? "None")")
-            }
-        }
+//        DEBUG PRINT
+//        .task {
+//            for alignedPhoneme in word.alignedPhonemes {
+//                print("Type: \(alignedPhoneme.type) | Actual: \(alignedPhoneme.actual ?? "?") | Target: \(alignedPhoneme.target) | Score: \(alignedPhoneme.score) | Note: \(alignedPhoneme.note ?? "None")")
+//            }
+//        }
     }
     
     private func buildSpokenPhonemesText() -> Text {
