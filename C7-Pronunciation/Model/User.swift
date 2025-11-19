@@ -43,13 +43,13 @@ class User: ObservableObject {
         }
     }
 
-    
     // CALL THIS TO UPDATE GLOBAL PHONEME SCORES
     func updateScores(with phonemes: [AlignedPhoneme]) {
+        print("Phoneme scores updated!!!!! YAY YIPPIE LOV LOV LOV")
         for entry in phonemes {
             
             // checks only if the target and actual are actually valid to check
-            if !(entry.type == .match && entry.type == .replace) { continue }
+            if entry.type != .match && entry.type != .replace { continue }
             guard let target = entry.target else { continue }
             
             // find the index of the existing phoneme
@@ -103,7 +103,7 @@ class User: ObservableObject {
     func nextCard() -> Phrase {
         let newPhrase = phraseQueue.removeFirst()
         if phraseQueue.count <= 2 {
-            addPhrasesToQueue()
+            addPhrasesToQueue(basedOn: .attempts)
         }
         return newPhrase
     }

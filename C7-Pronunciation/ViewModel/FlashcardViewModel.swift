@@ -20,6 +20,7 @@ class FlashcardViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var overallScore: Double = 0.0
     @Published var errorMessage: String?
+    @Published var isEvaluated: Bool = false
     
     // MARK: - Internal Properties
     private var idealPhonemes: [[String]] = []
@@ -50,6 +51,7 @@ class FlashcardViewModel: ObservableObject {
         }
         self.overallScore = 0.0
         self.errorMessage = nil
+        self.isEvaluated = false
         
         // Generate Ideal Phonemes (The "Truth")
         // EspeakManager returns [[String]], e.g. [["h","ə","l","oʊ"], ["w","ɜː","l","d"]]
@@ -128,12 +130,15 @@ class FlashcardViewModel: ObservableObject {
                     return wordScore
                 }
                 
+                self.isEvaluated = true
                 self.isLoading = false
+                
                 
             } catch {
                 print("❌ Evaluation Error: \(error)")
                 self.errorMessage = "Could not analyze audio. Please try again."
                 self.isLoading = false
+                self.isEvaluated = false
             }
         }
     }
@@ -144,10 +149,13 @@ class FlashcardViewModel: ObservableObject {
     private func scoreColor(_ score: Double) -> Color {
         let percentage = score * 100
         switch percentage {
-        case 85...100: return .green
-        case 70..<85: return .blue
+        case 70...100: return .black
         case 50..<70: return .orange
         default: return .red
         }
+    }
+    
+    func getCurrentPhonemes() -> [AlignedPhoneme] {
+        return wordScores.flatMap { $0.alignedPhonemes }
     }
 }

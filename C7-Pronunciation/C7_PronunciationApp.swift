@@ -11,6 +11,7 @@ import SwiftData
 @main
 struct C7_PronunciationApp: App {
     @AppStorage("hasCompletedOnboarding") var hasCompletedOnboarding: Bool = false
+    @StateObject private var user = User()
 
     init() {
         // Warm up the model in background during app launch. COMMENT OUT TO IMPROVE LOAD SPEED IF NOT USING IT YEAH !
@@ -21,7 +22,8 @@ struct C7_PronunciationApp: App {
     
     var body: some Scene {
         WindowGroup {
-            PronunciationView()
+            FlashcardPageView()
+                .environmentObject(user)
 //            if hasCompletedOnboarding {
 //                HomeScreenView()
 //            } else {

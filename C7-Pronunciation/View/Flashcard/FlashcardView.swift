@@ -11,6 +11,8 @@ struct FlashcardView: View {
     @ObservedObject var viewModel: FlashcardViewModel
     var onPlayAudio: () -> Void
     
+    var onTapWord: (WordScore) -> Void
+    
     var body: some View {
         ZStack(alignment: .topTrailing) {
             // Card Background
@@ -22,10 +24,23 @@ struct FlashcardView: View {
             VStack {
                 Spacer()
                 
-                // Using the updated styling logic
-                textFlow(words: viewModel.wordScores)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 20)
+                // 2. Use FlowLayout instead of Text concatenation
+                FlowLayout(spacing: 6) {
+                    if viewModel.wordScores.isEmpty {
+                        // Fallback if no scores yet (just raw text)
+                        ForEach(viewModel.targetSentence.split(separator: " ").map(String.init), id: \.self) { word in
+                            Text(word)
+                                .font(.system(size: 28, weight: .medium))
+                                .foregroundColor(.black)
+                        }
+                    } else {
+                        // Render Evaluated/Scored words
+                        ForEach(viewModel.wordScores, id: \.id) { wordScore in
+                            wordView(for: wordScore)
+                        }
+                    }
+                }
+                .padding(.horizontal, 20)
                 
                 Spacer()
             }
@@ -73,5 +88,23 @@ struct FlashcardView: View {
                 return result + Text(separator) + textSegment
             }
         }
+    }
+    
+    @ViewBuilder
+    private func wordView(for wordScore: WordScore) -> some View {
+        let isLowScore = wordScore.score < 0.6
+        
+        Text(wordScore.word)
+            .font(.system(size: 28, weight: .medium))
+            // Color logic: If evaluated, use score color. If low score, ensure it's visible.
+            .foregroundColor(wordScore.isEvaluated ? wordScore.color : .black)
+            // Underline logic: Only if evaluated and score is bad
+            .underline(wordScore.isEvaluated && isLowScore, color: wordScore.color)
+            // Interaction logic: Only tappable if evaluated and score is bad
+            .onTapGesture {
+                if wordScore.isEvaluated && isLowScore {
+                    onTapWord(wordScore)
+                }
+            }
     }
 }
