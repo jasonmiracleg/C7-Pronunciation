@@ -29,6 +29,7 @@ struct C7_PronunciationApp: App {
 //                    self.hasCompletedOnboarding = true
 //                }
 //            }
+            FlashcardPageView()
         }
         .modelContainer(DataBankManager.shared.modelContainer)
     }

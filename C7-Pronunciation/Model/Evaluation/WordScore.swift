@@ -22,6 +22,8 @@ struct WordScore: Identifiable {
         self.word = word
         self.score = score
         self.alignedPhonemes = alignedPhonemes
+        self.color = .black
+        self.isEvaluated = false
     }
 
     /// Returns an array containing just the 'target' strings.

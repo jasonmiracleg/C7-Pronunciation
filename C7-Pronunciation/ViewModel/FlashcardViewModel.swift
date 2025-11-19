@@ -42,9 +42,11 @@ class FlashcardViewModel: ObservableObject {
     func updateTargetSentence(_ text: String) {
         self.targetSentence = text
         
-        // Reset scores to neutral
+        // Reset scores to neutral - create initial WordScore objects without evaluation
         self.wordScores = text.split(separator: " ").map {
-            WordScore(word: String($0), score: 0.0, alignedPhonemes: [])
+            var wordScore = WordScore(word: String($0), score: 0.0, alignedPhonemes: [])
+            // Don't mark as evaluated yet
+            return wordScore
         }
         self.overallScore = 0.0
         self.errorMessage = nil
@@ -71,9 +73,9 @@ class FlashcardViewModel: ObservableObject {
         self.errorMessage = nil
         self.isLoading = false
         
-        // Reset colors to black/neutral before starting
+        // Reset to unevaluated state before starting
         for i in 0..<wordScores.count {
-            wordScores[i].setColor(.black)
+            wordScores[i].isEvaluated = false
         }
         
         do {
@@ -101,29 +103,35 @@ class FlashcardViewModel: ObservableObject {
                 let chunkedPredictions = try await AudioManager.shared.recognizePhonemesFromLastRecording()
                 let decodedPhonemes = chunkedPredictions.flatMap { $0 }
                 
+                print("📊 Decoded Phonemes Count: \(decodedPhonemes.count)")
+                print("📊 Decoded Phonemes: \(decodedPhonemes.map { $0.topPrediction.phoneme }.joined(separator: " "))")
+                
                 // B. Align and Score (The "Math")
                 let result = PronunciationScorer.shared.alignAndScore(
                     decodedPhonemes: decodedPhonemes,
                     targetSentence: self.targetSentence
                 )
                 
+                print("📊 Total Score: \(result.totalScore)")
+                print("📊 Word Scores: \(result.wordScores.map { "\($0.word): \($0.score)" }.joined(separator: ", "))")
+                
                 // C. Update UI
                 self.overallScore = result.totalScore
                 
-                // Update individual words with colors
-                var processedWordScores = result.wordScores
-                for i in 0..<processedWordScores.count {
-                    let score = processedWordScores[i].score
-                    let color = self.scoreColor(score)
-                    processedWordScores[i].setColor(color)
-                    processedWordScores[i].evaluated()
+                // FIXED: Update word scores with proper mutation
+                self.wordScores = result.wordScores.map { originalWordScore in
+                    var wordScore = originalWordScore
+                    let color = self.scoreColor(wordScore.score)
+                    wordScore.color = color
+                    wordScore.isEvaluated = true
+                    print("📊 Setting \(wordScore.word) - Score: \(wordScore.score), Color: \(color)")
+                    return wordScore
                 }
                 
-                self.wordScores = processedWordScores
                 self.isLoading = false
                 
             } catch {
-                print("Evaluation Error: \(error)")
+                print("❌ Evaluation Error: \(error)")
                 self.errorMessage = "Could not analyze audio. Please try again."
                 self.isLoading = false
             }

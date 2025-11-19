@@ -5,6 +5,7 @@
 //  Created by Savio Enoson on 15/11/25.
 //
 
+
 import Foundation
 
 // MARK: - Pronunciation Scorer Singleton
@@ -125,6 +126,8 @@ public class PronunciationScorer {
         guard !wordLengths.isEmpty else {
             return PronunciationEvalResult(totalScore: 0, wordScores: [])
         }
+        
+        print("🔍 Word Lengths: \(wordLengths)")
         
         var currentWordBoundary = wordLengths[0]
         var currentWordIndex = 0
@@ -283,6 +286,11 @@ public class PronunciationScorer {
                     gopIndex += 1
                 }
             }
+        }
+        
+        // IMPORTANT FIX: Finalize the last word if we have pending scores
+        if currentWordPhonemeCount > 0 {
+            finalizeCurrentWord()
         }
         
         let finalTotalScore = scoreCount > 0 ? totalScore / Double(scoreCount) : 0.0
