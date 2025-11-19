@@ -11,10 +11,13 @@ import SwiftData
 @main
 struct C7_PronunciationApp: App {
     @AppStorage("hasCompletedOnboarding") var hasCompletedOnboarding: Bool = false
+    @StateObject private var user = User()
     @State private var isModelLoaded = false
 
     var body: some Scene {
         WindowGroup {
+            FlashcardPageView()
+                .environmentObject(user)
             ZStack {
                 if isModelLoaded {
                     Group {

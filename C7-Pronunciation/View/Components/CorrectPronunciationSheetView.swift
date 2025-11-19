@@ -42,16 +42,11 @@ struct CorrectPronunciationSheetView: View {
                 Button(action: {
                     speak(text: wordScore.word.lowercased())
                 }) {
-                    VStack(spacing: 12) {
-                        Image(systemName: "speaker.wave.2.circle.fill")
-                            .resizable()
-                            .frame(width: 50, height: 50)
-                            .foregroundColor(.blue)
-                    }
+                    Image(systemName: "speaker.wave.2.circle.fill")
+                        .font(.system(size: 36))
+                        .foregroundColor(.white)
                 }
-                .padding(.bottom, 20)
-                
-                Spacer()
+                .glassEffect( .regular.tint(Color.interactive))
             }
             .navigationTitle("Evaluation")
             .navigationBarTitleDisplayMode(.inline)

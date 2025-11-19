@@ -10,10 +10,12 @@ import SwiftUI
 
 struct FlashcardPageView: View {
     @Environment(\.dismiss) var dismiss
+    @EnvironmentObject var user: User
     @StateObject private var viewModel = FlashcardViewModel()
-    @State private var currentIndex = 0
-    @State private var phrases: [Phrase] = []
+    @State private var phrase: Phrase?
     @State private var isLoadingPhrases = true
+    @State private var isEvaluated = false
+    @State private var selectedWord: WordScore? = nil
 
     private let synthesizer = AVSpeechSynthesizer()
 
@@ -23,69 +25,44 @@ struct FlashcardPageView: View {
                 // Background
                 Color(UIColor.systemGroupedBackground)
                     .ignoresSafeArea()
-
+                
                 if isLoadingPhrases {
                     ProgressView("Loading phrases...")
-                } else if phrases.isEmpty {
+                }
+                else {
                     VStack(spacing: 20) {
-                        Image(systemName: "text.badge.xmark")
-                            .font(.system(size: 60))
-                            .foregroundColor(.gray)
-                        Text("No phrases available")
-                            .font(.headline)
-                            .foregroundColor(.gray)
-                        Button("Dismiss") {
-                            dismiss()
-                        }
-                    }
-                } else {
-                    VStack(spacing: 20) {
-                        // MARK: - Instructions
                         Spacer()
-                        Text(
-                            "Let's practice your pronunciation by reading the sentences on the cards below."
-                        )
-                        .multilineTextAlignment(.center)
-                        .lineLimit(nil)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .padding(.horizontal, 40)
-                        .padding(.bottom, 16)
-
-                        // MARK: - Card Carousel
-                        TabView(selection: $currentIndex) {
-                            ForEach(Array(phrases.enumerated()), id: \.offset) {
-                                index,
-                                phrase in
-                                FlashcardView(
-                                    viewModel: viewModel,
-                                    onPlayAudio: { speak(text: phrase.text) }
-                                )
-                                .tag(index)
-                                .padding(.horizontal, 24)
-                            }
+                        
+                        // MARK: - Instructions
+                        Text("Let's practice your pronunciation by reading the sentences on the cards below.")
+                            .font(.subheadline)
+                            .multilineTextAlignment(.center)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .padding(.horizontal, 40)
+                            .padding(.bottom, 16)
+                        
+                        // MARK: - Card Display
+                        if let currentPhrase = phrase {
+                            FlashcardView(
+                                viewModel: viewModel,
+                                onPlayAudio: { speak(text: currentPhrase.text) },
+                                onTapWord: { word in
+                                    selectedWord = word
+                                }
+                            )
+                            .padding(.horizontal, 24)
+                            .frame(height: 400)
                         }
-                        .tabViewStyle(.page(indexDisplayMode: .never))
-                        .frame(height: 400)
-                        .onChange(of: currentIndex) { oldValue, newValue in
-                            // Update the target sentence when swiping to a new card
-                            if newValue < phrases.count {
-                                viewModel.updateTargetSentence(
-                                    phrases[newValue].text
-                                )
-                            }
-                        }
-
-                        // MARK: - Page Indicator
-                        HStack(spacing: 8) {
-                            ForEach(0..<phrases.count, id: \.self) { index in
-                                Circle()
-                                    .fill(
-                                        index == currentIndex
-                                            ? Color.blue
-                                            : Color.gray.opacity(0.3)
-                                    )
-                                    .frame(width: 8, height: 8)
-                            }
+                        
+                        Spacer()
+                        
+                        // MARK: - Buttons (Microphone / Next / Retry)
+                        buttonStack
+                            .padding(.bottom, 40)
+                    }
+                    .onChange(of: viewModel.isEvaluated) { _, newValue in
+                        if newValue == true {
+                            isEvaluated = true
                         }
                         .padding(.top, 10)
 
@@ -97,6 +74,17 @@ struct FlashcardPageView: View {
                     }
                 }
 
+                // MARK: - Error Overlay
+                if let error = viewModel.errorMessage {
+                    VStack {
+                        Text(error)
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(Color.red)
+                            .cornerRadius(10)
+                    }
+                }
+                
                 // MARK: - Error Overlay
                 if let error = viewModel.errorMessage {
                     VStack {
@@ -130,10 +118,111 @@ struct FlashcardPageView: View {
             .onAppear {
                 loadPhrases()
             }
+            .sheet(item: $selectedWord) { word in
+                CorrectPronunciationSheetView(wordScore: word) 
+                    .presentationDetents([.fraction(0.25)])
+            }
+        }
+    }
+    
+    // MARK: - Subviews
+    
+    var headerView: some View {
+        HStack {
+            Spacer()
+            Text("Flash Cards")
+                .font(.headline)
+                .fontWeight(.semibold)
+            Spacer()
+            
+            Button(action: { dismiss() }) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundColor(.gray)
+                    .padding(8)
+                    .background(Color.gray.opacity(0.2))
+                    .clipShape(Circle())
+            }
+        }
+    }
+    
+    var buttonStack: some View {
+        ZStack {
+            // 1. Main Action Button
+            if isEvaluated {
+                retryButton
+                    .transition(.opacity)
+            } else {
+                recordingButton
+                    .transition(.opacity)
+            }
+            
+            // 2. Next Button
+            if isEvaluated {
+                nextButton
+                    .offset(x: 90)
+                    .transition(.scale.combined(with: .opacity))
+            }
+        }
+        .frame(height: 100)
+    }
+
+
+    // MARK: - Data Loading
+
+    private func loadPhrases() {
+        Task { @MainActor in
+            isLoadingPhrases = true
+            isEvaluated = false
+            
+            
+            if user.phraseQueue.isEmpty {
+                user.addPhrasesToQueue(basedOn: .mixed)
+            }
+            
+            if !user.phraseQueue.isEmpty {
+                phrase = user.nextCard()
+                
+                // Set the target for the ViewModel
+                if let currentPhrase = phrase {
+                    viewModel.updateTargetSentence(currentPhrase.text)
+                }
+            } else {
+                phrase = nil
+            }
+
+            isLoadingPhrases = false
+            
+            print("✅ Loaded phrase for practice")
         }
     }
 
-    // MARK: - Subviews
+    private func loadNextPhrase() {
+        // A. Capture the scores from the current attempt
+        let currentPhonemes = viewModel.getCurrentPhonemes()
+        
+        // B. Update the User profile
+        user.updateScores(with: currentPhonemes)
+        
+        print("💾 Saved scores for \(currentPhonemes.count) phonemes")
+
+        // C. Reset UI state
+        isEvaluated = false
+        
+        // D. Load the next phrase
+        loadPhrases()
+    }
+
+    private func resetCard() {
+        guard let currentPhrase = phrase else { return }
+        
+        // 1. Reset UI state
+        isEvaluated = false
+        
+        // 2. Tell the ViewModel to reset its scores/state
+        viewModel.updateTargetSentence(currentPhrase.text)
+    }
+    
     var recordingButton: some View {
         Group {
             if viewModel.isLoading {
@@ -153,57 +242,64 @@ struct FlashcardPageView: View {
                             .font(.system(size: 64))
                             .foregroundStyle(.white)
                     }
-                    .glassEffect( .regular.tint(Color.accent))
+                    .glassEffect( .regular.tint(Color.interactive))
                 }
                 .frame(width: 120, height: 120)
             }
         }
     }
+    
+    var retryButton: some View {
+        Button(action: resetCard) {
+            
+            Image(systemName: "arrow.clockwise.circle.fill")
+                .font(.system(size: 64))
+                .foregroundStyle(.white)
 
-
-    // MARK: - Data Loading
-
-    private func loadPhrases() {
-        Task { @MainActor in
-            isLoadingPhrases = true
-
-            // Fetch random phrases from different categories
-            // You can customize this to fetch from specific categories or use different logic
-            let randomPicks = DataBankManager.shared.getRandomPhrasePicks()
-
-            // Combine phrases from different categories (or choose one category)
-            var allPhrases: [Phrase] = []
-            allPhrases.append(contentsOf: randomPicks.formal)
-            allPhrases.append(contentsOf: randomPicks.informal)
-
-            // Only add user-added phrases if they exist
-            if !randomPicks.userAdded.isEmpty {
-                allPhrases.append(contentsOf: randomPicks.userAdded)
-            }
-
-            // Shuffle for variety
-            phrases = allPhrases.shuffled()
-
-            // Set the first phrase as the target
-            if let firstPhrase = phrases.first {
-                viewModel.updateTargetSentence(firstPhrase.text)
-            }
-
-            isLoadingPhrases = false
-
-            print("✅ Loaded \(phrases.count) phrases for practice")
         }
+        // Disable interaction if loading
+        .glassEffect( .regular.tint(Color.interactive))
+        .disabled(viewModel.isLoading)
+        
+        
+    }
+    
+    var nextButton: some View {
+        Button(action: loadNextPhrase) {
+            Image(systemName: "arrow.forward.circle.fill")
+                .font(.system(size: 36))
+                .foregroundColor(.white)
+        }
+        .glassEffect( .regular.tint(Color.interactive))
+        .disabled(viewModel.isLoading)
     }
 
     // MARK: - Helpers
 
     func speak(text: String) {
+        // 1. Stop any current speech
         if synthesizer.isSpeaking {
             synthesizer.stopSpeaking(at: .immediate)
         }
+        
+        // 2. Configure Audio Session to force output to the main Speaker
+        do {
+            let audioSession = AVAudioSession.sharedInstance()
+            
+            // We use .playAndRecord with .defaultToSpeaker so we don't break the microphone permission/setup
+            // but strictly route audio to the loud speaker.
+            try audioSession.setCategory(.playback, mode: .default)
+            try audioSession.setActive(true)
+        } catch {
+            print("Failed to setup audio session: \(error)")
+        }
+
+        // 3. Create and configure the utterance
         let utterance = AVSpeechUtterance(string: text)
         utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
         utterance.rate = 0.5
+        utterance.volume = 1.0
+        
         synthesizer.speak(utterance)
     }
 }
@@ -211,6 +307,9 @@ struct FlashcardPageView: View {
 // Preview
 struct FlashcardPageView_Previews: PreviewProvider {
     static var previews: some View {
-        FlashcardPageView()
+    let user = User()
+    
+    FlashcardPageView()
+        .environmentObject(user)
     }
 }

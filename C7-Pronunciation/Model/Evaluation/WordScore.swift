@@ -22,7 +22,7 @@ struct WordScore: Identifiable {
         self.word = word
         self.score = score
         self.alignedPhonemes = alignedPhonemes
-        self.color = .black
+        self.color = Color.primary
         self.isEvaluated = false
     }
 
