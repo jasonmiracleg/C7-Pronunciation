@@ -21,13 +21,14 @@ struct C7_PronunciationApp: App {
     
     var body: some Scene {
         WindowGroup {
-            if hasCompletedOnboarding {
-                HomeScreenView()
-            } else {
-                OnboardingView {
-                    self.hasCompletedOnboarding = true
-                }
-            }
+//            if hasCompletedOnboarding {
+//                HomeScreenView()
+//            } else {
+//                OnboardingView {
+//                    self.hasCompletedOnboarding = true
+//                }
+//            }
+            FlashcardPageView()
         }
         .modelContainer(DataBankManager.shared.modelContainer)
     }

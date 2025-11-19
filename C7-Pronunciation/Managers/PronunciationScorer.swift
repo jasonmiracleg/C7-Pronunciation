@@ -5,12 +5,13 @@
 //  Created by Savio Enoson on 15/11/25.
 //
 
+
 import Foundation
 
 // MARK: - Pronunciation Scorer Singleton
 
 public class PronunciationScorer {
-    public static let shared = PronunciationScorer() 
+    public static let shared = PronunciationScorer()
     
     private init() { }
     
@@ -19,7 +20,6 @@ public class PronunciationScorer {
     ///   - decodedPhonemes: Array of detected phonemes from the model (as PhonemePrediction objects)
     ///   - idealPhonemes: Array of arrays representing target phonemes grouped by word
     ///   - targetSentence: Original target sentence in string format
-    ///   - words: Array of target words (optional, for word-level scoring)
     /// - Returns: PronunciationResult containing aligned scores, total score, and word scores
     func alignAndScore(
         decodedPhonemes: [PhonemePrediction],
@@ -34,9 +34,15 @@ public class PronunciationScorer {
             }
         }
         
+        print("🔍 Target Words: \(targetWords)")
+        print("🔍 Ideal Phonemes Structure: \(idealPhonemes)")
+        
         // Flatten the ideal phonemes for alignment
         let targetPhonemesFlat = idealPhonemes.flatMap { $0 }
         let actualPhonemes = decodedPhonemes.map { $0.topPrediction.phoneme }
+        
+        print("🔍 Target Phonemes Flat: \(targetPhonemesFlat)")
+        print("🔍 Actual Phonemes: \(actualPhonemes)")
         
         // Get Levenshtein edit operations
         let opcodes = levenshteinOpcodes(from: targetPhonemesFlat, to: actualPhonemes)
@@ -58,26 +64,35 @@ public class PronunciationScorer {
             return PronunciationEvalResult(totalScore: 0, wordScores: [])
         }
         
+        print("🔍 Word Lengths: \(wordLengths)")
+        
         var currentWordBoundary = wordLengths[0]
         var currentWordIndex = 0
+        
+        // Helper function to finalize a word's score
+        func finalizeCurrentWord() {
+            let avgScore = currentWordPhonemeCount > 0
+                ? currentWordScoreTotal / Double(currentWordPhonemeCount)
+                : 0.0
+            wordScores.append(avgScore)
+            
+            print("📝 Word \(currentWordIndex) (\(targetWords[safe: currentWordIndex] ?? "?")): Score=\(avgScore), Total=\(currentWordScoreTotal), Count=\(currentWordPhonemeCount)")
+            
+            // Reset for next word
+            currentWordScoreTotal = 0
+            currentWordPhonemeCount = 0
+            currentWordIndex += 1
+            
+            // Set new boundary if there are more words
+            if currentWordIndex < wordLengths.count {
+                currentWordBoundary += wordLengths[currentWordIndex]
+            }
+        }
         
         // Helper function to check word boundaries
         func checkWordBoundary() {
             if targetPhonemeIndex == currentWordBoundary {
-                let avgScore = currentWordPhonemeCount > 0
-                ? currentWordScoreTotal / Double(currentWordPhonemeCount)
-                : 0.0
-                wordScores.append(avgScore)
-                
-                // Reset for next word
-                currentWordScoreTotal = 0
-                currentWordPhonemeCount = 0
-                currentWordIndex += 1
-                
-                // Set new boundary if there are more words
-                if currentWordIndex < wordLengths.count {
-                    currentWordBoundary += wordLengths[currentWordIndex]
-                }
+                finalizeCurrentWord()
             }
         }
         
@@ -212,31 +227,40 @@ public class PronunciationScorer {
             }
         }
         
+        // IMPORTANT FIX: Finalize the last word if we have pending scores
+        if currentWordPhonemeCount > 0 {
+            finalizeCurrentWord()
+        }
+        
         let finalTotalScore = scoreCount > 0 ? totalScore / Double(scoreCount) : 0.0
         
         // Split aligned phonemes by word
         let groupedAlignedPhonemes = splitAlignedPhonemesByWord(alignedPhonemes: alignedScores, guide: idealPhonemes)
-  
-        // DEBUG PRINTS
-//        print("Unalligned Phonemes:")
-//        print(alignedScores.compactMap(\.actual).joined(separator: ", "))
-//        print("Guide:")
-//        print(idealPhonemes)
-//        print("Alignment results:")
-//        for group in groupedAlignedPhonemes {
-//            print(group.compactMap(\.actual).joined(separator: " "))
-//        }
         
-        print(targetWords)
+        print("🔍 Word Scores Array: \(wordScores)")
+        print("🔍 Grouped Aligned Phonemes Count: \(groupedAlignedPhonemes.count)")
         
         // Create word-level scores with word names
-        let wordScoreResults: [WordScore]
-        wordScoreResults = wordScores.enumerated().map { WordScore(word: targetWords[$0.offset], alignedPhonemes: groupedAlignedPhonemes[$0.offset]) }
+        let wordScoreResults: [WordScore] = zip(targetWords, wordScores).enumerated().map { index, pair in
+            let (word, score) = pair
+            let phonemes = groupedAlignedPhonemes[safe: index] ?? []
+            return WordScore(word: word, score: score, alignedPhonemes: phonemes)
+        }
+        
+        print("🔍 Final Word Score Results: \(wordScoreResults.map { "\($0.word): \($0.score)" })")
         
         return PronunciationEvalResult(
             totalScore: finalTotalScore,
-            wordScores: wordScoreResults,
+            wordScores: wordScoreResults
         )
+    }
+}
+
+// MARK: - Helper Extensions
+
+extension Array {
+    subscript(safe index: Int) -> Element? {
+        return indices.contains(index) ? self[index] : nil
     }
 }
 
@@ -373,7 +397,8 @@ func mergeConsecutiveOperations(_ operations: [EditOperation]) -> [EditOperation
     return merged
 }
 
-// MARK: -- Helper functions
+// MARK: - Helper functions
+
 /// Splits aligned phonemes per word based on the known ideal phonemes list
 private func splitAlignedPhonemesByWord(alignedPhonemes: [AlignedPhoneme], guide: [[String]]) -> [[AlignedPhoneme]] {
     
