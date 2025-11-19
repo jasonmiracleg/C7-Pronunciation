@@ -11,26 +11,39 @@ import SwiftData
 @main
 struct C7_PronunciationApp: App {
     @AppStorage("hasCompletedOnboarding") var hasCompletedOnboarding: Bool = false
+    @State private var isModelLoaded = false
 
-    init() {
-        // Warm up the model in background during app launch. COMMENT OUT TO IMPROVE LOAD SPEED IF NOT USING IT YEAH !
-        Task.detached(priority: .background) {
-            AudioManager.shared.warmUp()
-        }
-    }
-    
     var body: some Scene {
         WindowGroup {
-//            DataBankTestView()
-//            PronunciationTestView()
-            if hasCompletedOnboarding {
-                HomeScreenView()
-            } else {
-                OnboardingView {
-                    self.hasCompletedOnboarding = true
+            ZStack {
+                if isModelLoaded {
+                    Group {
+                        if hasCompletedOnboarding {
+                            HomeScreenView()
+                        } else {
+                            OnboardingView {
+                                self.hasCompletedOnboarding = true
+                            }
+                        }
+                    }
+                    .transition(.opacity.animation(.easeIn(duration: 1.0)))
+                }
+                
+                if !isModelLoaded {
+                    SplashScreenView()
+                        .zIndex(1)
+                        .transition(.opacity.animation(.easeOut(duration: 1.0)))
+                }
+            }
+            .modelContainer(DataBankManager.shared.modelContainer)
+            .task {
+                await AudioManager.shared.preloadModel()
+                try? await Task.sleep(nanoseconds: 1_000_000_000)
+                
+                withAnimation {
+                    isModelLoaded = true
                 }
             }
         }
-        .modelContainer(DataBankManager.shared.modelContainer)
     }
 }
