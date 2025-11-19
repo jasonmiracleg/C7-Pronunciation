@@ -19,12 +19,12 @@ class CustomViewModel: ObservableObject {
     @Published var targetSentence: String = "I don't work simultaneously. I'm starting to think about it. But, I don't like it."
     @Published var decodedPhonemes: [[PhonemePrediction]] = [[]]
     @Published var idealPhonemes: [[String]] = [[]]
-    
-    // Changed: We now store an array of results (one per sentence)
     @Published var sentenceResults: [PronunciationEvalResult] = []
     
-    // Keep the master result if needed for overall stats, or ignore
-    @Published var overallResult: PronunciationEvalResult?
+    // MARK: - Waveform State
+    // 30 bars for the visualizer
+    @Published var audioLevels: [Float] = Array(repeating: 0.0, count: 30)
+    private var meteringTimer: Timer?
     
     // State vars
     @Published var isLoading = false
@@ -38,6 +38,7 @@ class CustomViewModel: ObservableObject {
     func toggleRecording() {
         if audioManager.isRecording {
             isRecording = false
+            stopMetering() // Stop visualizer
             audioManager.stopRecording()
             Task {
                 await submitRecording()
@@ -45,15 +46,40 @@ class CustomViewModel: ObservableObject {
         } else {
             isRecording = true
             resetResults()
-            do {
-                // 2. Try to start, catch failure
-                try audioManager.startRecording()
-            } catch {
-                print("Start failed: \(error)")
-                // 3. Revert UI immediately if start failed
-                self.isRecording = false
-                self.errorMessage = "Could not access microphone"
-            }
+            startMetering() // Start visualizer
+            audioManager.startRecording()
+        }
+    }
+    
+    // MARK: - Metering Logic
+    
+    private func startMetering() {
+        // Update 20 times a second (0.05s)
+        meteringTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
+            self.updateAudioLevels()
+        }
+    }
+    
+    private func stopMetering() {
+        meteringTimer?.invalidate()
+        meteringTimer = nil
+        // Reset visualization to flat
+        withAnimation {
+            audioLevels = Array(repeating: 0.0, count: 30)
+        }
+    }
+    
+    private func updateAudioLevels() {
+        // Get real data from AudioManager
+        let newLevel = audioManager.currentAveragePower
+        
+        var current = audioLevels
+        current.removeFirst()
+        current.append(newLevel)
+        
+        DispatchQueue.main.async {
+            self.audioLevels = current
         }
     }
     
@@ -66,53 +92,55 @@ class CustomViewModel: ObservableObject {
         self.isLoading = true
         
         do {
-            guard audioManager.isPhonemeRecognitionReady else {
-                throw NSError(domain: "Test", code: 0, userInfo: [NSLocalizedDescriptionKey: "AudioManager is not ready."])
-            }
+            // No need to check isPhonemeRecognitionReady explicitly here if AudioManager handles it,
+            // but good for safety.
             
+            // Use the restored function
             let result = try await audioManager.recognizePhonemes(from: audioURL)
+            
             self.decodedPhonemes = result
             self.idealPhonemes = espeakManager.getPhonemes(for: self.targetSentence)
             
         } catch {
             self.errorMessage = error.localizedDescription
             self.isLoading = false
+            print("✗ Test failed: \(error.localizedDescription)")
             return
         }
         
         self.isLoading = false
-        
-        // 1. Get the master list of WordScores for the whole text
         let masterResult = scorer.alignAndScore(decodedPhonemes: decodedPhonemes.flatMap { $0 }, targetSentence: self.targetSentence)
         
-        // 2. Process into sentences
         processSentences(fullText: self.targetSentence, allWordScores: masterResult.wordScores)
     }
     
     private func processSentences(fullText: String, allWordScores: [WordScore]) {
         var results: [PronunciationEvalResult] = []
+        var phrasesToSave: [String] = []
         var wordIndexOffset = 0
         
-        // Split full text by sentences
         fullText.enumerateSubstrings(in: fullText.startIndex..., options: .bySentences) { (substring, _, _, _) in
             guard let sentence = substring else { return }
             
-            // Count how many words are in this specific sentence to slice the master array
             var wordCountInSentence = 0
             sentence.enumerateSubstrings(in: sentence.startIndex..., options: .byWords) { _, _, _, _ in
                 wordCountInSentence += 1
             }
             
-            // Safety check to prevent index out of bounds
             let endIndex = min(wordIndexOffset + wordCountInSentence, allWordScores.count)
             
             if wordIndexOffset < endIndex {
-                // Extract the scores for this sentence
                 let sentenceScores = Array(allWordScores[wordIndexOffset..<endIndex])
+                let cleanSentence = sentence.trimmingCharacters(in: .whitespacesAndNewlines)
                 
-                // Calculate new average for this sentence
+                // Calculate average
                 let total = sentenceScores.reduce(0.0) { $0 + $1.score }
-                let average = total / Double(sentenceScores.count)
+                let average = sentenceScores.isEmpty ? 0.0 : total / Double(sentenceScores.count)
+                
+                // Auto-save low scores logic
+                if average < 0.5 && !cleanSentence.isEmpty {
+                    phrasesToSave.append(cleanSentence)
+                }
                 
                 let result = PronunciationEvalResult(
                     totalScore: average,
@@ -127,6 +155,11 @@ class CustomViewModel: ObservableObject {
         
         DispatchQueue.main.async {
             self.sentenceResults = results
+            
+            for phrase in phrasesToSave {
+                print("Auto-saving low scoring phrase: \(phrase)")
+                DataBankManager.shared.addUserPhrase(phrase)
+            }
         }
     }
     

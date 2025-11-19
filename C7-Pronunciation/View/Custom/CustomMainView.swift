@@ -14,7 +14,7 @@ struct CustomMainView: View {
     @State var isEnable: Bool = true
     @State private var isPresented: Bool = false
     
-    @Binding var viewModel: CustomViewModel
+    @ObservedObject var viewModel: CustomViewModel
     
     var body: some View {
         NavigationStack {
@@ -41,7 +41,7 @@ struct CustomMainView: View {
                         }) {
                             Image(systemName: "arrow.clockwise.circle.fill")
                                 .font(.system(size: 64))
-                                .foregroundStyle(Color.interactive)
+                                .foregroundStyle(Color.accentColor) // Ensure this color exists or use .accentColor
                                 .padding()
                         }
                         
@@ -52,30 +52,44 @@ struct CustomMainView: View {
                         }) {
                             Image(systemName: "checkmark.circle.fill")
                                 .font(.system(size: 64))
-                                .foregroundStyle(Color.interactive)
+                                .foregroundStyle(Color.accentColor)
                                 .padding()
                         }
                     }
 
                 } else {
-                    Button(action: {
-                        if !viewModel.isRecording {
-                            viewModel.setTargetSentence(text)
-                            viewModel.toggleRecording()
-                            
-                            isEnable.toggle()
+                    // Encapsulate Mic and Waveform in a VStack
+                    VStack(spacing: 16) {
+                        
+                        // Show waveform only when recording
+                        if viewModel.isRecording {
+                            WaveformView(levels: viewModel.audioLevels)
+                                .padding(.horizontal, 40)
+                                .transition(.opacity.animation(.easeInOut))
                         } else {
-                            viewModel.toggleRecording()
-                            isDone.toggle()
+                            // Placeholder to keep layout stable (optional, remove if you want button to jump)
+                            Color.clear.frame(height: 50)
                         }
-                    }) {
-                        Image(systemName: !viewModel.isRecording ? "microphone.circle.fill" : "stop.circle.fill")
-                            .font(.system(size: 64))
-                            .foregroundStyle(Color.interactive)
-                            .padding()
-                            .opacity(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0.4 : 1) 
+                        
+                        Button(action: {
+                            if !viewModel.isRecording {
+                                viewModel.setTargetSentence(text)
+                                viewModel.toggleRecording()
+                                
+                                isEnable.toggle()
+                            } else {
+                                viewModel.toggleRecording()
+                                isDone.toggle()
+                            }
+                        }) {
+                            Image(systemName: !viewModel.isRecording ? "microphone.circle.fill" : "stop.circle.fill")
+                                .font(.system(size: 64))
+                                .foregroundStyle(Color.accentColor)
+                                .padding()
+                                .opacity(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0.4 : 1)
+                        }
+                        .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     }
-                    .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
                 Spacer()
             }
@@ -86,7 +100,7 @@ struct CustomMainView: View {
             .navigationTitle("Custom")
             .navigationBarTitleDisplayMode(.inline)
             .padding(.horizontal)
-            .scrollDismissesKeyboard(.interactively)   
+            .scrollDismissesKeyboard(.interactively)
             .ignoresSafeArea(.keyboard, edges: .bottom)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {

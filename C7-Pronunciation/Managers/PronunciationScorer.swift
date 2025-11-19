@@ -17,44 +17,31 @@ public class PronunciationScorer {
     
     private init() { }
     
-    // MARK: - Phonetic Similarity Data (Robust)
+    // MARK: - Phonetic Similarity Data (Stricter)
     private let phonemeSimilarityGroups: [Set<String>] = [
-        // 1. The "A" Group
-        // Merges Trap (æ), generic 'a', Palm (ɑ), and generic variations
-        ["a", "æ", "ɑ", "ɒ", "aɪ", "aʊ"],
-        
-        // 2. The "Strut/Schwa" Group
-        ["ʌ", "ɐ", "ə", "3", "ɝ"],
-        
-        // 3. The "Tense I" Group
-        ["i", "y", "j", "iː"],
-        
-        // 4. The "Lax I" Group
+
+        ["a", "æ", "ɑ", "ɒ"],
+        ["ʌ", "ɐ", "ə"],
+        ["i", "y", "j"],
         ["ɪ"],
-        
-        // 5. The "Tense U" Group
-        ["u", "w", "uː"],
-        
-        // 6. The "Lax U" Group
+        ["u", "w"],
         ["ʊ"],
-        
-        // 7. The "Mid Front" Group (E sounds)
-        ["e", "ɛ", "eɪ", "ɛə"],
-        
-        // 8. The "O" Group
-        // Merges Goat (o/oʊ), Thought (ɔ), and length variations
-        ["o", "ɔ", "oʊ", "əʊ", "oː", "ɔː"],
-        
-        // 9. Rhotics
-        ["r", "ɹ", "ɾ", "ɚ"],
-        
-        // 10. Laterals
-        ["l", "ɫ", "l̩"],
-        
-        // 11. Nasals (Sometimes confused)
-        ["m", "ɱ"],
-        ["n", "ŋ"]
+        ["e", "ɛ", "3", "eɪ"],
+        ["o", "ɔ", "oʊ", "əʊ"],
+        ["r", "ɹ", "ɾ", "ɝ", "ɚ"],
+        ["l", "ɫ"]
     ]
+    
+    // MARK: - Phonetic Similarity Data (Lenient)
+//    private let phonemeSimilarityGroups: [Set<String>] = [
+//        ["a", "æ", "ɑ", "ɒ", "ɐ", "ʌ"], // A-like vowels
+//        ["e", "ɛ", "ɜ", "ə"],           // E-like vowels + Schwa
+//        ["i", "ɪ", "y", "j"],           // I-like vowels
+//        ["o", "ɔ"],                     // O-like vowels
+//        ["u", "ʊ", "w"],                // U-like vowels / glides
+//        ["r", "ɹ", "ɾ"],                // Rhotics
+//        ["l", "ɫ"]                      // Laterals
+//    ]
     
     /// Checks if two phonemes are similar, ignoring diacritics/length markers if needed
     private func checkPhonemeSimilarity(target: String, actual: String) -> Bool {
@@ -188,7 +175,7 @@ public class PronunciationScorer {
                         // 1. Check Phonetic Similarity
                         if checkPhonemeSimilarity(target: targetPhoneme, actual: actualPhoneme) {
                             // Similar: Use actual score but cap at 0.9 to differentiate from perfect
-                            phonemeScoreToAdd = min(actualItem.score, 0.9)
+                            phonemeScoreToAdd = min(actualItem.score, 0.75)
                             
                             alignedScores.append(AlignedPhoneme(
                                 type: .match,
@@ -214,7 +201,7 @@ public class PronunciationScorer {
                             
                             if isForgiven {
                                 // Strict Forgiveness: Must have at least 40% confidence
-                                phonemeScoreToAdd = max(forgivenScore, 0.40)
+                                phonemeScoreToAdd = max(forgivenScore, 0.30)
                                 
                                 alignedScores.append(AlignedPhoneme(
                                     type: .match,
@@ -288,7 +275,7 @@ public class PronunciationScorer {
             }
         }
         
-
+        
         let finalTotalScore = scoreCount > 0 ? totalScore / Double(scoreCount) : 0.0
         
         // Split with Greedy logic

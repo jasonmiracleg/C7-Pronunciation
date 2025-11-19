@@ -14,21 +14,22 @@ struct C7_PronunciationApp: App {
 
     init() {
         // Warm up the model in background during app launch. COMMENT OUT TO IMPROVE LOAD SPEED IF NOT USING IT YEAH !
-        Task {
-            AudioManager.initialize()
+        Task.detached(priority: .background) {
+            AudioManager.shared.warmUp()
         }
     }
     
     var body: some Scene {
         WindowGroup {
-            PronunciationView()
-//            if hasCompletedOnboarding {
-//                HomeScreenView()
-//            } else {
-//                OnboardingView {
-//                    self.hasCompletedOnboarding = true
-//                }
-//            }
+//            DataBankTestView()
+//            PronunciationTestView()
+            if hasCompletedOnboarding {
+                HomeScreenView()
+            } else {
+                OnboardingView {
+                    self.hasCompletedOnboarding = true
+                }
+            }
         }
         .modelContainer(DataBankManager.shared.modelContainer)
     }
