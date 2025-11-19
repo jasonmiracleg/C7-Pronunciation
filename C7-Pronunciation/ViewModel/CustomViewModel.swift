@@ -81,7 +81,6 @@ class CustomViewModel: ObservableObject {
         }
         
         self.isLoading = false
-        self.evalResults = scorer.alignAndScore(decodedPhonemes: decodedPhonemes.flatMap { $0 }, targetSentence: self.targetSentence)
         
         // 1. Get the master list of WordScores for the whole text
         let masterResult = scorer.alignAndScore(decodedPhonemes: decodedPhonemes.flatMap { $0 }, targetSentence: self.targetSentence)
