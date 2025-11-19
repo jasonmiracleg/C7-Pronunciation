@@ -9,7 +9,7 @@ import Foundation
 import CoreML
 
 /// Responsible strictly for ML Model interaction and decoding logic.
-public class Wav2VecManager {
+class Wav2VecManager {
     
     private var model: MLModel?
     private var vocabulary: PhonemeVocabulary?
@@ -17,44 +17,49 @@ public class Wav2VecManager {
     
     private let modelName = "Wav2Vec2_Phoneme"
     private let vocabFilename = "vocab"
-    private let chunkSize = 80000 // 5 seconds at 16kHz
+    private let chunkSize = 80000
     
-    init() {
-        // Changed: Wrap initialization in a detached Task so it doesn't block the thread
-        Task.detached(priority: .userInitiated) {
-            await self.initialize()
-        }
+    // Track if we are already loaded so we don't reload
+    private var isLoaded = false
+    
+    init() { }
+    
+    /// Call this to force the model to load. Returns when finished.
+    func load() {
+        if isLoaded { return }
+        initialize()
+        isLoaded = true
     }
     
     private func initialize() {
-        do {
-                    // 1. Load Vocabulary
-                    guard let vocab = PhonemeVocabulary(jsonFilename: vocabFilename) else {
-                        print("✗ Failed to load vocabulary")
-                        return
-                    }
-                    self.vocabulary = vocab
-                    
-                    // 2. Init Decoder
-                    self.decoder = CTCDecoder(vocabulary: vocab)
-                    
-                    // 3. Load CoreML Model
-                    guard let modelURL = Bundle.main.url(forResource: modelName, withExtension: "mlmodelc")
-                            ?? Bundle.main.url(forResource: modelName, withExtension: "mlpackage") else {
-                        print("✗ Model not found: \(modelName)")
-                        return
-                    }
-                    
-                    let config = MLModelConfiguration()
-                    config.computeUnits = .all
-                    
-                    self.model = try MLModel(contentsOf: modelURL, configuration: config)
-                    print("✓ Wav2VecManager initialized (Background)")
-                    
-                } catch {
-                    print("✗ Wav2VecManager init failed: \(error)")
+            do {
+                // 1. Load Vocabulary
+                guard let vocab = PhonemeVocabulary(jsonFilename: vocabFilename) else {
+                    print("✗ Failed to load vocabulary")
+                    return
                 }
-    }
+                self.vocabulary = vocab
+                
+                // 2. Init Decoder
+                self.decoder = CTCDecoder(vocabulary: vocab)
+                
+                // 3. Load CoreML Model
+                guard let modelURL = Bundle.main.url(forResource: modelName, withExtension: "mlmodelc")
+                        ?? Bundle.main.url(forResource: modelName, withExtension: "mlpackage") else {
+                    print("✗ Model not found: \(modelName)")
+                    return
+                }
+                
+                let config = MLModelConfiguration()
+                config.computeUnits = .all
+                
+                self.model = try MLModel(contentsOf: modelURL, configuration: config)
+                print("✓ Wav2VecManager Model Loaded Successfully")
+                
+            } catch {
+                print("✗ Wav2VecManager init failed: \(error)")
+            }
+        }
     
     /// Main entry point: Takes raw float samples and returns phoneme predictions
     func process(samples: [Float]) throws -> [[PhonemePrediction]] {

@@ -35,11 +35,10 @@ class AudioManager: NSObject, ObservableObject, AVAudioRecorderDelegate {
         checkPermissions()
     }
     
-    /// Call this to trigger the creation of Wav2VecManager without doing anything else.
-    func warmUp() {
-        print("AudioManager warming up...")
-        // Accessing wav2vecManager triggers its init, which triggers the background Task.
-        let _ = self.wav2vecManager
+    func preloadModel() async {
+        print("AudioManager: Waiting for model to load...")
+        await wav2vecManager.load()
+        print("AudioManager: Model ready.")
     }
     
     private func setupAudioSession() {
