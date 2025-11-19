@@ -6,6 +6,8 @@
 //
 
 
+// THIS FUCKING PAGE IS THE ONE THATS FOR PHONEME LEVEL ACCURACY
+
 /// Represents an aligned phoneme result
 struct AlignedPhoneme {
     enum AlignmentType: String {

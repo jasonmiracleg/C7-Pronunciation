@@ -99,13 +99,13 @@ struct CTCDecoder {
             
             let alternatives = Array(top3.dropFirst()).map { idx, val in
                 let prob = exp(val - maxLogit) / expSum
-                return PhonemeScore(phoneme: vocabulary.token(for: idx) ?? "", score: Double(prob))
+                return PhonemeEvaluationScore(phoneme: vocabulary.token(for: idx) ?? "", score: Double(prob))
             }
             
             if topIndex != 0 { // Skip blank
                 let topScore = Double(topProb)
                 let result = PhonemePrediction(
-                    topPrediction: PhonemeScore(phoneme: vocabulary.token(for: topIndex) ?? "", score: topScore),
+                    topPrediction: PhonemeEvaluationScore(phoneme: vocabulary.token(for: topIndex) ?? "", score: topScore),
                     score: topScore,
                     top3: alternatives
                 )
