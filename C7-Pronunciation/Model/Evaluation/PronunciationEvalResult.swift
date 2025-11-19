@@ -5,11 +5,14 @@
 //  Created by Savio Enoson on 15/11/25.
 //
 
+import Foundation
 
 /// The main result of the alignment and scoring
-struct PronunciationEvalResult {
+struct PronunciationEvalResult: Identifiable {
+    let id = UUID()
     let totalScore: Double
     let wordScores: [WordScore]
+    var sentenceText: String? = ""
     var feedback: String {
         if totalScore >= 85 {
             return "Excellent pronunciation!"

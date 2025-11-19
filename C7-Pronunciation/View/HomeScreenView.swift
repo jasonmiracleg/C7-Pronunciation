@@ -8,10 +8,13 @@
 import SwiftUI
 
 struct HomeScreenView: View {
+    @State private var isCustomPresented = false
+    @State private var isFlashCardPresented = false
+    @State private var customViewModel = CustomViewModel()
+    
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 20) {
-                
                 Text("Welcome back!")
                     .font(.title)
                     .fontWeight(.bold)
@@ -21,14 +24,23 @@ struct HomeScreenView: View {
                     .foregroundColor(.secondary)
                     .padding(.bottom, 10)
                 
-                NavigationCard(title: "Flash Cards", imgName: "Home Card_1", desc: "Short, bite-sized chunks of practice. Helps you get used to saying common phrases.", gradientColor: [Color("DarkBlue"), .accentColor])
+                NavigationCard(title: "Flash Cards", imgName: "Home Card_1", desc: "Short, bite-sized chunks of practice. Helps you get used to saying common phrases.", gradientColor: [Color("DarkBlue"), .accentColor]) {
+                    isFlashCardPresented.toggle()
+                }
                 
-                NavigationCard(title: "Custom Mode", imgName: "Home Card_2", desc: "Practice with your own script and get a comprehensive review of how you did.", gradientColor: [Color("DarkPurple"), Color("LightPurple")])
-                
+                NavigationCard(title: "Custom Mode", imgName: "Home Card_2", desc: "Practice with your own script and get a comprehensive review of how you did.", gradientColor: [Color("DarkPurple"), Color("LightPurple")]) {
+                    isCustomPresented.toggle()
+                }
                 Spacer()
             }
             .padding(.horizontal)
             .padding(.top, 20)
+            .fullScreenCover(isPresented: $isCustomPresented) {
+                CustomMainView(viewModel: $customViewModel)
+            }
+            .fullScreenCover(isPresented: $isFlashCardPresented) {
+                FlashcardPageView()
+            }
         }
     }
     
@@ -37,6 +49,7 @@ struct HomeScreenView: View {
         let imgName: String
         let desc: String
         let gradientColor: [Color]
+        var onTap: (() -> Void)? = nil   // <— NEW
         
         var body: some View {
             HStack(spacing: 20) {
@@ -57,6 +70,9 @@ struct HomeScreenView: View {
                 .padding(.trailing)
                 .padding(.vertical, 10)
                 .foregroundColor(Color.white)
+            }
+            .onTapGesture {
+                onTap?()
             }
             .padding(.horizontal)
             .frame(width: .infinity, height: 180)

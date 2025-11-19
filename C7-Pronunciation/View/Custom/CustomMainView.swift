@@ -73,7 +73,9 @@ struct CustomMainView: View {
                             .font(.system(size: 64))
                             .foregroundStyle(Color.interactive)
                             .padding()
+                            .opacity(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0.4 : 1) 
                     }
+                    .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
                 Spacer()
             }
@@ -84,6 +86,8 @@ struct CustomMainView: View {
             .navigationTitle("Custom")
             .navigationBarTitleDisplayMode(.inline)
             .padding(.horizontal)
+            .scrollDismissesKeyboard(.interactively)   
+            .ignoresSafeArea(.keyboard, edges: .bottom)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button(action: {

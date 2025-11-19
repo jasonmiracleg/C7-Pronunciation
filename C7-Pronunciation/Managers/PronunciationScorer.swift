@@ -13,19 +13,85 @@ import Foundation
 public class PronunciationScorer {
     public static let shared = PronunciationScorer()
     
+    private let espeakManager = EspeakManager.shared
+    
     private init() { }
     
+    // MARK: - Phonetic Similarity Data (Robust)
+    private let phonemeSimilarityGroups: [Set<String>] = [
+        // 1. The "A" Group
+        // Merges Trap (æ), generic 'a', Palm (ɑ), and generic variations
+        ["a", "æ", "ɑ", "ɒ", "aɪ", "aʊ"],
+        
+        // 2. The "Strut/Schwa" Group
+        ["ʌ", "ɐ", "ə", "3", "ɝ"],
+        
+        // 3. The "Tense I" Group
+        ["i", "y", "j", "iː"],
+        
+        // 4. The "Lax I" Group
+        ["ɪ"],
+        
+        // 5. The "Tense U" Group
+        ["u", "w", "uː"],
+        
+        // 6. The "Lax U" Group
+        ["ʊ"],
+        
+        // 7. The "Mid Front" Group (E sounds)
+        ["e", "ɛ", "eɪ", "ɛə"],
+        
+        // 8. The "O" Group
+        // Merges Goat (o/oʊ), Thought (ɔ), and length variations
+        ["o", "ɔ", "oʊ", "əʊ", "oː", "ɔː"],
+        
+        // 9. Rhotics
+        ["r", "ɹ", "ɾ", "ɚ"],
+        
+        // 10. Laterals
+        ["l", "ɫ", "l̩"],
+        
+        // 11. Nasals (Sometimes confused)
+        ["m", "ɱ"],
+        ["n", "ŋ"]
+    ]
+    
+    /// Checks if two phonemes are similar, ignoring diacritics/length markers if needed
+    private func checkPhonemeSimilarity(target: String, actual: String) -> Bool {
+        // 1. Exact Match (Normalized)
+        if target.precomposedStringWithCanonicalMapping == actual.precomposedStringWithCanonicalMapping { return true }
+        
+        // 2. Group Lookup
+        for group in phonemeSimilarityGroups {
+            if group.contains(target) && group.contains(actual) {
+                return true
+            }
+        }
+        
+        // 3. Strip Modifiers (e.g. "oː" -> "o") and check again
+        let cleanTarget = target.replacingOccurrences(of: "[ːˌˈ]", with: "", options: .regularExpression)
+        let cleanActual = actual.replacingOccurrences(of: "[ːˌˈ]", with: "", options: .regularExpression)
+        
+        if cleanTarget == cleanActual { return true }
+        
+        // 4. Check groups with stripped versions
+        for group in phonemeSimilarityGroups {
+            if group.contains(cleanTarget) && group.contains(cleanActual) {
+                return true
+            }
+        }
+        
+        return false
+    }
+    
     /// Aligns and scores phonemes using Levenshtein distance
-    /// - Parameters:
-    ///   - decodedPhonemes: Array of detected phonemes from the model (as PhonemePrediction objects)
-    ///   - idealPhonemes: Array of arrays representing target phonemes grouped by word
-    ///   - targetSentence: Original target sentence in string format
-    /// - Returns: PronunciationResult containing aligned scores, total score, and word scores
     func alignAndScore(
         decodedPhonemes: [PhonemePrediction],
-        idealPhonemes: [[String]],
         targetSentence: String
     ) -> PronunciationEvalResult {
+        // Get ideal phonemes for sentence from espeak
+        let idealPhonemes = espeakManager.getPhonemes(for: targetSentence)
+        
         // Split the sentence into individual target words
         var targetWords: [String] = []
         targetSentence.enumerateSubstrings(in: targetSentence.startIndex..., options: .byWords) { (substring, _, _, _) in
@@ -34,18 +100,16 @@ public class PronunciationScorer {
             }
         }
         
-        print("🔍 Target Words: \(targetWords)")
-        print("🔍 Ideal Phonemes Structure: \(idealPhonemes)")
+        // Flatten and Normalize inputs
+        let targetPhonemesFlat = idealPhonemes.flatMap { $0 }.map { $0.precomposedStringWithCanonicalMapping }
+        let actualPhonemes = decodedPhonemes.map { $0.topPrediction.phoneme.precomposedStringWithCanonicalMapping }
         
-        // Flatten the ideal phonemes for alignment
-        let targetPhonemesFlat = idealPhonemes.flatMap { $0 }
-        let actualPhonemes = decodedPhonemes.map { $0.topPrediction.phoneme }
-        
-        print("🔍 Target Phonemes Flat: \(targetPhonemesFlat)")
-        print("🔍 Actual Phonemes: \(actualPhonemes)")
-        
-        // Get Levenshtein edit operations
-        let opcodes = levenshteinOpcodes(from: targetPhonemesFlat, to: actualPhonemes)
+        // Get Weighted Levenshtein edit operations
+        let opcodes = levenshteinOpcodes(
+            from: targetPhonemesFlat,
+            to: actualPhonemes,
+            similarityChecker: checkPhonemeSimilarity
+        )
         
         var alignedScores: [AlignedPhoneme] = []
         var totalScore: Double = 0
@@ -58,7 +122,6 @@ public class PronunciationScorer {
         var currentWordPhonemeCount: Int = 0
         var targetPhonemeIndex: Int = 0
         
-        // Get word lengths (phoneme count per word)
         let wordLengths = idealPhonemes.map { $0.count }
         guard !wordLengths.isEmpty else {
             return PronunciationEvalResult(totalScore: 0, wordScores: [])
@@ -69,38 +132,27 @@ public class PronunciationScorer {
         var currentWordBoundary = wordLengths[0]
         var currentWordIndex = 0
         
-        // Helper function to finalize a word's score
-        func finalizeCurrentWord() {
-            let avgScore = currentWordPhonemeCount > 0
-                ? currentWordScoreTotal / Double(currentWordPhonemeCount)
-                : 0.0
-            wordScores.append(avgScore)
-            
-            print("📝 Word \(currentWordIndex) (\(targetWords[safe: currentWordIndex] ?? "?")): Score=\(avgScore), Total=\(currentWordScoreTotal), Count=\(currentWordPhonemeCount)")
-            
-            // Reset for next word
-            currentWordScoreTotal = 0
-            currentWordPhonemeCount = 0
-            currentWordIndex += 1
-            
-            // Set new boundary if there are more words
-            if currentWordIndex < wordLengths.count {
-                currentWordBoundary += wordLengths[currentWordIndex]
-            }
-        }
-        
-        // Helper function to check word boundaries
         func checkWordBoundary() {
             if targetPhonemeIndex == currentWordBoundary {
-                finalizeCurrentWord()
+                let avgScore = currentWordPhonemeCount > 0
+                ? currentWordScoreTotal / Double(currentWordPhonemeCount)
+                : 0.0
+                wordScores.append(avgScore)
+                
+                currentWordScoreTotal = 0
+                currentWordPhonemeCount = 0
+                currentWordIndex += 1
+                
+                if currentWordIndex < wordLengths.count {
+                    currentWordBoundary += wordLengths[currentWordIndex]
+                }
             }
         }
         
-        // Process each edit operation
         for opcode in opcodes {
             switch opcode.type {
             case .equal:
-                // Perfect match - phonemes are the same
+                // Perfect match
                 for i in opcode.targetRange {
                     let targetPhoneme = targetPhonemesFlat[i]
                     let actualItem = decodedPhonemes[gopIndex]
@@ -117,7 +169,6 @@ public class PronunciationScorer {
                     scoreCount += 1
                     gopIndex += 1
                     
-                    // Word score tracking
                     currentWordScoreTotal += actualItem.score
                     currentWordPhonemeCount += 1
                     targetPhonemeIndex += 1
@@ -125,49 +176,68 @@ public class PronunciationScorer {
                 }
                 
             case .replace:
-                // Phoneme mismatch - check if it's in top-3 (forgiveness)
+                // Mismatch (could be similar or wrong)
                 for i in opcode.targetRange {
                     let targetPhoneme = targetPhonemesFlat[i]
                     var phonemeScoreToAdd: Double = 0.0
                     
                     if gopIndex < decodedPhonemes.count {
                         let actualItem = decodedPhonemes[gopIndex]
+                        let actualPhoneme = actualItem.topPrediction.phoneme
                         
-                        var isForgiven = false
-                        var forgivenScore: Double = 0.0
-                        
-                        // Check if target phoneme is in top-3 predictions
-                        for topPhoneme in actualItem.top3 {
-                            if topPhoneme.phoneme == targetPhoneme {
-                                isForgiven = true
-                                forgivenScore = topPhoneme.score
-                                break
-                            }
-                        }
-                        
-                        if isForgiven {
-                            phonemeScoreToAdd = forgivenScore
+                        // 1. Check Phonetic Similarity
+                        if checkPhonemeSimilarity(target: targetPhoneme, actual: actualPhoneme) {
+                            // Similar: Use actual score but cap at 0.9 to differentiate from perfect
+                            phonemeScoreToAdd = min(actualItem.score, 0.9)
+                            
                             alignedScores.append(AlignedPhoneme(
                                 type: .match,
                                 target: targetPhoneme,
-                                actual: actualItem.topPrediction.phoneme,
-                                score: forgivenScore,
-                                note: "Forgiven mismatch (said '\(actualItem.topPrediction.phoneme)')"
+                                actual: actualPhoneme,
+                                score: phonemeScoreToAdd,
+                                note: "Similar sound (said '\(actualPhoneme)')"
                             ))
-                            totalScore += forgivenScore
+                            totalScore += phonemeScoreToAdd
+                            
                         } else {
-                            alignedScores.append(AlignedPhoneme(
-                                type: .replace,
-                                target: targetPhoneme,
-                                actual: actualItem.topPrediction.phoneme,
-                                score: 0.0,
-                                note: "Said '\(actualItem.topPrediction.phoneme)'"
-                            ))
+                            // 2. Check Forgiveness (Top 3)
+                            var isForgiven = false
+                            var forgivenScore: Double = 0.0
+                            
+                            for topPhoneme in actualItem.top3 {
+                                if checkPhonemeSimilarity(target: targetPhoneme, actual: topPhoneme.phoneme) {
+                                    isForgiven = true
+                                    forgivenScore = topPhoneme.score
+                                    break
+                                }
+                            }
+                            
+                            if isForgiven {
+                                // Strict Forgiveness: Must have at least 40% confidence
+                                phonemeScoreToAdd = max(forgivenScore, 0.40)
+                                
+                                alignedScores.append(AlignedPhoneme(
+                                    type: .match,
+                                    target: targetPhoneme,
+                                    actual: actualPhoneme,
+                                    score: phonemeScoreToAdd,
+                                    note: "Forgiven mismatch (said '\(actualPhoneme)')"
+                                ))
+                                totalScore += phonemeScoreToAdd
+                            } else {
+                                // 3. Wrong
+                                alignedScores.append(AlignedPhoneme(
+                                    type: .replace,
+                                    target: targetPhoneme,
+                                    actual: actualPhoneme,
+                                    score: 0.0,
+                                    note: "Said '\(actualPhoneme)'"
+                                ))
+                            }
                         }
-                        
                         gopIndex += 1
                     } else {
-                        // No more actual phonemes - it's a deletion
+                        // Ran out of actual phonemes (Deletion)
                         alignedScores.append(AlignedPhoneme(
                             type: .delete,
                             target: targetPhoneme,
@@ -178,8 +248,6 @@ public class PronunciationScorer {
                     }
                     
                     scoreCount += 1
-                    
-                    // Word score tracking
                     currentWordScoreTotal += phonemeScoreToAdd
                     currentWordPhonemeCount += 1
                     targetPhonemeIndex += 1
@@ -187,10 +255,9 @@ public class PronunciationScorer {
                 }
                 
             case .delete:
-                // Missing phoneme - user didn't say it
+                // Missing phoneme
                 for i in opcode.targetRange {
                     let targetPhoneme = targetPhonemesFlat[i]
-                    
                     alignedScores.append(AlignedPhoneme(
                         type: .delete,
                         target: targetPhoneme,
@@ -198,10 +265,7 @@ public class PronunciationScorer {
                         score: 0.0,
                         note: nil
                     ))
-                    
                     scoreCount += 1
-                    
-                    // Word score tracking
                     currentWordScoreTotal += 0.0
                     currentWordPhonemeCount += 1
                     targetPhonemeIndex += 1
@@ -209,10 +273,9 @@ public class PronunciationScorer {
                 }
                 
             case .insert:
-                // Extra phoneme - user added something
+                // Extra phoneme
                 for _ in opcode.actualRange {
                     let actualItem = decodedPhonemes[gopIndex]
-                    
                     alignedScores.append(AlignedPhoneme(
                         type: .insert,
                         target: nil,
@@ -220,9 +283,7 @@ public class PronunciationScorer {
                         score: actualItem.score,
                         note: nil
                     ))
-                    
                     gopIndex += 1
-                    // Note: Insertions do NOT affect word score or target index
                 }
             }
         }
@@ -234,154 +295,180 @@ public class PronunciationScorer {
         
         let finalTotalScore = scoreCount > 0 ? totalScore / Double(scoreCount) : 0.0
         
-        // Split aligned phonemes by word
+        // Split with Greedy logic
         let groupedAlignedPhonemes = splitAlignedPhonemesByWord(alignedPhonemes: alignedScores, guide: idealPhonemes)
         
-        print("🔍 Word Scores Array: \(wordScores)")
-        print("🔍 Grouped Aligned Phonemes Count: \(groupedAlignedPhonemes.count)")
-        
-        // Create word-level scores with word names
-        let wordScoreResults: [WordScore] = zip(targetWords, wordScores).enumerated().map { index, pair in
-            let (word, score) = pair
-            let phonemes = groupedAlignedPhonemes[safe: index] ?? []
-            return WordScore(word: word, score: score, alignedPhonemes: phonemes)
+        let wordScoreResults: [WordScore] = zip(targetWords, zip(wordScores, groupedAlignedPhonemes)).map { word, data in
+            WordScore(word: word, score: data.0, alignedPhonemes: data.1)
         }
-        
-        print("🔍 Final Word Score Results: \(wordScoreResults.map { "\($0.word): \($0.score)" })")
         
         return PronunciationEvalResult(
             totalScore: finalTotalScore,
             wordScores: wordScoreResults
         )
     }
-}
-
-// MARK: - Helper Extensions
-
-extension Array {
-    subscript(safe index: Int) -> Element? {
-        return indices.contains(index) ? self[index] : nil
+    
+    // MARK: - Helper functions
+    
+    private func splitAlignedPhonemesByWord(alignedPhonemes: [AlignedPhoneme], guide: [[String]]) -> [[AlignedPhoneme]] {
+        var result: [[AlignedPhoneme]] = []
+        var alignedIndex = 0
+        
+        for targetWord in guide {
+            let expectedTargetCount = targetWord.count
+            var currentWordChunk: [AlignedPhoneme] = []
+            var consumedTargetCount = 0
+            
+            // 1. Consume Targets
+            while alignedIndex < alignedPhonemes.count && consumedTargetCount < expectedTargetCount {
+                let current = alignedPhonemes[alignedIndex]
+                currentWordChunk.append(current)
+                alignedIndex += 1
+                if current.type != .insert {
+                    consumedTargetCount += 1
+                }
+            }
+            
+            // 2. Consume Trailing Inserts (Attach to CURRENT word, not next)
+            while alignedIndex < alignedPhonemes.count {
+                if alignedPhonemes[alignedIndex].type == .insert {
+                    currentWordChunk.append(alignedPhonemes[alignedIndex])
+                    alignedIndex += 1
+                } else {
+                    break
+                }
+            }
+            
+            if !currentWordChunk.isEmpty {
+                result.append(currentWordChunk)
+            }
+        }
+        
+        // Attach any remaining tail to the last word
+        if alignedIndex < alignedPhonemes.count {
+            if result.isEmpty {
+                result.append(Array(alignedPhonemes[alignedIndex...]))
+            } else {
+                var lastChunk = result.removeLast()
+                lastChunk.append(contentsOf: alignedPhonemes[alignedIndex...])
+                result.append(lastChunk)
+            }
+        }
+        
+        return result
     }
 }
 
-// MARK: - Levenshtein Distance Implementation
+// MARK: - Robust Levenshtein
 
-/// Represents an edit operation type
-enum EditType {
-    case equal
-    case replace
-    case delete
-    case insert
-}
+enum EditType { case equal, replace, delete, insert }
 
-/// Represents an edit operation with ranges
 struct EditOperation {
     let type: EditType
     let targetRange: Range<Int>
     let actualRange: Range<Int>
 }
 
-/// Computes Levenshtein edit operations (opcodes) between two sequences
-/// - Parameters:
-///   - source: The source sequence (target phonemes)
-///   - target: The target sequence (actual phonemes)
-/// - Returns: Array of EditOperation representing the alignment
-func levenshteinOpcodes(from source: [String], to target: [String]) -> [EditOperation] {
+func levenshteinOpcodes(from source: [String], to target: [String], similarityChecker: (String, String) -> Bool) -> [EditOperation] {
     let m = source.count
     let n = target.count
     
-    // Create the distance matrix
+    // Safety for empty inputs
+    if m == 0 && n == 0 { return [] }
+    if m == 0 { return [EditOperation(type: .insert, targetRange: 0..<0, actualRange: 0..<n)] }
+    if n == 0 { return [EditOperation(type: .delete, targetRange: 0..<m, actualRange: 0..<0)] }
+    
+    let insertCost = 1
+    let deleteCost = 2
+    // Replace cost is dynamic: 1 if similar, 4 if different.
+    // High diff cost (4) ensures we prefer Insert(1)+Delete(2)=3 over a bad replacement.
+    
     var dp = Array(repeating: Array(repeating: 0, count: n + 1), count: m + 1)
     
-    // Initialize first row and column
-    for i in 0...m {
-        dp[i][0] = i
-    }
-    for j in 0...n {
-        dp[0][j] = j
-    }
+    for i in 0...m { dp[i][0] = i * deleteCost }
+    for j in 0...n { dp[0][j] = j * insertCost }
     
-    // Fill the matrix
     for i in 1...m {
         for j in 1...n {
-            if source[i - 1] == target[j - 1] {
-                dp[i][j] = dp[i - 1][j - 1]
+            let s = source[i-1]
+            let t = target[j-1]
+            
+            if s == t {
+                dp[i][j] = dp[i-1][j-1] // Cost 0
             } else {
+                let isSimilar = similarityChecker(s, t)
+                let replaceCost = isSimilar ? 1 : 4
+                
                 dp[i][j] = min(
-                    dp[i - 1][j] + 1,      // deletion
-                    dp[i][j - 1] + 1,      // insertion
-                    dp[i - 1][j - 1] + 1   // substitution
+                    dp[i-1][j] + deleteCost,      // Delete
+                    dp[i][j-1] + insertCost,      // Insert
+                    dp[i-1][j-1] + replaceCost    // Replace
                 )
             }
         }
     }
     
-    // Backtrack to get operations
+    // BACKTRACKING (Modified for sequential preference)
     var operations: [EditOperation] = []
     var i = m
     var j = n
     
     while i > 0 || j > 0 {
-        if i > 0 && j > 0 && source[i - 1] == target[j - 1] {
-            // Equal - find the start of the equal sequence
-            var equalStart = (i - 1, j - 1)
-            while equalStart.0 > 0 && equalStart.1 > 0 &&
-                    source[equalStart.0 - 1] == target[equalStart.1 - 1] {
-                equalStart = (equalStart.0 - 1, equalStart.1 - 1)
-            }
-            operations.insert(EditOperation(
-                type: .equal,
-                targetRange: equalStart.0..<i,
-                actualRange: equalStart.1..<j
-            ), at: 0)
-            i = equalStart.0
-            j = equalStart.1
-        } else if i > 0 && j > 0 && dp[i][j] == dp[i - 1][j - 1] + 1 {
-            // Replace
-            operations.insert(EditOperation(
-                type: .replace,
-                targetRange: (i - 1)..<i,
-                actualRange: (j - 1)..<j
-            ), at: 0)
-            i -= 1
+        // Determine costs again to see which path is valid
+        let currentVal = dp[i][j]
+        
+        // CHECK 1: Insert (Prioritize skipping extra actual sounds)
+        // We check this BEFORE Match to handle "Repeated Sound" ties.
+        // If Actual has "L L" and Target has "L", checking Insert first
+        // ensures we consume the second "L" as an insert, matching the first "L".
+        if j > 0 && currentVal == dp[i][j-1] + insertCost {
+            operations.insert(EditOperation(type: .insert, targetRange: i..<i, actualRange: (j-1)..<j), at: 0)
             j -= 1
-        } else if i > 0 && dp[i][j] == dp[i - 1][j] + 1 {
-            // Delete
-            operations.insert(EditOperation(
-                type: .delete,
-                targetRange: (i - 1)..<i,
-                actualRange: j..<j
-            ), at: 0)
-            i -= 1
-        } else if j > 0 && dp[i][j] == dp[i][j - 1] + 1 {
-            // Insert
-            operations.insert(EditOperation(
-                type: .insert,
-                targetRange: i..<i,
-                actualRange: (j - 1)..<j
-            ), at: 0)
-            j -= 1
+            continue
         }
+        
+        // CHECK 2: Delete (Prioritize skipping missed target sounds)
+        if i > 0 && currentVal == dp[i-1][j] + deleteCost {
+            operations.insert(EditOperation(type: .delete, targetRange: (i-1)..<i, actualRange: j..<j), at: 0)
+            i -= 1
+            continue
+        }
+        
+        // CHECK 3: Match / Replace
+        // Only take this path if Ins/Del were not optimal or not chosen.
+        if i > 0 && j > 0 {
+            let s = source[i-1]
+            let t = target[j-1]
+            let isExact = s == t
+            let isSimilar = similarityChecker(s, t)
+            let cost = isExact ? 0 : (isSimilar ? 1 : 4)
+            
+            if currentVal == dp[i-1][j-1] + cost {
+                let type: EditType = isExact ? .equal : .replace
+                operations.insert(EditOperation(type: type, targetRange: (i-1)..<i, actualRange: (j-1)..<j), at: 0)
+                i -= 1
+                j -= 1
+                continue
+            }
+        }
+        
+        // Fallback (should rarely happen given logic)
+        break
     }
     
-    // Merge consecutive operations of the same type
     return mergeConsecutiveOperations(operations)
 }
 
-/// Merges consecutive operations of the same type for cleaner output
 func mergeConsecutiveOperations(_ operations: [EditOperation]) -> [EditOperation] {
     guard !operations.isEmpty else { return [] }
-    
     var merged: [EditOperation] = []
     var current = operations[0]
     
     for i in 1..<operations.count {
         let next = operations[i]
-        
         if current.type == next.type &&
             current.targetRange.upperBound == next.targetRange.lowerBound &&
             current.actualRange.upperBound == next.actualRange.lowerBound {
-            // Merge
             current = EditOperation(
                 type: current.type,
                 targetRange: current.targetRange.lowerBound..<next.targetRange.upperBound,
@@ -393,62 +480,5 @@ func mergeConsecutiveOperations(_ operations: [EditOperation]) -> [EditOperation
         }
     }
     merged.append(current)
-    
     return merged
-}
-
-// MARK: - Helper functions
-
-/// Splits aligned phonemes per word based on the known ideal phonemes list
-private func splitAlignedPhonemesByWord(alignedPhonemes: [AlignedPhoneme], guide: [[String]]) -> [[AlignedPhoneme]] {
-    
-    var result: [[AlignedPhoneme]] = []
-    // This is our cursor for the flat alignedPhonemes list
-    var alignedIndex = 0
-    
-    // Loop through each target word in the guide (e.g., ["ɡ", "ʊ", "d"])
-    for targetWord in guide {
-        
-        // This is the number of *target* phonemes we expect for this word.
-        let expectedTargetCount = targetWord.count
-        
-        // This will store all aligned phonemes for the current word
-        var currentWordChunk: [AlignedPhoneme] = []
-        
-        // This counts how many of the word's target phonemes we've seen
-        var consumedTargetCount = 0
-        
-        // Keep consuming from alignedPhonemes as long as...
-        // 1. We haven't run out of aligned phonemes
-        // 2. We haven't found all the target phonemes for this word yet
-        while alignedIndex < alignedPhonemes.count && consumedTargetCount < expectedTargetCount {
-            
-            // Get the next aligned phoneme
-            let currentAlignedPhoneme = alignedPhonemes[alignedIndex]
-            currentWordChunk.append(currentAlignedPhoneme)
-            alignedIndex += 1 // Always advance the main cursor
-
-            // If the phoneme was a .match, .replace, or .delete,
-            // it corresponds to one of the target phonemes.
-            // If it was an .insert, it's an *extra* sound and
-            // doesn't count against the target total.
-            //
-            if currentAlignedPhoneme.type != .insert {
-                consumedTargetCount += 1
-            }
-        }
-        
-        // Add the completed chunk for this word to the result
-        if !currentWordChunk.isEmpty {
-            result.append(currentWordChunk)
-        }
-    }
-    
-    // After looping through the guide, check if there are any
-    // leftover phonemes (e.g., extra sounds at the very end).
-    if alignedIndex < alignedPhonemes.count {
-        result.append(Array(alignedPhonemes[alignedIndex...]))
-    }
-    
-    return result
 }

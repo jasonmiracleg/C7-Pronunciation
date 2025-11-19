@@ -10,23 +10,8 @@ import SwiftUI
 struct EvaluationView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var viewModel: CustomViewModel
-
-    let dummyWordScores: [WordScore] = [
-
-        WordScore(
-            word: "simultaneously",
-            score: 0.52,  // ❌ will be underlined red
-            alignedPhonemes: [
-                AlignedPhoneme(
-                    type: .replace,
-                    target: "ˌsaɪ.məlˈteɪ.ni.əs.li",
-                    actual: "sa.məl.te.ni.li",
-                    score: 0.5,
-                    note: "Mispronounced vowel"
-                )
-            ]
-        ),
-    ]
+    @State private var selectedWord: WordScore? = nil
+    @State private var showPopOver = false
 
     var body: some View {
         NavigationStack {
@@ -35,21 +20,26 @@ struct EvaluationView: View {
                     .font(.subheadline)
                     .multilineTextAlignment(.center)
                     .foregroundStyle(Color(UIColor.systemGray2))
+                    .padding(.top)
                 
-                // Scrollable cards
+                // Scrollable cards list
                 ScrollView {
-                    VStack() {
-//                        ForEach(0..<10) { _ in
-                            EvaluationCardView(
-                                sentence: viewModel.targetSentence,
-                                wordScores: dummyWordScores
-                            ) { selectedWord in
-                                print("Tapped: \(selectedWord.word)")
+                    VStack(spacing: 20) {
+                        // Iterate over the sentence results array
+                        ForEach(viewModel.sentenceResults) { result in
+                            EvaluationCardView(result: result) { tapped in
+                                selectedWord = tapped
+                                showPopOver = true
                             }
-//                        }
+                        }
                     }
                     .padding(.horizontal)
+                    .padding(.bottom, 20)
                 }
+            }
+            .sheet(item: $selectedWord) { word in
+                CorrectPronunciationSheetView(wordScore: word)
+                    .presentationDetents([.fraction(0.25)])
             }
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {

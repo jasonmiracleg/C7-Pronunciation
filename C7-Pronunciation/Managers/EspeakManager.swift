@@ -22,11 +22,6 @@ private func phonemeCallback(samples: UnsafeMutablePointer<Int16>?, num_samples:
             EspeakManager.shared.accumulate(phoneme: phoneme)
         }
         
-        if e.type == espeakEVENT_WORD {
-            // We've hit the start of a word.
-            EspeakManager.shared.markWordBoundary(at: e.text_position, length: e.length)
-        }
-        
         evt = evt?.advanced(by: 1)
     }
     return 0
@@ -38,11 +33,6 @@ public class EspeakManager {
     
     // Internal storage for the current synthesis session
     private var currentPhonemes: [String] = []
-    private var wordBoundaries: [Int] = []  // Indices where words end
-    
-    /// Stores the end position of the last processed word event.
-    /// This is used to detect and merge contractions (e.g., "I'm").
-    private var lastWordEndPosition: Int = -1
     
     /// Loaded vocabulary for filtering phonemes.
     private var validPhonemes: Set<String> = []
@@ -58,7 +48,7 @@ public class EspeakManager {
         }
         
         // 2. Find the Documents directory (where we can write)
-        guard let docDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+        guard FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first != nil else {
             fatalError("EspeakManager: Failed to find documents directory.")
         }
         
@@ -82,8 +72,7 @@ public class EspeakManager {
         // 6. Configuration
         espeak_ng_SetVoiceByName("en")
         
-        // Set pitch range to 0 to get a more monotonic (robotic) voice,
-        // which is better for phoneme analysis.
+        // Set pitch range to 0 to get a more monotonic (robotic) voice, typically is better for phoneme analysis.
         espeak_ng_SetParameter(espeakRANGE, 0, 0)
         
         // Enable Phoneme Events with IPA output
@@ -103,50 +92,56 @@ public class EspeakManager {
         return phonemesByWord.map { $0.joined() }.joined(separator: " ")
     }
     
+    /// Generates phonemes for a given line of text, splitting by word.
     /// Generates phonemes for a given line of text.
-    public func getPhonemes(for text: String) -> [[String]] {
+        public func getPhonemes(for text: String) -> [[String]] {
+            
+            // 1. Define punctuation to remove, but KEEP apostrophes
+            let punctuationToStrip = CharacterSet.punctuationCharacters
+                .subtracting(CharacterSet(charactersIn: "'"))
+            
+            // 2. Split text into words
+            let words = text.lowercased()
+                .components(separatedBy: .whitespacesAndNewlines) // Split by space
+                .map { $0.trimmingCharacters(in: punctuationToStrip) } // Remove "!" "," "." etc.
+                .filter { !$0.isEmpty } // Remove empty strings
+            
+            var allWordsPhonemes: [[String]] = []
+            
+            // 3. Synthesize each word individually
+            for word in words {
+                // Get phonemes for this *individual* word.
+                // synthesizePhrase("i'm") will now correctly return ["aɪ", "m"]
+                // synthesizePhrase("i") will return ["aɪ"]
+                // synthesizePhrase("am") will return ["ɐm"]
+                let phonemes = synthesizePhrase(word)
+                
+                // Add the list if it's not empty
+                if !phonemes.isEmpty {
+                    allWordsPhonemes.append(phonemes)
+                }
+            }
+            
+            return allWordsPhonemes
+        }
+    
+    
+    /// Synthesizes a single word/phrase and returns all its phonemes as one list.
+    private func synthesizePhrase(_ text: String) -> [String] {
         // 1. Clear previous state
         clear()
         
         // 2. Synthesize the text
-        // This is a synchronous call. It will trigger the `phonemeCallback`
-        // function multiple times before returning.
         text.withCString { cText in
             espeak_ng_Synthesize(cText, strlen(cText) + 1, 0, POS_CHARACTER, 0, UInt32(espeakCHARS_UTF8), nil, nil)
         }
         
-        // 3. Process the results
-        // The `currentPhonemes` and `wordBoundaries` arrays are now populated.
-        // We need to split the flat phoneme list into a 2D word list.
-        var result: [[String]] = []
+        // 3. Force eSpeak to process all remaining buffered events.
+        espeak_ng_Synchronize()
         
-        // If no boundaries were found (e.g., empty text), return empty.
-        if wordBoundaries.isEmpty {
-            return result
-        }
-        
-        // Iterate over the boundary indices
-        for i in 0..<wordBoundaries.count {
-            let startIndex = wordBoundaries[i]
-            
-            // Determine the end index
-            let endIndex: Int
-            if i == wordBoundaries.count - 1 {
-                // This is the last word, so go to the end of the phonemes list
-                endIndex = currentPhonemes.count
-            } else {
-                // This is not the last word, so end at the start of the next word
-                endIndex = wordBoundaries[i + 1]
-            }
-            
-            // Slice the array and add it to our results
-            if startIndex < endIndex { // Ensure we don't add empty arrays
-                let wordPhonemes = Array(currentPhonemes[startIndex..<endIndex])
-                result.append(wordPhonemes)
-            }
-        }
-        
-        return result
+        // 4. Return the flat list of phonemes collected by the callback.
+        // We are assuming all phonemes belong to the single word we just synthesized.
+        return currentPhonemes
     }
     
     // MARK: - Internal Callback Handlers
@@ -173,37 +168,9 @@ public class EspeakManager {
         currentPhonemes.append(cleanedPhoneme)
     }
     
-    /// (Called by C callback) Decides whether to mark a new word boundary.
-    internal func markWordBoundary(at textPosition: Int32, length: Int32) {
-        let currentWordStartPosition = Int(textPosition)
-        
-        // Calculate the end position of this word event in the original text
-        let currentWordEndPosition = currentWordStartPosition + Int(length)
-        
-        // Check if this "word" event starts exactly where the last one ended.
-        // e.g., "I" (pos 0, len 1) ends at 1. "'m" (pos 1, len 2) starts at 1.
-        // This detects a contraction split.
-        if currentWordStartPosition == self.lastWordEndPosition {
-            // This is part of a contraction (e.g., the "'m" part of "I'm").
-            // We DO NOT add a new word boundary, as we want to merge
-            // the phonemes with the previous word.
-            // We just update the "final" end position to track the end of *this* fragment.
-            self.lastWordEndPosition = currentWordEndPosition
-        } else {
-            // This is a new, separate word.
-            // Add a word boundary at the current phoneme list index.
-            self.wordBoundaries.append(self.currentPhonemes.count)
-            
-            // Store the end position of this new word.
-            self.lastWordEndPosition = currentWordEndPosition
-        }
-    }
-    
     /// Resets the internal state for a new synthesis task.
     private func clear() {
         currentPhonemes = []
-        wordBoundaries = []
-        lastWordEndPosition = -1 // Reset the contraction detector
     }
     
     /// Loads and decodes the vocab.json file.

@@ -78,7 +78,15 @@ class FlashcardViewModel: ObservableObject {
             wordScores[i].isEvaluated = false
         }
         
-        AudioManager.shared.startRecording()
+        do {
+            // 2. Try to start, catch failure
+            try AudioManager.shared.startRecording()
+        } catch {
+            print("Start failed: \(error)")
+            // 3. Revert UI immediately if start failed
+            self.isRecording = false
+            self.errorMessage = "Could not access microphone"
+        }
     }
     
     func stopRecordingAndEvaluate() {
@@ -101,7 +109,6 @@ class FlashcardViewModel: ObservableObject {
                 // B. Align and Score (The "Math")
                 let result = PronunciationScorer.shared.alignAndScore(
                     decodedPhonemes: decodedPhonemes,
-                    idealPhonemes: self.idealPhonemes,
                     targetSentence: self.targetSentence
                 )
                 
