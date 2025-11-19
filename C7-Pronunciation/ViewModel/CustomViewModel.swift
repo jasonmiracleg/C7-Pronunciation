@@ -91,6 +91,7 @@ class CustomViewModel: ObservableObject {
     
     private func processSentences(fullText: String, allWordScores: [WordScore]) {
         var results: [PronunciationEvalResult] = []
+        var phrasesToSave: [String] = [] // 1. Create a buffer for phrases to save
         var wordIndexOffset = 0
         
         // Split full text by sentences
@@ -109,10 +110,17 @@ class CustomViewModel: ObservableObject {
             if wordIndexOffset < endIndex {
                 // Extract the scores for this sentence
                 let sentenceScores = Array(allWordScores[wordIndexOffset..<endIndex])
+                let cleanSentence = sentence.trimmingCharacters(in: .whitespacesAndNewlines)
                 
-                // Calculate new average for this sentence
+                // 2. Calculate average to check threshold
                 let total = sentenceScores.reduce(0.0) { $0 + $1.score }
-                let average = total / Double(sentenceScores.count)
+                // Handle division by zero if sentence has no words
+                let average = sentenceScores.isEmpty ? 0.0 : total / Double(sentenceScores.count)
+                
+                // 3. If score is less than 50% (0.5), mark for saving
+                if average < 0.6 && !cleanSentence.isEmpty {
+                    phrasesToSave.append(cleanSentence)
+                }
                 
                 let result = PronunciationEvalResult(
                     totalScore: average,
@@ -127,6 +135,13 @@ class CustomViewModel: ObservableObject {
         
         DispatchQueue.main.async {
             self.sentenceResults = results
+            
+            // 4. Save the low scoring phrases to the database
+            // DataBankManager is @MainActor, so we call it inside this main thread block
+            for phrase in phrasesToSave {
+                print("Auto-saving low scoring phrase: \(phrase)")
+                DataBankManager.shared.addUserPhrase(phrase)
+            }
         }
     }
     
