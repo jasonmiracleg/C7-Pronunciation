@@ -15,7 +15,7 @@ struct FlashcardView: View {
         ZStack(alignment: .topTrailing) {
             // Card Background
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color.white)
+                .fill(Color(UIColor.tertiarySystemBackground))
                 .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 5)
             
             // Content
@@ -47,7 +47,6 @@ struct FlashcardView: View {
         if words.isEmpty {
             Text(viewModel.targetSentence)
                 .font(.system(size: 28, weight: .medium))
-                .foregroundColor(.black)
         } else {
             // Concatenate Text views to allow wrapping
             words.reduce(Text("")) { (result, wordScore) -> Text in
@@ -55,6 +54,7 @@ struct FlashcardView: View {
                 
                 var textSegment = Text(wordScore.word)
                     .font(.system(size: 28, weight: .medium))
+                    .foregroundColor(Color.primary)
                 
                 if wordScore.isEvaluated {
                     // Use the color set by the ViewModel based on score ranges

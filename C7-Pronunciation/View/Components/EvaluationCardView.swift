@@ -75,11 +75,12 @@ struct EvaluationCardView: View {
         ) { item in
             if let score = indexedScores[item.index], score.score < 0.6 {
                 Text(item.word + " ")
-                    .underline()
-                    .foregroundColor(score.score < 0.4 ? .red : .orange)
+                    .font(.title3)
+                    .underline(true, color: score.score < 0.4 ? .red : .orange)
                     .onTapGesture { onTap(score) }
             } else {
                 Text(item.word + " ")
+                    .font(.title3)
             }
         }
     }

@@ -13,49 +13,76 @@ struct CustomMainView: View {
     @State var text = ""
     @State var isEnable: Bool = true
     @State private var isPresented: Bool = false
+    @FocusState private var focusField: Bool
     
     @ObservedObject var viewModel: CustomViewModel
     
     var body: some View {
         NavigationStack {
-            VStack {
-                Spacer()
-                
-                Text("Write Anything on Your Mind Below")
-                Text("Hit Record to Check Your Pronunciation")
-                
-                Spacer()
-                
-                TextEditor(text: $text)
-                    .customStyleEditor(placeholder: "Write Here", userInput: $text, isEnabled: isEnable)
-                    .frame(height: 350)
-                    .padding(.horizontal, 16)
-                
-                Spacer()
-                
-                if isDone {
-                    HStack {
-                        Button(action: {
-                            isEnable.toggle()
-                            isDone.toggle()
-                        }) {
-                            Image(systemName: "arrow.clockwise.circle.fill")
-                                .font(.system(size: 64))
-                                .foregroundStyle(Color.accentColor) // Ensure this color exists or use .accentColor
-                                .padding()
+            ZStack {
+                Color(UIColor.systemGroupedBackground)
+                    .ignoresSafeArea()
+                VStack {
+                    Spacer()
+                    Text("Write Anything on Your Mind Below")
+                    Text("Hit Record to Check Your Pronunciation")
+                        .padding(.bottom, 16)
+                    
+                    TextEditor(text: $text)
+                        .customStyleEditor(placeholder: "Write Here", userInput: $text, isEnabled: isEnable)
+                        .frame(height: 350)
+                        .padding(.horizontal, 24)
+                        .focused($focusField)
+                    
+                    Spacer()
+                    
+                    if isDone {
+                        HStack {
+                            Button(action: {
+                                isEnable.toggle()
+                                isDone.toggle()
+                            }) {
+                                Image(systemName: "arrow.clockwise.circle.fill")
+                                    .font(.system(size: 64))
+                                    .foregroundStyle(Color.white)
+                            }
+                            .glassEffect( .regular.tint(Color.interactive))
+                            
+                            Spacer()
+                            
+                            Button(action: {
+                                isPresented.toggle()
+                            }) {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .font(.system(size: 64))
+                                    .foregroundStyle(.white)
+                            }
+                            .glassEffect( .regular.tint(Color.interactive))
                         }
-                        
-                        Spacer()
+                        .padding(.horizontal)
+
+                    } else {
                         
                         Button(action: {
-                            isPresented.toggle()
+                            if !viewModel.isRecording {
+                                viewModel.setTargetSentence(text)
+                                viewModel.toggleRecording()
+                                
+                                isEnable.toggle()
+                            } else {
+                                viewModel.toggleRecording()
+                                isDone.toggle()
+                            }
                         }) {
-                            Image(systemName: "checkmark.circle.fill")
+                            Image(systemName: !viewModel.isRecording ? "microphone.circle.fill" : "stop.circle.fill")
                                 .font(.system(size: 64))
-                                .foregroundStyle(Color.accentColor)
-                                .padding()
+                                .foregroundColor(.white)
+                                .opacity(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0.4 : 1)
                         }
+                        .glassEffect(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?  .regular.tint(Color.secondary) : .regular.tint(Color.interactive))
+                        .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     }
+                    Spacer()
 
                 } else {
                     // Encapsulate Mic and Waveform in a VStack
@@ -91,7 +118,9 @@ struct CustomMainView: View {
                         .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     }
                 }
-                Spacer()
+            }
+            .onTapGesture {
+                focusField = false
             }
             .fullScreenCover(isPresented: $isPresented) {
                 EvaluationView()
@@ -99,8 +128,7 @@ struct CustomMainView: View {
             }
             .navigationTitle("Custom")
             .navigationBarTitleDisplayMode(.inline)
-            .padding(.horizontal)
-            .scrollDismissesKeyboard(.interactively)
+            .scrollDismissesKeyboard(.interactively)   
             .ignoresSafeArea(.keyboard, edges: .bottom)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
