@@ -24,7 +24,7 @@ struct CustomTextEditorStyle: ViewModifier {
                         .padding(.top, 2)
                         .font(.system(size: 14))
                         .foregroundColor(isEnabled ?
-                                         Color(UIColor.systemGray2) :
+                                         Color(UIColor.placeholderText) :
                                          Color(UIColor.systemGray3))
                 }
             }
@@ -33,8 +33,8 @@ struct CustomTextEditorStyle: ViewModifier {
             .foregroundColor(isEnabled ? .primary : .primary.opacity(0.8))
             .background(
                 isEnabled ?
-                Color(UIColor.systemGray6) :
-                Color(UIColor.systemGray5)
+                Color(UIColor.tertiarySystemBackground) :
+                    Color(UIColor.systemGray4).opacity(0.5)
             )
             .clipShape(RoundedRectangle(cornerRadius: 20))
             .scrollContentBackground(.hidden)

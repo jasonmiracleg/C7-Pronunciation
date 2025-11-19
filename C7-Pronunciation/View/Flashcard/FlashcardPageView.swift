@@ -5,8 +5,8 @@
 //  Created by Abelito Faleyrio Visese on 17/11/25.
 //
 
-import SwiftUI
 import AVFoundation
+import SwiftUI
 
 struct FlashcardPageView: View {
     @Environment(\.dismiss) var dismiss
@@ -18,7 +18,7 @@ struct FlashcardPageView: View {
     @State private var selectedWord: WordScore? = nil
 
     private let synthesizer = AVSpeechSynthesizer()
-    
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -64,6 +64,24 @@ struct FlashcardPageView: View {
                         if newValue == true {
                             isEvaluated = true
                         }
+                        .padding(.top, 10)
+
+                        Spacer()
+
+                        // MARK: - Microphone Button
+                        recordingButton
+                            .padding(.bottom, 40)
+                    }
+                }
+
+                // MARK: - Error Overlay
+                if let error = viewModel.errorMessage {
+                    VStack {
+                        Text(error)
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(Color.red)
+                            .cornerRadius(10)
                     }
                 }
                 
@@ -126,8 +144,6 @@ struct FlashcardPageView: View {
                     .clipShape(Circle())
             }
         }
-        .padding(.horizontal)
-        .padding(.top, 20)
     }
     
     var buttonStack: some View {
@@ -150,9 +166,10 @@ struct FlashcardPageView: View {
         }
         .frame(height: 100)
     }
-    
+
+
     // MARK: - Data Loading
-    
+
     private func loadPhrases() {
         Task { @MainActor in
             isLoadingPhrases = true
@@ -173,7 +190,7 @@ struct FlashcardPageView: View {
             } else {
                 phrase = nil
             }
-            
+
             isLoadingPhrases = false
             
             print("✅ Loaded phrase for practice")
@@ -256,9 +273,9 @@ struct FlashcardPageView: View {
         .glassEffect( .regular.tint(Color.interactive))
         .disabled(viewModel.isLoading)
     }
-    
+
     // MARK: - Helpers
-    
+
     func speak(text: String) {
         // 1. Stop any current speech
         if synthesizer.isSpeaking {
@@ -286,7 +303,6 @@ struct FlashcardPageView: View {
         synthesizer.speak(utterance)
     }
 }
-
 
 // Preview
 struct FlashcardPageView_Previews: PreviewProvider {

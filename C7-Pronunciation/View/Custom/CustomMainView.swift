@@ -13,71 +13,89 @@ struct CustomMainView: View {
     @State var text = ""
     @State var isEnable: Bool = true
     @State private var isPresented: Bool = false
+    @FocusState private var focusField: Bool
     
-    @Binding var viewModel: CustomViewModel
+    @ObservedObject var viewModel: CustomViewModel
     
     var body: some View {
         NavigationStack {
-            VStack {
-                Spacer()
-                
-                Text("Write Anything on Your Mind Below")
-                Text("Hit Record to Check Your Pronunciation")
-                
-                Spacer()
-                
-                TextEditor(text: $text)
-                    .customStyleEditor(placeholder: "Write Here", userInput: $text, isEnabled: isEnable)
-                    .frame(height: 350)
-                    .padding(.horizontal, 16)
-                
-                Spacer()
-                
-                if isDone {
-                    HStack {
-                        Button(action: {
-                            isEnable.toggle()
-                            isDone.toggle()
-                        }) {
-                            Image(systemName: "arrow.clockwise.circle.fill")
-                                .font(.system(size: 64))
-                                .foregroundStyle(Color.interactive)
-                                .padding()
-                        }
-                        
-                        Spacer()
-                        
-                        Button(action: {
-                            isPresented.toggle()
-                        }) {
-                            Image(systemName: "checkmark.circle.fill")
-                                .font(.system(size: 64))
-                                .foregroundStyle(Color.interactive)
-                                .padding()
-                        }
-                    }
-
-                } else {
-                    Button(action: {
-                        if !viewModel.isRecording {
-                            viewModel.setTargetSentence(text)
-                            viewModel.toggleRecording()
+            ZStack {
+                Color(UIColor.systemGroupedBackground)
+                    .ignoresSafeArea()
+                VStack {
+                    Spacer()
+                    Text("Write Anything on Your Mind Below")
+                    Text("Hit Record to Check Your Pronunciation")
+                        .padding(.bottom, 16)
+                    
+                    TextEditor(text: $text)
+                        .customStyleEditor(placeholder: "Write Here", userInput: $text, isEnabled: isEnable)
+                        .frame(height: 350)
+                        .padding(.horizontal, 24)
+                        .focused($focusField)
+                    
+                    Spacer()
+                    
+                    if isDone {
+                        HStack {
+                            Button(action: {
+                                isEnable.toggle()
+                                isDone.toggle()
+                            }) {
+                                Image(systemName: "arrow.clockwise.circle.fill")
+                                    .font(.system(size: 64))
+                                    .foregroundStyle(Color.white)
+                            }
+                            .glassEffect( .regular.tint(Color.accentColor))
                             
-                            isEnable.toggle()
-                        } else {
-                            viewModel.toggleRecording()
-                            isDone.toggle()
+                            Spacer()
+                            
+                            Button(action: {
+                                isPresented.toggle()
+                            }) {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .font(.system(size: 64))
+                                    .foregroundStyle(.white)
+                            }
+                            .glassEffect( .regular.tint(Color.accentColor))
                         }
-                    }) {
-                        Image(systemName: !viewModel.isRecording ? "microphone.circle.fill" : "stop.circle.fill")
-                            .font(.system(size: 64))
-                            .foregroundStyle(Color.interactive)
-                            .padding()
-                            .opacity(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0.4 : 1) 
+                        .padding(.horizontal)
+
+                    } else {
+                        // Show waveform only when recording
+                        if viewModel.isRecording {
+                            WaveformView(levels: viewModel.audioLevels)
+                                .padding(.horizontal, 40)
+                                .transition(.opacity.animation(.easeInOut))
+                        } else {
+                            // Placeholder to keep layout stable (optional, remove if you want button to jump)
+                            Color.clear.frame(height: 50)
+                        }
+                        
+                        Button(action: {
+                            if !viewModel.isRecording {
+                                viewModel.setTargetSentence(text)
+                                viewModel.toggleRecording()
+                                
+                                isEnable.toggle()
+                            } else {
+                                viewModel.toggleRecording()
+                                isDone.toggle()
+                            }
+                        }) {
+                            Image(systemName: !viewModel.isRecording ? "microphone.circle.fill" : "stop.circle.fill")
+                                .font(.system(size: 64))
+                                .foregroundColor(.white)
+                                .opacity(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0.4 : 1)
+                        }
+                        .glassEffect(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?  .regular.tint(Color.secondary) : .regular.tint(Color.accentColor))
+                        .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     }
-                    .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    Spacer()
                 }
-                Spacer()
+            }
+            .onTapGesture {
+                focusField = false
             }
             .fullScreenCover(isPresented: $isPresented) {
                 EvaluationView()
@@ -85,7 +103,6 @@ struct CustomMainView: View {
             }
             .navigationTitle("Custom")
             .navigationBarTitleDisplayMode(.inline)
-            .padding(.horizontal)
             .scrollDismissesKeyboard(.interactively)   
             .ignoresSafeArea(.keyboard, edges: .bottom)
             .toolbar {
