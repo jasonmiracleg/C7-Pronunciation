@@ -8,12 +8,13 @@
 import Foundation
 import SwiftUI
 import Combine
+import Speech
+import AVFoundation
 
 class CustomViewModel: ObservableObject {
     
     // Dependencies
     private let audioManager = AudioManager.shared
-    private let espeakManager = EspeakManager.shared
     private let scorer = PronunciationScorer.shared
     
     @Published var targetSentence: String = "I don't work simultaneously. I'm starting to think about it. But, I don't like it."
@@ -26,27 +27,94 @@ class CustomViewModel: ObservableObject {
     @Published var audioLevels: [Float] = Array(repeating: 0.0, count: 30)
     private var meteringTimer: Timer?
     
+    // MARK: - Teleprompter State
+    @Published var teleprompterSentences: [String] = []
+    @Published var currentSentenceIndex: Int = 0
+    @Published var shouldAutoScroll: Bool = true
+    @Published var recognizedText: String = ""
+    
+    private var recordingStartTime: Date?
+    var autoScrollTimer: Timer?
+    private var cumulativeWordBuffer: [String] = []
+    
+    @Published var wordsPerMinute: Double = 120.0
+    var currentSentenceStartTime: Date? = nil
+    var lastSentenceAdvanceTime: Date?
+    private let minimumSecondsBetweenAdvances: TimeInterval = 2.5  // Minimum time between sentence advances
+    private let averageWordsPerSecond: Double = 1
+
+    
+    // Speech recognition for teleprompter
+    var speechRecognizer: SFSpeechRecognizer?
+    var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
+    var recognitionTask: SFSpeechRecognitionTask?
+    var audioEngine: AVAudioEngine?
+    
+    // MARK: - Initialization
+    
+    init() {
+        speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: "en-US"))
+        speechRecognizer?.defaultTaskHint = .dictation
+        requestSpeechPermissions()
+    }
+    
+    private func requestSpeechPermissions() {
+        SFSpeechRecognizer.requestAuthorization { authStatus in
+            DispatchQueue.main.async {
+                switch authStatus {
+                case .authorized:
+                    print("✅ Speech recognition authorized")
+                case .denied, .restricted, .notDetermined:
+                    print("❌ Speech recognition not authorized")
+                @unknown default:
+                    break
+                }
+            }
+        }
+    }
+    
     // State vars
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var isRecording = false
+    @Published var hasRecorded = false
     
     func setTargetSentence(_ sentence: String) {
         targetSentence = sentence
     }
     
+    func resetTeleprompter() {
+        teleprompterSentences = []
+        currentSentenceIndex = 0
+        shouldAutoScroll = true
+        recognizedText = ""
+        cumulativeWordBuffer = []
+        recordingStartTime = nil
+        hasRecorded = false
+    }
+    
     func toggleRecording() {
         if audioManager.isRecording {
             isRecording = false
-            stopMetering() // Stop visualizer
+//            print("🎙️ Stopping recording...")
+            
+            stopMetering()
+            stopSpeechRecognition()
             audioManager.stopRecording()
+            
+            isLoading = true
+            
             Task {
                 await submitRecording()
             }
         } else {
             isRecording = true
+            hasRecorded = true
+//            print("🎙️ Starting recording...")
+            
             resetResults()
-            startMetering() // Start visualizer
+            startMetering()
+            startSpeechRecognition()
             audioManager.startRecording()
         }
     }
@@ -64,10 +132,8 @@ class CustomViewModel: ObservableObject {
     private func stopMetering() {
         meteringTimer?.invalidate()
         meteringTimer = nil
-        // Reset visualization to flat
-        withAnimation {
-            audioLevels = Array(repeating: 0.0, count: 30)
-        }
+        // Reset visualization to flat immediately
+        audioLevels = Array(repeating: 0.0, count: 30)
     }
     
     private func updateAudioLevels() {
@@ -84,34 +150,45 @@ class CustomViewModel: ObservableObject {
     }
     
     private func submitRecording() async {
+        // Check if file exists
         guard let audioURL = audioManager.audioURL else {
-            self.errorMessage = "Recording not found."
+            await MainActor.run {
+                self.errorMessage = "Recording not found."
+                // SAFETY: If we fail early, we must turn off loading
+                self.isLoading = false
+            }
             return
         }
         
-        self.isLoading = true
+        // NOTE: We removed "self.isLoading = true" from here because
+        // we now do it in toggleRecording()
         
         do {
-            // No need to check isPhonemeRecognitionReady explicitly here if AudioManager handles it,
-            // but good for safety.
-            
-            // Use the restored function
             let result = try await audioManager.recognizePhonemes(from: audioURL)
             
-            self.decodedPhonemes = result
-            self.idealPhonemes = espeakManager.getPhonemes(for: self.targetSentence)
+            await MainActor.run {
+                self.decodedPhonemes = result
+            }
             
         } catch {
-            self.errorMessage = error.localizedDescription
-            self.isLoading = false
+            await MainActor.run {
+                self.errorMessage = error.localizedDescription
+                self.isLoading = false
+                print("❌ Evaluation failed - isLoading = false")
+            }
             print("✗ Test failed: \(error.localizedDescription)")
             return
         }
         
-        self.isLoading = false
         let masterResult = scorer.alignAndScore(decodedPhonemes: decodedPhonemes.flatMap { $0 }, targetSentence: self.targetSentence)
         
-        processSentences(fullText: self.targetSentence, allWordScores: masterResult.wordScores)
+        await MainActor.run {
+            processSentences(fullText: self.targetSentence, allWordScores: masterResult.wordScores)
+            print("✅ Evaluation complete - isLoading = false")
+            
+            // 4. Finally turn off loading, which triggers the Navigation in the View
+            self.isLoading = false
+        }
     }
     
     private func processSentences(fullText: String, allWordScores: [WordScore]) {
@@ -153,13 +230,12 @@ class CustomViewModel: ObservableObject {
             wordIndexOffset += wordCountInSentence
         }
         
-        DispatchQueue.main.async {
-            self.sentenceResults = results
-            
-            for phrase in phrasesToSave {
-                print("Auto-saving low scoring phrase: \(phrase)")
-                DataBankManager.shared.addUserPhrase(phrase)
-            }
+        // Directly update published property (Caller is already on MainActor)
+        self.sentenceResults = results
+        
+        for phrase in phrasesToSave {
+            print("Auto-saving low scoring phrase: \(phrase)")
+            DataBankManager.shared.addUserPhrase(phrase)
         }
     }
     

@@ -38,7 +38,7 @@ struct SplashScreenView: View {
                         .progressViewStyle(CircularProgressViewStyle(tint: .white))
                         .scaleEffect(1.2)
                     
-                    Text("Preparing AI Model...")
+                    Text("Loading...")
                         .font(.subheadline)
                         .foregroundColor(.white.opacity(0.8))
                 }

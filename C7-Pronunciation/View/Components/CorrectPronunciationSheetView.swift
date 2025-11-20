@@ -12,8 +12,8 @@ struct CorrectPronunciationSheetView: View {
     @Environment(\.dismiss) private var dismiss
     let wordScore: WordScore
     
-    private let synthesizer = AVSpeechSynthesizer()
-
+    private let synthesizer = SpeechSynthesizer.shared
+    
     var body: some View {
         NavigationStack {
             VStack(alignment: .center, spacing: 16) {
@@ -37,16 +37,18 @@ struct CorrectPronunciationSheetView: View {
                 
                 Divider()
                     .padding(.horizontal)
-
+                
                 // Playback Button
                 Button(action: {
-                    speak(text: wordScore.word.lowercased())
+                    // UPDATED: Use Singleton
+                    SpeechSynthesizer.shared.speak(text: wordScore.word.lowercased())
                 }) {
                     Image(systemName: "speaker.wave.2.circle.fill")
                         .font(.system(size: 36))
                         .foregroundColor(.white)
                 }
                 .glassEffect( .regular.tint(Color.accent))
+                .padding(.bottom, 20)
             }
             .navigationTitle("Evaluation")
             .navigationBarTitleDisplayMode(.inline)
@@ -91,18 +93,5 @@ struct CorrectPronunciationSheetView: View {
         } else {
             return .primary
         }
-    }
-    
-    // MARK: - TTS Logic
-    
-    func speak(text: String) {
-        if synthesizer.isSpeaking {
-            synthesizer.stopSpeaking(at: .immediate)
-        }
-        
-        let utterance = AVSpeechUtterance(string: text)
-        utterance.voice = AVSpeechSynthesisVoice(language: "en")
-        utterance.rate = 0.4
-        synthesizer.speak(utterance)
     }
 }

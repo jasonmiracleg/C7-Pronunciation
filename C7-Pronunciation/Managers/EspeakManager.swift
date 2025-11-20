@@ -70,7 +70,7 @@ public class EspeakManager {
         espeak_ng_InitializeOutput(ENOUTPUT_MODE_SYNCHRONOUS, 0, nil)
         
         // 6. Configuration
-        espeak_ng_SetVoiceByName("en")
+        espeak_ng_SetVoiceByName("en-us")
         
         // Set pitch range to 0 to get a more monotonic (robotic) voice, typically is better for phoneme analysis.
         espeak_ng_SetParameter(espeakRANGE, 0, 0)

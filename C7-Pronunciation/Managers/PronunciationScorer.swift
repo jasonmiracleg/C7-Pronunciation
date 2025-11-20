@@ -18,30 +18,29 @@ public class PronunciationScorer {
     private init() { }
     
     // MARK: - Phonetic Similarity Data (Stricter)
-    private let phonemeSimilarityGroups: [Set<String>] = [
-
-        ["a", "æ", "ɑ", "ɒ"],
-        ["ʌ", "ɐ", "ə"],
-        ["i", "y", "j"],
-        ["ɪ"],
-        ["u", "w"],
-        ["ʊ"],
-        ["e", "ɛ", "3", "eɪ"],
-        ["o", "ɔ", "oʊ", "əʊ"],
-        ["r", "ɹ", "ɾ", "ɝ", "ɚ"],
-        ["l", "ɫ"]
-    ]
+//    private let phonemeSimilarityGroups: [Set<String>] = [
+//        ["a", "æ", "ɑ", "ɒ"],
+//        ["ʌ", "ɐ", "ə"],
+//        ["i", "y", "j"],
+//        ["ɪ"],
+//        ["u", "w"],
+//        ["ʊ"],
+//        ["e", "ɛ", "3", "eɪ"],
+//        ["o", "ɔ", "oʊ", "əʊ"],
+//        ["r", "ɹ", "ɾ", "ɝ", "ɚ"],
+//        ["l", "ɫ"]
+//    ]
     
     // MARK: - Phonetic Similarity Data (Lenient)
-//    private let phonemeSimilarityGroups: [Set<String>] = [
-//        ["a", "æ", "ɑ", "ɒ", "ɐ", "ʌ"], // A-like vowels
-//        ["e", "ɛ", "ɜ", "ə"],           // E-like vowels + Schwa
-//        ["i", "ɪ", "y", "j"],           // I-like vowels
-//        ["o", "ɔ"],                     // O-like vowels
-//        ["u", "ʊ", "w"],                // U-like vowels / glides
-//        ["r", "ɹ", "ɾ"],                // Rhotics
-//        ["l", "ɫ"]                      // Laterals
-//    ]
+    private let phonemeSimilarityGroups: [Set<String>] = [
+        ["a", "æ", "ɑ", "ɒ", "ɐ", "ʌ"], // A-like vowels
+        ["e", "ɛ", "ɜ", "ə"],           // E-like vowels + Schwa
+        ["i", "ɪ", "y", "j"],           // I-like vowels
+        ["o", "ɔ"],                     // O-like vowels
+        ["u", "ʊ", "w"],                // U-like vowels / glides
+        ["r", "ɹ", "ɾ"],                // Rhotics
+        ["l", "ɫ"]                      // Laterals
+    ]
     
     /// Checks if two phonemes are similar, ignoring diacritics/length markers if needed
     private func checkPhonemeSimilarity(target: String, actual: String) -> Bool {

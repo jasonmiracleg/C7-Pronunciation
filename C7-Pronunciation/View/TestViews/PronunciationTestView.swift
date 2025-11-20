@@ -11,7 +11,7 @@ import SwiftUI
 struct PronunciationView: View { 
     
     @StateObject private var viewModel = PronunciationViewModel()
-    @StateObject private var synthesizer = SpeechSynthesizer() // Keep this helper for playback
+    @StateObject private var synthesizer = SpeechSynthesizer.shared
     
     // UI State for the detail sheet
     @State private var selectedWord: WordScore?
@@ -178,7 +178,7 @@ struct WordDetailView: View {
                 }
                 
                 Button {
-                    synthesizer.speak(word: word.word)
+                    synthesizer.speak(text: word.word)
                 } label: {
                     Label("Play Pronunciation", systemImage: "speaker.wave.2.fill")
                 }
