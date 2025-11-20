@@ -17,14 +17,14 @@ class DataBankManager {
     
     let modelContainer: ModelContainer
 
-    private var context: ModelContext {
+    var context: ModelContext {
         modelContainer.mainContext
     }
     
     private init() {
         do {
             let schema = Schema([
-                Phrase.self,
+                Phrase.self, PhonemeRecommendationScore.self
             ])
             let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
