@@ -6,18 +6,39 @@
 //
 import Foundation
 import Combine
+import SwiftData
 
 class User: ObservableObject {
     
-    @Published var phonemeScores: [PhonemeRecommendationScore] = []
+    var phonemeScores: [PhonemeRecommendationScore] = []
     @Published var phraseQueue: [Phrase] = []
     var successfullyLoadedPhonemes = true
     
-    init(){
+    init() {
+        let context = DataBankManager.shared.context
+        let descriptor = FetchDescriptor<PhonemeRecommendationScore>(
+            sortBy: [SortDescriptor(\.phoneme)]
+        )
+        
+        if let loaded = try? context.fetch(descriptor), !loaded.isEmpty {
+            // Load stored scores
+            self.phonemeScores = loaded
+            return
+        }
+
+        // First launch: generate from vocab and insert into DB
         let vocab = loadVocabulary()
-        if vocab.count == 0 { successfullyLoadedPhonemes = false }
-        phonemeScores = vocab.map { PhonemeRecommendationScore(id: $0.id, phoneme: $0.phoneme) }
+        self.phonemeScores = vocab.map {
+            PhonemeRecommendationScore(phoneme: $0.phoneme)
+        }
+
+        for item in phonemeScores {
+            context.insert(item)
+        }
+
+        try? context.save()
     }
+
     
     private func loadVocabulary() -> [VocabEntry] {
         guard let url = Bundle.main.url(forResource: "vocab_gpt_cleansed", withExtension: "json") else {
@@ -57,7 +78,6 @@ class User: ObservableObject {
                 phonemeScores[index].updateScore(evalScore: entry.score)
             } else { // this else is an edge case theres a completely new phoneme
                 var newPhoneme = PhonemeRecommendationScore(
-                    id: phonemeScores.count,
                     phoneme: target
                 )
                 newPhoneme.updateScore(evalScore: entry.score)
@@ -65,12 +85,18 @@ class User: ObservableObject {
             }
             
         }
+        // saving into swift data after going through all phonemes
+        try? DataBankManager.shared.context.save()
     }
     
     func updateScore(for phoneme: String, evalScore: Double){
         // find the index of the phoneme
         if let index = phonemeScores.firstIndex(where: { $0.phoneme == phoneme }) {
             phonemeScores[index].updateScore(evalScore: evalScore)
+            
+            // saving into swift data
+            try? DataBankManager.shared.context.save()
+            
             print("Found the phoneme")
             return
         }
