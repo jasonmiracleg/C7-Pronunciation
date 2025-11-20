@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import Combine
+import SwiftData
 
 
 struct GavinTestView: View {
@@ -197,6 +198,8 @@ struct GavinTestView: View {
 
 #Preview {
     GavinTestView()
+        .modelContainer(for: [PhonemeRecommendationScore.self],
+                        inMemory: true)
 }
 
 class GavinTestViewModel: ObservableObject {
