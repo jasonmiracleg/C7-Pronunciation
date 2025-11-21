@@ -8,36 +8,46 @@
 import SwiftUI
 
 struct EvaluationCardView: View {
-    // Changed input to the result object
     let result: PronunciationEvalResult
     var onTapWord: (WordScore) -> Void
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Interactive Text
-            interactiveUnderlinedText(
-                fullText: result.sentenceText!,
-                wordScores: result.wordScores,
-                onTap: onTapWord
-            )
+            HStack(alignment: .center, spacing: 8) {
+                interactiveUnderlinedText(
+                    fullText: result.sentenceText!,
+                    wordScores: result.wordScores,
+                    onTap: onTapWord
+                )
+                
+                Spacer(minLength: 0)
+                
+                // Speaker (TTS) button
+                Button(action: {
+                    SpeechSynthesizer.shared.speak(text: result.sentenceText ?? "")
+                }) {
+                    Image(systemName: "speaker.wave.2.circle.fill")
+                        .font(.system(size: 28))
+                        .foregroundStyle(Color.white)
+                }
+                .glassEffect( .regular.tint(Color.accentColor))
+                .padding(.leading, 4)
+            }
         }
         .padding()
-        .background(RoundedRectangle(cornerRadius: 16).fill(Color(UIColor.systemGray6)))
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(UIColor.systemGray6))
+        )
     }
-    
-    func getColor(score: Double) -> Color {
-        if score >= 85 { return .green }
-        if score >= 50 { return .orange }
-        return .red
-    }
-    
+        
     func clean(_ word: String) -> String {
         word
             .replacingOccurrences(of: "’", with: "'")
             .trimmingCharacters(in: .punctuationCharacters)
             .lowercased()
     }
-    
+
     @ViewBuilder
     func interactiveUnderlinedText(
         fullText: String,
@@ -57,11 +67,9 @@ struct EvaluationCardView: View {
             let cleanedWords = words.map { clean($0) }
             let cleanedScores = wordScores.map { clean($0.word) }
 
-            // Logic to map scores to words; handles punctuation differences
             var scoreIndex = 0
             for (index, w) in cleanedWords.enumerated() {
                 if scoreIndex < cleanedScores.count {
-                     // Simple matching: checks if the cleaned words match
                     if cleanedScores[scoreIndex] == w {
                         indexedScores[index] = wordScores[scoreIndex]
                         scoreIndex += 1

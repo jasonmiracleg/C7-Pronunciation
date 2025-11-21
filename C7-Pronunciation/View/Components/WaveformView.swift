@@ -26,6 +26,7 @@ struct WaveformView: View {
             }
         }
         .frame(height: 50) // Fixed height for the container
-        .animation(.easeOut(duration: 0.1), value: levels)
+        .padding(.bottom, 10)
+        .animation(.easeOut(duration: 0.05), value: levels)
     }
 }

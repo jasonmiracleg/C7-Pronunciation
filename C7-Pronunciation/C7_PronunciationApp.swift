@@ -18,6 +18,7 @@ struct C7_PronunciationApp: App {
         WindowGroup {
             ZStack {
                 if isModelLoaded {
+//                    DataBankTestView()
                     Group {
                         if hasCompletedOnboarding {
                             HomeScreenView()

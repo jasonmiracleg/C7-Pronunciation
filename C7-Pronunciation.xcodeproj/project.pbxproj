@@ -34,6 +34,16 @@
 		6A7F0D962EC5687C003D503F /* C7-PronunciationUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "C7-PronunciationUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		2CB536902ECE12D400535FC3 /* Exceptions for "C7-Pronunciation" folder in "C7-Pronunciation" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 6A7F0D7C2EC5687C003D503F /* C7-Pronunciation */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		2C775DBA2EC5E86C00B12CFA /* Resources */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
@@ -45,6 +55,9 @@
 		};
 		6A7F0D7F2EC5687C003D503F /* C7-Pronunciation */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				2CB536902ECE12D400535FC3 /* Exceptions for "C7-Pronunciation" folder in "C7-Pronunciation" target */,
+			);
 			path = "C7-Pronunciation";
 			sourceTree = "<group>";
 		};
@@ -419,12 +432,14 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = V5VRZXHBBU;
+				DEVELOPMENT_TEAM = 54XZ73U5GW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "C7-Pronunciation/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Talkative;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This app uses the microphone to record the user speaking a phrase for pronunciation scoring.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "This app uses speech recognition to highlight words as they are spoken by the user.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -453,12 +468,14 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = V5VRZXHBBU;
+				DEVELOPMENT_TEAM = 54XZ73U5GW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "C7-Pronunciation/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Talkative;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This app uses the microphone to record the user speaking a phrase for pronunciation scoring.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "This app uses speech recognition to highlight words as they are spoken by the user.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
