@@ -64,6 +64,7 @@ class DataBankManager {
     /// Converts text to phonemes (en - international) and saves it to the database in the .userAdded category
     func addUserPhrase(_ text: String) {
         let phonemeString = EspeakManager.shared.getPhonemesAsString(for: text)
+        print(phonemeString)
         
         // Handle potential failures (or empty results)
         guard phonemeString != "" else {

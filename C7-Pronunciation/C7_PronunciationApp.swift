@@ -16,9 +16,9 @@ struct C7_PronunciationApp: App {
 
     var body: some Scene {
         WindowGroup {
-//            KeyboardTestView()
             ZStack {
                 if isModelLoaded {
+//                    DataBankTestView()
                     Group {
                         if hasCompletedOnboarding {
                             HomeScreenView()

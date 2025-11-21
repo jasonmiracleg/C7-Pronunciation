@@ -40,7 +40,6 @@ struct CorrectPronunciationSheetView: View {
                 
                 // Playback Button
                 Button(action: {
-                    // UPDATED: Use Singleton
                     SpeechSynthesizer.shared.speak(text: wordScore.word.lowercased())
                 }) {
                     Image(systemName: "speaker.wave.2.circle.fill")

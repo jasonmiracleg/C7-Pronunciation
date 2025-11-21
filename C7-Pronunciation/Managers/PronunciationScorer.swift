@@ -3,8 +3,8 @@
 //  C7-Pronunciation
 //
 //  Created by Savio Enoson on 15/11/25.
+//  Improved version with multi-dialect support
 //
-
 
 import Foundation
 
@@ -17,66 +17,272 @@ public class PronunciationScorer {
     
     private init() { }
     
-    // MARK: - Phonetic Similarity Data (Stricter)
-//    private let phonemeSimilarityGroups: [Set<String>] = [
-//        ["a", "æ", "ɑ", "ɒ"],
-//        ["ʌ", "ɐ", "ə"],
-//        ["i", "y", "j"],
-//        ["ɪ"],
-//        ["u", "w"],
-//        ["ʊ"],
-//        ["e", "ɛ", "3", "eɪ"],
-//        ["o", "ɔ", "oʊ", "əʊ"],
-//        ["r", "ɹ", "ɾ", "ɝ", "ɚ"],
-//        ["l", "ɫ"]
-//    ]
+    // MARK: - Phonetic Similarity Data
     
-    // MARK: - Phonetic Similarity Data (Lenient)
-    private let phonemeSimilarityGroups: [Set<String>] = [
-        ["a", "æ", "ɑ", "ɒ", "ɐ", "ʌ"], // A-like vowels
-        ["e", "ɛ", "ɜ", "ə"],           // E-like vowels + Schwa
-        ["i", "ɪ", "y", "j"],           // I-like vowels
-        ["o", "ɔ"],                     // O-like vowels
-        ["u", "ʊ", "w"],                // U-like vowels / glides
-        ["r", "ɹ", "ɾ"],                // Rhotics
-        ["l", "ɫ"]                      // Laterals
+    /// Dialect-specific phoneme mappings for cross-dialect acceptance
+    private let dialectPhonemeEquivalents: [String: Set<String>] = [
+        // R-colored vowels (US) vs non-rhotic (UK)
+        "ɝ": ["ɜː", "ɜ"],      // US "bird" /bɝd/ vs UK "bird" /bɜːd/
+        "ɚ": ["ə"],            // US "better" /ˈbɛɾɚ/ vs UK /ˈbɛtə/
+        "ɑr": ["ɑː"],          // US "car" vs UK "car"
+        
+        // LOT-CLOTH vowel (US /ɑ/ vs UK /ɒ/)
+        "ɑ": ["ɒ", "ɔ"],
+        "ɒ": ["ɑ", "ɔ"],
+        
+        // GOAT diphthong (US /oʊ/ vs UK /əʊ/)
+        "oʊ": ["əʊ", "o"],
+        "əʊ": ["oʊ", "o"],
+        
+        // T-flapping (US /ɾ/ vs UK /t/)
+        "ɾ": ["t", "d"],
+        "t": ["ɾ"],
+        
+        // Dark L variations
+        "l": ["ɫ"],
+        "ɫ": ["l"],
+        
+        // STRUT vowel variations
+        "ʌ": ["ɐ", "ə"],
+        "ɐ": ["ʌ", "ə"],
     ]
     
-    /// Checks if two phonemes are similar, ignoring diacritics/length markers if needed
+    /// Core phonetic similarity groups - strict grouping
+    private let phonemeSimilarityGroups: [Set<String>] = [
+        // Keep only very similar vowels together
+        ["a", "æ"],
+        ["ɑ", "ɒ"],
+        
+        // Schwa variants
+        ["ə", "ɐ"],
+        
+        // I-like vowels - separate short/long
+        ["i", "iː"],
+        ["ɪ"],
+        
+        // U-like vowels - separate short/long
+        ["u", "uː"],
+        ["ʊ"],
+        
+        // E-like vowels
+        ["e", "ɛ"],
+        ["ɜ", "ɜː"],
+        
+        // O-like vowels
+        ["o", "oː"],
+        ["ɔ", "ɔː"],
+        
+        // Rhotics
+        ["r", "ɹ", "ɾ"],
+        
+        // Laterals
+        ["l", "ɫ"],
+    ]
+    
+    /// Checks if two phonemes are similar, considering dialect variations
     private func checkPhonemeSimilarity(target: String, actual: String) -> Bool {
         // 1. Exact Match (Normalized)
-        if target.precomposedStringWithCanonicalMapping == actual.precomposedStringWithCanonicalMapping { return true }
+        if target.precomposedStringWithCanonicalMapping == actual.precomposedStringWithCanonicalMapping {
+            return true
+        }
         
-        // 2. Group Lookup
+        // 2. Check dialect equivalents (NEW!)
+        if let equivalents = dialectPhonemeEquivalents[target], equivalents.contains(actual) {
+            return true
+        }
+        if let equivalents = dialectPhonemeEquivalents[actual], equivalents.contains(target) {
+            return true
+        }
+        
+        // 3. Group Lookup
         for group in phonemeSimilarityGroups {
             if group.contains(target) && group.contains(actual) {
                 return true
             }
         }
         
-        // 3. Strip Modifiers (e.g. "oː" -> "o") and check again
+        // 4. Strip Modifiers (e.g. "oː" -> "o") and check again
         let cleanTarget = target.replacingOccurrences(of: "[ːˌˈ]", with: "", options: .regularExpression)
         let cleanActual = actual.replacingOccurrences(of: "[ːˌˈ]", with: "", options: .regularExpression)
         
         if cleanTarget == cleanActual { return true }
         
-        // 4. Check groups with stripped versions
+        // 5. Check groups with stripped versions
         for group in phonemeSimilarityGroups {
             if group.contains(cleanTarget) && group.contains(cleanActual) {
                 return true
             }
         }
         
+        // 6. Check dialect equivalents with stripped versions
+        if let equivalents = dialectPhonemeEquivalents[cleanTarget], equivalents.contains(cleanActual) {
+            return true
+        }
+        if let equivalents = dialectPhonemeEquivalents[cleanActual], equivalents.contains(cleanTarget) {
+            return true
+        }
+        
         return false
     }
     
-    /// Aligns and scores phonemes using Levenshtein distance
+    // MARK: - Scoring Methods
+    
+    /// Default scoring method - uses multi-dialect support by default for best accuracy.
+    /// Accepts US, UK, and generic English pronunciations.
     func alignAndScore(
         decodedPhonemes: [PhonemePrediction],
         targetSentence: String
     ) -> PronunciationEvalResult {
-        // Get ideal phonemes for sentence from espeak
-        let idealPhonemes = espeakManager.getPhonemes(for: targetSentence)
+        // Use multi-dialect scoring by default
+        return alignAndScoreMultiDialect(
+            decodedPhonemes: decodedPhonemes,
+            targetSentence: targetSentence
+        )
+    }
+    
+    /// Multi-dialect scoring - tries all three English dialects and returns best match.
+    /// This is now called by default from alignAndScore().
+    private func alignAndScoreMultiDialect(
+        decodedPhonemes: [PhonemePrediction],
+        targetSentence: String
+    ) -> PronunciationEvalResult {
+        
+        // Get phonemes for all three dialects
+        let allDialectPhonemes = espeakManager.getPhonemesForAllDialects(for: targetSentence)
+        
+        // Debug: Print input phonemes (what user said)
+        print("═══════════════════════════════════════════════════════════════")
+        print("🎤 TARGET SENTENCE: \"\(targetSentence)\"")
+        print("═══════════════════════════════════════════════════════════════")
+        print("")
+        print("📥 USER INPUT (Decoded Phonemes - Unaligned):")
+        let userPhonemes = decodedPhonemes.map { $0.topPrediction.phoneme }
+        print("   \(userPhonemes.joined(separator: " "))")
+        print("")
+        
+        // Debug: Print ideal phonemes for each dialect
+        print("📚 IDEAL PHONEMES BY DIALECT:")
+        for (dialect, phonemes) in allDialectPhonemes {
+            let flatPhonemes = phonemes.flatMap { $0 }
+            print("   [\(dialect.rawValue)]: \(flatPhonemes.joined(separator: " "))")
+        }
+        print("")
+        
+        // Try generic English first (primary)
+        if let genericPhonemes = allDialectPhonemes[.generic] {
+            let genericResult = scoreAgainstDialect(
+                decodedPhonemes: decodedPhonemes,
+                targetSentence: targetSentence,
+                idealPhonemes: genericPhonemes,
+                dialect: .generic
+            )
+            
+            // If generic scores well (>0.75), use it
+            if genericResult.totalScore > 0.75 {
+                print("✅ Using Generic English: Score = \(String(format: "%.2f", genericResult.totalScore))")
+                printAlignmentDetails(result: genericResult)
+                return genericResult
+            }
+            
+            // Otherwise, try all dialects and pick best
+            var bestResult = genericResult
+            var bestScore = genericResult.totalScore
+            var bestDialect = EspeakManager.Dialect.generic
+            
+            print("📊 DIALECT SCORES:")
+            print("   [en]: \(String(format: "%.2f", genericResult.totalScore))")
+            
+            for (dialect, dialectPhonemes) in allDialectPhonemes where dialect != .generic {
+                let result = scoreAgainstDialect(
+                    decodedPhonemes: decodedPhonemes,
+                    targetSentence: targetSentence,
+                    idealPhonemes: dialectPhonemes,
+                    dialect: dialect
+                )
+                
+                print("   [\(dialect.rawValue)]: \(String(format: "%.2f", result.totalScore))")
+                
+                if result.totalScore > bestScore {
+                    bestScore = result.totalScore
+                    bestResult = result
+                    bestDialect = dialect
+                }
+            }
+            
+            print("")
+            print("🏆 BEST DIALECT: \(bestDialect.rawValue) with score \(String(format: "%.2f", bestScore))")
+            printAlignmentDetails(result: bestResult)
+            
+            return bestResult
+        }
+        
+        // Fallback if generic not available
+        var bestResult: PronunciationEvalResult?
+        var bestScore: Double = -1.0
+        
+        for (dialect, dialectPhonemes) in allDialectPhonemes {
+            let result = scoreAgainstDialect(
+                decodedPhonemes: decodedPhonemes,
+                targetSentence: targetSentence,
+                idealPhonemes: dialectPhonemes,
+                dialect: dialect
+            )
+            
+            print("📊 Dialect \(dialect.rawValue): Score = \(String(format: "%.2f", result.totalScore))")
+            
+            if result.totalScore > bestScore {
+                bestScore = result.totalScore
+                bestResult = result
+            }
+        }
+        
+        if let result = bestResult {
+            printAlignmentDetails(result: result)
+        }
+        
+        return bestResult ?? PronunciationEvalResult(totalScore: 0, wordScores: [])
+    }
+    
+    /// Prints detailed alignment information for debugging
+    private func printAlignmentDetails(result: PronunciationEvalResult) {
+        print("")
+        print("📋 ALIGNED PHONEMES BY WORD:")
+        print("───────────────────────────────────────────────────────────────")
+        
+        for wordScore in result.wordScores {
+            let scoreEmoji = wordScore.score >= 0.8 ? "✅" : (wordScore.score >= 0.5 ? "⚠️" : "❌")
+            print("\(scoreEmoji) \"\(wordScore.word)\" - Score: \(String(format: "%.2f", wordScore.score))")
+            
+            for aligned in wordScore.alignedPhonemes {
+                let typeStr: String
+                switch aligned.type {
+                case .match: typeStr = "✓"
+                case .replace: typeStr = "✗"
+                case .delete: typeStr = "−"
+                case .insert: typeStr = "+"
+                }
+                
+                let target = aligned.target ?? "∅"
+                let actual = aligned.actual ?? "∅"
+                let note = aligned.note.map { " (\($0))" } ?? ""
+                
+                print("     \(typeStr) target: \(target) | actual: \(actual) | score: \(String(format: "%.2f", aligned.score))\(note)")
+            }
+        }
+        
+        print("───────────────────────────────────────────────────────────────")
+        print("📊 TOTAL SCORE: \(String(format: "%.2f", result.totalScore))")
+        print("═══════════════════════════════════════════════════════════════")
+        print("")
+    }
+    
+    /// Score against a specific dialect's phonemes
+    private func scoreAgainstDialect(
+        decodedPhonemes: [PhonemePrediction],
+        targetSentence: String,
+        idealPhonemes: [[String]],
+        dialect: EspeakManager.Dialect
+    ) -> PronunciationEvalResult {
         
         // Split the sentence into individual target words
         var targetWords: [String] = []
@@ -112,8 +318,6 @@ public class PronunciationScorer {
         guard !wordLengths.isEmpty else {
             return PronunciationEvalResult(totalScore: 0, wordScores: [])
         }
-        
-        print("🔍 Word Lengths: \(wordLengths)")
         
         var currentWordBoundary = wordLengths[0]
         var currentWordIndex = 0
@@ -171,59 +375,40 @@ public class PronunciationScorer {
                         let actualItem = decodedPhonemes[gopIndex]
                         let actualPhoneme = actualItem.topPrediction.phoneme
                         
-                        // 1. Check Phonetic Similarity
+                        // 1. Check Phonetic Similarity (now includes dialect variations!)
                         if checkPhonemeSimilarity(target: targetPhoneme, actual: actualPhoneme) {
-                            // Similar: Use actual score but cap at 0.9 to differentiate from perfect
-                            phonemeScoreToAdd = min(actualItem.score, 0.75)
+                            // Similar: Use actual score but cap lower to be stricter
+                            phonemeScoreToAdd = min(actualItem.score, 0.70)
                             
                             alignedScores.append(AlignedPhoneme(
                                 type: .match,
                                 target: targetPhoneme,
                                 actual: actualPhoneme,
                                 score: phonemeScoreToAdd,
-                                note: "Similar sound (said '\(actualPhoneme)')"
+                                note: "Similar/dialect variant"
                             ))
                             totalScore += phonemeScoreToAdd
                             
                         } else {
-                            // 2. Check Forgiveness (Top 3)
-                            var isForgiven = false
-                            var forgivenScore: Double = 0.0
+                            // 2. Wrong phoneme - no forgiveness
+                            phonemeScoreToAdd = 0.0
                             
-                            for topPhoneme in actualItem.top3 {
-                                if checkPhonemeSimilarity(target: targetPhoneme, actual: topPhoneme.phoneme) {
-                                    isForgiven = true
-                                    forgivenScore = topPhoneme.score
-                                    break
-                                }
-                            }
-                            
-                            if isForgiven {
-                                // Strict Forgiveness: Must have at least 40% confidence
-                                phonemeScoreToAdd = max(forgivenScore, 0.30)
-                                
-                                alignedScores.append(AlignedPhoneme(
-                                    type: .match,
-                                    target: targetPhoneme,
-                                    actual: actualPhoneme,
-                                    score: phonemeScoreToAdd,
-                                    note: "Forgiven mismatch (said '\(actualPhoneme)')"
-                                ))
-                                totalScore += phonemeScoreToAdd
-                            } else {
-                                // 3. Wrong
-                                alignedScores.append(AlignedPhoneme(
-                                    type: .replace,
-                                    target: targetPhoneme,
-                                    actual: actualPhoneme,
-                                    score: 0.0,
-                                    note: "Said '\(actualPhoneme)'"
-                                ))
-                            }
+                            alignedScores.append(AlignedPhoneme(
+                                type: .replace,
+                                target: targetPhoneme,
+                                actual: actualPhoneme,
+                                score: 0.0,
+                                note: "Wrong (said '\(actualPhoneme)')"
+                            ))
                         }
+                        
+                        scoreCount += 1
                         gopIndex += 1
+                        currentWordScoreTotal += phonemeScoreToAdd
+                        currentWordPhonemeCount += 1
+                        
                     } else {
-                        // Ran out of actual phonemes (Deletion)
+                        // Missing phoneme
                         alignedScores.append(AlignedPhoneme(
                             type: .delete,
                             target: targetPhoneme,
@@ -231,11 +416,9 @@ public class PronunciationScorer {
                             score: 0.0,
                             note: nil
                         ))
+                        scoreCount += 1
                     }
                     
-                    scoreCount += 1
-                    currentWordScoreTotal += phonemeScoreToAdd
-                    currentWordPhonemeCount += 1
                     targetPhonemeIndex += 1
                     checkWordBoundary()
                 }
@@ -252,8 +435,6 @@ public class PronunciationScorer {
                         note: nil
                     ))
                     scoreCount += 1
-                    currentWordScoreTotal += 0.0
-                    currentWordPhonemeCount += 1
                     targetPhonemeIndex += 1
                     checkWordBoundary()
                 }
@@ -273,7 +454,6 @@ public class PronunciationScorer {
                 }
             }
         }
-        
         
         let finalTotalScore = scoreCount > 0 ? totalScore / Double(scoreCount) : 0.0
         
@@ -362,8 +542,6 @@ func levenshteinOpcodes(from source: [String], to target: [String], similarityCh
     
     let insertCost = 1
     let deleteCost = 2
-    // Replace cost is dynamic: 1 if similar, 4 if different.
-    // High diff cost (4) ensures we prefer Insert(1)+Delete(2)=3 over a bad replacement.
     
     var dp = Array(repeating: Array(repeating: 0, count: n + 1), count: m + 1)
     
@@ -376,40 +554,36 @@ func levenshteinOpcodes(from source: [String], to target: [String], similarityCh
             let t = target[j-1]
             
             if s == t {
-                dp[i][j] = dp[i-1][j-1] // Cost 0
+                dp[i][j] = dp[i-1][j-1]
             } else {
                 let isSimilar = similarityChecker(s, t)
                 let replaceCost = isSimilar ? 1 : 4
                 
                 dp[i][j] = min(
-                    dp[i-1][j] + deleteCost,      // Delete
-                    dp[i][j-1] + insertCost,      // Insert
-                    dp[i-1][j-1] + replaceCost    // Replace
+                    dp[i-1][j] + deleteCost,
+                    dp[i][j-1] + insertCost,
+                    dp[i-1][j-1] + replaceCost
                 )
             }
         }
     }
     
-    // BACKTRACKING (Modified for sequential preference)
+    // BACKTRACKING
     var operations: [EditOperation] = []
     var i = m
     var j = n
     
     while i > 0 || j > 0 {
-        // Determine costs again to see which path is valid
         let currentVal = dp[i][j]
         
-        // CHECK 1: Insert (Prioritize skipping extra actual sounds)
-        // We check this BEFORE Match to handle "Repeated Sound" ties.
-        // If Actual has "L L" and Target has "L", checking Insert first
-        // ensures we consume the second "L" as an insert, matching the first "L".
+        // CHECK 1: Insert
         if j > 0 && currentVal == dp[i][j-1] + insertCost {
             operations.insert(EditOperation(type: .insert, targetRange: i..<i, actualRange: (j-1)..<j), at: 0)
             j -= 1
             continue
         }
         
-        // CHECK 2: Delete (Prioritize skipping missed target sounds)
+        // CHECK 2: Delete
         if i > 0 && currentVal == dp[i-1][j] + deleteCost {
             operations.insert(EditOperation(type: .delete, targetRange: (i-1)..<i, actualRange: j..<j), at: 0)
             i -= 1
@@ -417,7 +591,6 @@ func levenshteinOpcodes(from source: [String], to target: [String], similarityCh
         }
         
         // CHECK 3: Match / Replace
-        // Only take this path if Ins/Del were not optimal or not chosen.
         if i > 0 && j > 0 {
             let s = source[i-1]
             let t = target[j-1]
@@ -434,7 +607,6 @@ func levenshteinOpcodes(from source: [String], to target: [String], similarityCh
             }
         }
         
-        // Fallback (should rarely happen given logic)
         break
     }
     
