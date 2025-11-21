@@ -24,7 +24,7 @@ struct FlashcardView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .padding(.vertical, 24)
                 .padding(.horizontal, 48)
-                .opacity(0.15)
+                .opacity(0.1)
             
             // Main Content
             VStack {
@@ -62,7 +62,7 @@ struct FlashcardView: View {
             
             // CTA Text
             if viewModel.isEvaluated {
-                Text("Click on the underlined words to see evaluation details.")
+                Text("Tap on the underlined words to see evaluation details.")
                     .font(.subheadline)
                     .foregroundColor(Color.secondary)
                     .multilineTextAlignment(.center)

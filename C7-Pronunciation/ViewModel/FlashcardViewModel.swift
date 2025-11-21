@@ -101,12 +101,25 @@ class FlashcardViewModel: ObservableObject {
                 // C. Update UI on MainActor
                 self.overallScore = result.totalScore
                 
-                self.wordScores = result.wordScores.map { originalWordScore in
-                    var wordScore = originalWordScore
-                    let color = self.scoreColor(wordScore.score)
-                    wordScore.color = color
-                    wordScore.isEvaluated = true
-                    return wordScore
+                // We check if the word counts match. If they do, we zip the arrays
+                // to apply the new scores to the OLD words (which contain punctuation).
+                if result.wordScores.count == self.wordScores.count {
+                    self.wordScores = zip(self.wordScores, result.wordScores).map { (original, evaluated) in
+                        var finalWord = evaluated
+                        finalWord.word = original.word // Restore the original text (e.g., "Hello," vs "hello")
+                        finalWord.color = self.scoreColor(evaluated.score)
+                        finalWord.isEvaluated = true
+                        return finalWord
+                    }
+                } else {
+                    // Fallback: If tokenization somehow changed the word count, use the raw evaluated words
+                    self.wordScores = result.wordScores.map { originalWordScore in
+                        var wordScore = originalWordScore
+                        let color = self.scoreColor(wordScore.score)
+                        wordScore.color = color
+                        wordScore.isEvaluated = true
+                        return wordScore
+                    }
                 }
                 
                 self.isEvaluated = true

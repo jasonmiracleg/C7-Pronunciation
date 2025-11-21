@@ -112,10 +112,10 @@ public class EspeakManager {
         // 5. Set Synchronous Mode (Retrieval Mode)
         espeak_ng_InitializeOutput(ENOUTPUT_MODE_SYNCHRONOUS, 0, nil)
         
-        // 6. Configuration - start with generic English
-        let voiceResult = espeak_ng_SetVoiceByName("en")
+        // 6. Configuration - start with US English
+        let voiceResult = espeak_ng_SetVoiceByName("en-us")
         if voiceResult == ENS_OK {
-            currentDialect = .generic
+            currentDialect = .us
         } else {
             print("EspeakManager: WARNING - Failed to set initial voice 'en'")
         }
@@ -154,28 +154,28 @@ public class EspeakManager {
             print("   [\(dialect.rawValue)]: \(status)")
         }
         
-        // Reset to generic
-        espeak_ng_SetVoiceByName("en")
-        currentDialect = .generic
+        // Reset to us
+        espeak_ng_SetVoiceByName("en-us")
+        currentDialect = .us
     }
     
     // MARK: - Backward Compatible API (OLD SIGNATURE)
     
     /// **BACKWARD COMPATIBLE** - Original method signature that returns [[String]]
     /// This maintains compatibility with existing code that expects the old return type.
-    /// Always returns generic English phonemes for consistency with old behavior.
+    /// Always returns US-English phonemes for consistency with old behavior.
     ///
     /// - Parameter text: The text to convert to phonemes
     /// - Returns: Array of phoneme arrays, one per word (e.g., [["h", "ə"], ["l", "oʊ"]])
     public func getPhonemes(for text: String) -> [[String]] {
-        let wordPhonemes = getPhonemesDetailed(for: text, dialect: .generic)
+        let wordPhonemes = getPhonemesDetailed(for: text, dialect: .us)
         return wordPhonemes.map { $0.phonemes }
     }
     
     // MARK: - New Enhanced API
     
     /// Returns a single string of phonemes separated by spaces (e.g. "h ə l oʊ w ɜː l d")
-    public func getPhonemesAsString(for text: String, dialect: Dialect = .generic) -> String {
+    public func getPhonemesAsString(for text: String, dialect: Dialect = .us) -> String {
         let phonemesByWord = getPhonemesDetailed(for: text, dialect: dialect)
         return phonemesByWord.map { $0.phonemes.joined() }.joined(separator: " ")
     }
@@ -202,9 +202,9 @@ public class EspeakManager {
     ///
     /// - Parameters:
     ///   - text: The text to convert to phonemes
-    ///   - dialect: The English dialect to use (defaults to generic English)
+    ///   - dialect: The English dialect to use (defaults to US English)
     /// - Returns: Array of WordPhonemes with detailed position information
-    public func getPhonemesDetailed(for text: String, dialect: Dialect = .generic) -> [WordPhonemes] {
+    public func getPhonemesDetailed(for text: String, dialect: Dialect = .us) -> [WordPhonemes] {
         // 1. Set the voice for the desired dialect (with verification)
         let dialectSet = setDialect(dialect)
         if !dialectSet {

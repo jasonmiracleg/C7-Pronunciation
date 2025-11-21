@@ -3,6 +3,7 @@
 //  C7-Pronunciation
 //
 //  Created by Jason Miracle Gunawan on 18/11/25.
+//  Updated to show human-readable pronunciation respelling
 //
 
 import SwiftUI
@@ -12,12 +13,16 @@ struct CorrectPronunciationSheetView: View {
     @Environment(\.dismiss) private var dismiss
     let wordScore: WordScore
     
+    /// Toggle between IPA and respelling display
+    @State private var showIPA: Bool = false
+    
     private let synthesizer = SpeechSynthesizer.shared
     
     var body: some View {
         NavigationStack {
-            VStack(alignment: .center, spacing: 8) {
+            VStack {
                 VStack {
+                    // Word with color-coded letters
                     HStack(spacing: 0) {
                         let chars = Array(wordScore.word)
                         ForEach(Array(chars.enumerated()), id: \.offset) { index, char in
@@ -27,16 +32,12 @@ struct CorrectPronunciationSheetView: View {
                         }
                     }
                     
-                    Text("/ " + wordScore.allTargets() + " /")
+                    Text("/ " + wordScore.respelling.lowercased() + " /")
                         .font(.title3)
                         .foregroundStyle(.secondary)
-                        .padding(.bottom)
                 }
-                .multilineTextAlignment(.center)
-                .padding(.top, 40)
                 
-                Divider()
-                    .padding(.horizontal)
+                Spacer()
                 
                 // Playback Button
                 Button(action: {
@@ -46,10 +47,9 @@ struct CorrectPronunciationSheetView: View {
                         .font(.system(size: 48))
                         .foregroundColor(.white)
                 }
-                .glassEffect( .regular.tint(Color.accent))
-                .padding(.bottom, 24)
+                .glassEffect(.regular.tint(Color.accentColor))
             }
-            .navigationTitle("Evaluation")
+            .navigationTitle("Evaluation Detail")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
@@ -63,34 +63,70 @@ struct CorrectPronunciationSheetView: View {
         }
     }
     
-    // MARK: - Letter Coloring Heuristic
+    // MARK: - Pronunciation Breakdown View
     
-    /// Maps a letter's position to the corresponding phoneme score
-    func getLetterColor(letterIndex: Int, totalLetters: Int) -> Color {
-        let phonemes = wordScore.alignedPhonemes
-        guard !phonemes.isEmpty else { return .primary } // Fallback if no data
-        
-        // 1. Calculate percentage position of the letter (e.g., letter 2 of 4 is at 50%)
-        // We add 0.5 to center the hit within the letter's duration roughly
-        let position = Double(letterIndex) / Double(totalLetters)
-        
-        // 2. Find which phoneme covers this percentage
-        // Example: 3 phonemes. Position 0.5 maps to index 1.5 -> Index 1 (Middle phoneme)
-        let phonemeIndex = Int(position * Double(phonemes.count))
-        
-        // 3. Safety Clamp
-        let safeIndex = min(max(phonemeIndex, 0), phonemes.count - 1)
-        
-        // 4. Get Score
-        let score = phonemes[safeIndex].score
-        
-        // 5. Return Color based on your thresholds
-        if score < ERROR_THRESHOLD/2 {
+    /// Shows each sound with its IPA and respelling
+    private var pronunciationBreakdown: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Sound by Sound")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+                .textCase(.uppercase)
+            
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+                    ForEach(Array(wordScore.alignedPhonemes.enumerated()), id: \.offset) { index, aligned in
+                        if let target = aligned.target {
+                            VStack(spacing: 4) {
+                                // Respelling
+                                Text(PronunciationRespeller.shared.convertPhoneme(target).uppercased())
+                                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                    .foregroundStyle(colorForScore(aligned.score))
+                                
+                                // IPA (smaller)
+                                Text(target)
+                                    .font(.system(size: 12, design: .serif))
+                                    .foregroundStyle(.secondary)
+                            }
+                            .frame(minWidth: 36)
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 6)
+                            .background(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(colorForScore(aligned.score).opacity(0.1))
+                            )
+                        }
+                    }
+                }
+                .padding(.horizontal, 4)
+            }
+        }
+        .padding(.vertical, 8)
+    }
+    
+    // MARK: - Helper Functions
+    
+    /// Returns color based on phoneme score
+    private func colorForScore(_ score: Double) -> Color {
+        if score < ERROR_THRESHOLD / 2 {
             return .red
         } else if score < ERROR_THRESHOLD {
             return .orange
         } else {
             return .primary
         }
+    }
+    
+    /// Maps a letter's position to the corresponding phoneme score
+    func getLetterColor(letterIndex: Int, totalLetters: Int) -> Color {
+        let phonemes = wordScore.alignedPhonemes
+        guard !phonemes.isEmpty else { return .primary }
+        
+        let position = Double(letterIndex) / Double(totalLetters)
+        let phonemeIndex = Int(position * Double(phonemes.count))
+        let safeIndex = min(max(phonemeIndex, 0), phonemes.count - 1)
+        let score = phonemes[safeIndex].score
+        
+        return colorForScore(score)
     }
 }

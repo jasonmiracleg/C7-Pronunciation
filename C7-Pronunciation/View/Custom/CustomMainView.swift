@@ -80,7 +80,7 @@ struct CustomMainView: View {
                     .environmentObject(viewModel)
             }
             // Navigation
-            .navigationTitle("Custom")
+            .navigationTitle("Custom Mode")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
