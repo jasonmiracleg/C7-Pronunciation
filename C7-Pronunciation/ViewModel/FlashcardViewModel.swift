@@ -36,7 +36,7 @@ class FlashcardViewModel: ObservableObject {
         
         // Reset scores to neutral
         self.wordScores = text.split(separator: " ").map {
-            var wordScore = WordScore(word: String($0), score: 0.0, alignedPhonemes: [])
+            let wordScore = WordScore(word: String($0), score: 0.0, alignedPhonemes: [])
             return wordScore
         }
         self.overallScore = 0.0
@@ -66,6 +66,8 @@ class FlashcardViewModel: ObservableObject {
         // Reset to unevaluated state
         for i in 0..<wordScores.count {
             wordScores[i].isEvaluated = false
+            wordScores[i].color = .primary
+            wordScores[i].score = 1
         }
         
         startMetering()
@@ -154,11 +156,10 @@ class FlashcardViewModel: ObservableObject {
     // MARK: - Helpers
     
     private func scoreColor(_ score: Double) -> Color {
-        let percentage = score * 100
-        switch percentage {
-        case 70...100: return Color.primary
-        case 50..<70: return .orange
-        default: return .red
+        if score < ERROR_THRESHOLD {
+            return .red
+        } else {
+            return .primary
         }
     }
     

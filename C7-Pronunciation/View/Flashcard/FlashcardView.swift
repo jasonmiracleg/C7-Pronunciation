@@ -11,7 +11,20 @@ struct FlashcardView: View {
             // Background
             RoundedRectangle(cornerRadius: 24)
                 .fill(Color(UIColor.tertiarySystemBackground))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 24)
+                        .stroke(Color.accentColor, lineWidth: 6)
+                )
                 .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 5)
+            
+            // Logo
+            Image("card_logo")
+                .resizable()
+                .scaledToFit()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding(.vertical, 24)
+                .padding(.horizontal, 48)
+                .opacity(0.15)
             
             // Main Content
             VStack {
@@ -23,6 +36,7 @@ struct FlashcardView: View {
                         ForEach(viewModel.targetSentence.split(separator: " ").map(String.init), id: \.self) { word in
                             Text(word)
                                 .font(.system(size: 28, weight: .medium))
+                            
                         }
                     } else {
                         // Render Evaluated/Scored words
@@ -63,15 +77,12 @@ struct FlashcardView: View {
     
     @ViewBuilder
     private func wordView(for wordScore: WordScore) -> some View {
-        let isLowScore = wordScore.score <= 0.7
+        let isLowScore = wordScore.score <= ERROR_THRESHOLD
         
         Text(wordScore.word)
             .font(.system(size: 28, weight: .medium))
-            // Color logic: If evaluated, use score color. If low score, ensure it's visible.
-            .foregroundColor(Color.primary)
-            // Underline logic: Only if evaluated and score is bad
+            .foregroundColor(wordScore.color)
             .underline(wordScore.isEvaluated && isLowScore, color: wordScore.color)
-            // Interaction logic: Only tappable if evaluated and score is bad
             .onTapGesture {
                 if wordScore.isEvaluated && isLowScore {
                     onTapWord(wordScore)

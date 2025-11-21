@@ -3,7 +3,7 @@
 //  C7-Pronunciation
 //
 //  Created by Savio Enoson on 15/11/25.
-//  Improved version with multi-dialect support
+//  Improved version with dual-dialect support, compound phoneme handling, and robust alignment
 //
 
 import Foundation
@@ -15,36 +15,196 @@ public class PronunciationScorer {
     
     private let espeakManager = EspeakManager.shared
     
+    /// Toggle to enable/disable phoneme similarity groups
+    /// When disabled, only exact matches and dialect equivalents are accepted
+    public var usePhonemeSimilarityGroups: Bool = false
+    
     private init() { }
     
     // MARK: - Phonetic Similarity Data
     
     /// Dialect-specific phoneme mappings for cross-dialect acceptance
+    /// These handle US vs Generic English differences
     private let dialectPhonemeEquivalents: [String: Set<String>] = [
-        // R-colored vowels (US) vs non-rhotic (UK)
-        "ɝ": ["ɜː", "ɜ"],      // US "bird" /bɝd/ vs UK "bird" /bɜːd/
-        "ɚ": ["ə"],            // US "better" /ˈbɛɾɚ/ vs UK /ˈbɛtə/
-        "ɑr": ["ɑː"],          // US "car" vs UK "car"
+        // R-colored vowels (US) vs non-rhotic (Generic)
+        "ɝ": ["ɜː", "ɜ", "ɜːɹ"],
+        "ɚ": ["ə", "əɹ", "ɜː", "ɜ"],   // ɚ is r-colored schwa, equivalent to ɜː in some contexts
+        "ɑr": ["ɑː"],
+        "ɑːɹ": ["ɑː", "ɑ"],
+        "ɔːɹ": ["ɔː", "ɔ", "oː"],      // "for", "or", "more"
+        "ɛɹ": ["ɛə", "eə", "ɛ"],        // "air", "care"
+        "ɪɹ": ["ɪə", "iə", "ɪ"],        // "ear", "near"
+        "ʊɹ": ["ʊə", "uə", "ʊ"],        // "tour", "sure"
         
-        // LOT-CLOTH vowel (US /ɑ/ vs UK /ɒ/)
+        // NURSE vowel - ɜː (UK) vs ɝ/ɚ (US)
+        // "prefer", "person", "bird", "nurse"
+        "ɜː": ["ɝ", "ɚ", "ɜ"],
+        "ɜ": ["ɜː", "ɝ", "ɚ"],
+        
+        // LOT-CLOTH vowel (US /ɑ/ vs Generic /ɒ/)
         "ɑ": ["ɒ", "ɔ"],
         "ɒ": ["ɑ", "ɔ"],
         
-        // GOAT diphthong (US /oʊ/ vs UK /əʊ/)
-        "oʊ": ["əʊ", "o"],
-        "əʊ": ["oʊ", "o"],
+        // TRAP vowel - /æ/ (US/UK) vs /a/ (generic/other notations)
+        "æ": ["a"],
+        "a": ["æ"],
         
-        // T-flapping (US /ɾ/ vs UK /t/)
+        // KIT vowel variations
+        // ᵻ (barred i) is used in some transcriptions as a reduced /ɪ/
+        "ɪ": ["i", "ɪ̈", "ᵻ"],
+        "ᵻ": ["ɪ", "ə", "i"],           // Barred i - often a reduced vowel
+        
+        // GOAT diphthong variations
+        "oʊ": ["əʊ", "o", "oː"],
+        "əʊ": ["oʊ", "o", "oː"],
+        
+        // T-flapping (US /ɾ/ vs /t/)
         "ɾ": ["t", "d"],
         "t": ["ɾ"],
         
         // Dark L variations
-        "l": ["ɫ"],
+        "l": ["ɫ", "ɫ̩"],
         "ɫ": ["l"],
         
         // STRUT vowel variations
         "ʌ": ["ɐ", "ə"],
         "ɐ": ["ʌ", "ə"],
+        
+        // Rhotic vs non-rhotic 'r'
+        "ɹ": ["r", "ɾ"],
+        "r": ["ɹ", "ɾ"],
+        
+        // Short i variations
+        "iː": ["ɪ", "i"],
+        
+        // FOOT vowel
+        "ʊ": ["u", "ɷ"],
+    ]
+    
+    /// Word-specific acceptable phoneme variants
+    ///
+    /// PHILOSOPHY: Vowel reduction to schwa is ONLY acceptable in specific
+    /// short function words, NOT globally. This prevents false negatives
+    /// on content words like "food", "moon", "can't" where the full vowel
+    /// is required.
+    ///
+    /// Structure: [word: [target_phoneme: Set<acceptable_variants>]]
+    ///
+    /// Criteria for inclusion:
+    /// 1. Short words (1-2 syllables)
+    /// 2. Function words (articles, prepositions, conjunctions, auxiliaries)
+    /// 3. High frequency in connected speech
+    /// 4. Reduction is well-documented in phonetics
+    private let wordSpecificVariants: [String: [String: Set<String>]] = [
+        // ═══════════════════════════════════════════════════════════════
+        // ARTICLES
+        // ═══════════════════════════════════════════════════════════════
+        // "the" - both /ðiː/ and /ðə/ are acceptable in any context
+        // Native speakers mix these freely regardless of following sound
+        "the": [
+            "iː": ["ə", "ɪ", "i"],      // /ðiː/ target, /ðə/ actual = OK
+            "i": ["ə", "ɪ"],            // /ði/ target, /ðə/ actual = OK
+            "ə": ["iː", "ɪ", "i"],      // /ðə/ target, /ðiː/ actual = OK
+        ],
+        
+        // ═══════════════════════════════════════════════════════════════
+        // PREPOSITIONS
+        // ═══════════════════════════════════════════════════════════════
+        "to": ["uː": ["ə", "ʊ"], "u": ["ə", "ʊ"]],           // /tuː/ → /tə/
+        "for": ["ɔː": ["ə", "ɔ"], "ɔːɹ": ["ə", "ɚ", "ər"]],  // /fɔːr/ → /fər/
+        "of": ["ʌ": ["ə"], "ɒ": ["ə"]],                       // /ʌv/ → /əv/
+        "from": ["ʌ": ["ə"], "ɒ": ["ə"]],                     // /frʌm/ → /frəm/
+        "at": ["æ": ["ə"]],                                    // /æt/ → /ət/
+        "as": ["æ": ["ə"]],                                    // /æz/ → /əz/
+        
+        // ═══════════════════════════════════════════════════════════════
+        // CONJUNCTIONS
+        // ═══════════════════════════════════════════════════════════════
+        "and": ["æ": ["ə", "ɛ"]],                              // /ænd/ → /ənd/, /ən/
+        "but": ["ʌ": ["ə"]],                                   // /bʌt/ → /bət/
+        "or": ["ɔː": ["ə"], "ɔːɹ": ["ə", "ɚ"]],               // /ɔːr/ → /ər/
+        "than": ["æ": ["ə"]],                                  // /ðæn/ → /ðən/
+        "that": ["æ": ["ə"]],                                  // /ðæt/ → /ðət/ (conjunction)
+        
+        // ═══════════════════════════════════════════════════════════════
+        // AUXILIARIES / MODALS
+        // ═══════════════════════════════════════════════════════════════
+        "can": ["æ": ["ə"]],                                   // /kæn/ → /kən/
+        "have": ["æ": ["ə"]],                                  // /hæv/ → /həv/
+        "has": ["æ": ["ə"]],                                   // /hæz/ → /həz/
+        "had": ["æ": ["ə"]],                                   // /hæd/ → /həd/
+        "was": ["ɒ": ["ə"], "ʌ": ["ə"]],                       // /wɒz/ → /wəz/
+        "were": ["ɜː": ["ə"], "ɝ": ["ə"]],                     // /wɜːr/ → /wər/
+        "are": ["ɑː": ["ə"], "ɑːɹ": ["ə", "ɚ"]],              // /ɑːr/ → /ər/
+        "do": ["uː": ["ə", "ʊ"], "u": ["ə"]],                  // /duː/ → /də/
+        "does": ["ʌ": ["ə"]],                                  // /dʌz/ → /dəz/
+        "would": ["ʊ": ["ə"]],                                 // /wʊd/ → /wəd/
+        "could": ["ʊ": ["ə"]],                                 // /kʊd/ → /kəd/
+        "should": ["ʊ": ["ə"]],                                // /ʃʊd/ → /ʃəd/
+        "will": ["ɪ": ["ə"]],                                  // /wɪl/ → /wəl/
+        "shall": ["æ": ["ə"]],                                 // /ʃæl/ → /ʃəl/
+        "must": ["ʌ": ["ə"]],                                  // /mʌst/ → /məst/
+        
+        // ═══════════════════════════════════════════════════════════════
+        // PRONOUNS
+        // ═══════════════════════════════════════════════════════════════
+        "you": ["uː": ["ə", "ʊ"], "u": ["ə"]],                 // /juː/ → /jə/
+        "your": ["ɔː": ["ə"], "ɔːɹ": ["ə", "ɚ"]],             // /jɔːr/ → /jər/
+        "he": ["iː": ["ɪ", "i"]],                              // /hiː/ → /hi/, /ɪ/
+        "she": ["iː": ["ɪ", "i"]],                             // /ʃiː/ → /ʃi/
+        "we": ["iː": ["ɪ", "i"]],                              // /wiː/ → /wi/
+        "me": ["iː": ["ɪ", "i"]],                              // /miː/ → /mi/
+        "her": ["ɜː": ["ə"], "ɝ": ["ə", "ɚ"]],                // /hɜːr/ → /hər/, /ər/
+        "him": ["ɪ": ["ə"]],                                   // /hɪm/ → /ɪm/, /əm/
+        "his": ["ɪ": ["ə"]],                                   // /hɪz/ → /ɪz/
+        "them": ["ɛ": ["ə"]],                                  // /ðɛm/ → /ðəm/
+        "us": ["ʌ": ["ə"]],                                    // /ʌs/ → /əs/
+        "our": ["aʊ": ["ɑː", "ɑ"], "ɑː": ["ə"]],              // /aʊər/ → /ɑːr/, /ər/
+        
+        // ═══════════════════════════════════════════════════════════════
+        // OTHER COMMON FUNCTION WORDS
+        // ═══════════════════════════════════════════════════════════════
+        "be": ["iː": ["ɪ", "i"]],                              // /biː/ → /bi/
+        "been": ["iː": ["ɪ"]],                                 // /biːn/ → /bɪn/
+        "just": ["ʌ": ["ə"]],                                  // /dʒʌst/ → /dʒəst/
+        "some": ["ʌ": ["ə"]],                                  // /sʌm/ → /səm/
+        "there": ["ɛ": ["ə"], "ɛə": ["ə"]],                   // /ðɛər/ → /ðər/
+    ]
+    
+    /// Voicing pairs - consonants that differ ONLY in voicing
+    /// These are ALWAYS considered similar for alignment purposes
+    private let voicingPairs: [Set<String>] = [
+        // Fricatives
+        ["z", "s"],
+        ["v", "f"],
+        ["ð", "θ"],
+        ["ʒ", "ʃ"],
+        
+        // Stops
+        ["b", "p"],
+        ["d", "t"],
+        ["g", "k"],
+        ["ɡ", "k"],
+        
+        // Affricates
+        ["dʒ", "tʃ"],
+    ]
+    
+    /// Compound phoneme equivalences
+    /// Maps compound/ligature phonemes to their component equivalents
+    private let compoundPhonemeEquivalents: [String: Set<String>] = [
+        // R-colored vowels can match vowel + r
+        "ɔːɹ": ["ɔː", "ɔːr", "ɔr", "oːɹ", "oːr"],
+        "ɑːɹ": ["ɑː", "ɑːr", "ɑr", "aːɹ", "aːr"],
+        "ɛɹ": ["ɛr", "ɛə", "eɹ", "er"],
+        "ɪɹ": ["ɪr", "ɪə", "iɹ", "ir"],
+        "ʊɹ": ["ʊr", "ʊə", "uɹ", "ur"],
+        "ɚ": ["əɹ", "ər"],
+        "ɝ": ["ɜːɹ", "ɜːr", "ɜɹ"],
+        
+        // Affricates
+        "tʃ": ["t͡ʃ"],
+        "dʒ": ["d͡ʒ"],
     ]
     
     /// Core phonetic similarity groups - strict grouping
@@ -54,13 +214,13 @@ public class PronunciationScorer {
         ["ɑ", "ɒ"],
         
         // Schwa variants
-        ["ə", "ɐ"],
+        ["ə", "ɐ", "ᵻ"],
         
-        // I-like vowels - separate short/long
+        // I-like vowels
         ["i", "iː"],
         ["ɪ"],
         
-        // U-like vowels - separate short/long
+        // U-like vowels
         ["u", "uː"],
         ["ʊ"],
         
@@ -79,14 +239,84 @@ public class PronunciationScorer {
         ["l", "ɫ"],
     ]
     
-    /// Checks if two phonemes are similar, considering dialect variations
-    private func checkPhonemeSimilarity(target: String, actual: String) -> Bool {
-        // 1. Exact Match (Normalized)
-        if target.precomposedStringWithCanonicalMapping == actual.precomposedStringWithCanonicalMapping {
+    /// Checks if two phonemes form a voicing pair (differ only in voicing)
+    private func areVoicingPair(phoneme1: String, phoneme2: String) -> Bool {
+        let clean1 = stripModifiers(phoneme1)
+        let clean2 = stripModifiers(phoneme2)
+        
+        for pair in voicingPairs {
+            if pair.contains(clean1) && pair.contains(clean2) {
+                return true
+            }
+        }
+        return false
+    }
+    
+    /// Strips length markers and stress markers from a phoneme
+    private func stripModifiers(_ phoneme: String) -> String {
+        return phoneme.replacingOccurrences(of: "[ːˌˈʲ]", with: "", options: .regularExpression)
+    }
+    
+    /// Checks if a phoneme variant is acceptable for a specific word
+    /// This handles function word reductions (e.g., "to" /tuː/ → /tə/)
+    private func isWordSpecificVariant(word: String, target: String, actual: String) -> Bool {
+        let wordLower = word.lowercased()
+        
+        guard let wordVariants = wordSpecificVariants[wordLower] else {
+            return false
+        }
+        
+        // Check direct match
+        if let acceptableVariants = wordVariants[target], acceptableVariants.contains(actual) {
             return true
         }
         
-        // 2. Check dialect equivalents (NEW!)
+        // Check with stripped modifiers
+        let cleanTarget = stripModifiers(target)
+        let cleanActual = stripModifiers(actual)
+        
+        if let acceptableVariants = wordVariants[cleanTarget], acceptableVariants.contains(cleanActual) {
+            return true
+        }
+        
+        return false
+    }
+    
+    /// Checks if two phonemes are similar, considering dialect variations and compounds
+    /// This is the GLOBAL check - does not consider word context
+    private func checkPhonemeSimilarity(target: String, actual: String) -> Bool {
+        return checkPhonemeSimilarityWithContext(target: target, actual: actual, word: nil)
+    }
+    
+    /// Checks if two phonemes are similar, with optional word context for function word reductions
+    private func checkPhonemeSimilarityWithContext(target: String, actual: String, word: String?) -> Bool {
+        let normalizedTarget = target.precomposedStringWithCanonicalMapping
+        let normalizedActual = actual.precomposedStringWithCanonicalMapping
+        
+        // 1. Exact Match
+        if normalizedTarget == normalizedActual {
+            return true
+        }
+        
+        // 2. Check voicing pairs (always enabled)
+        if areVoicingPair(phoneme1: target, phoneme2: actual) {
+            return true
+        }
+        
+        // 3. Check word-specific variants (function word reductions)
+        if let word = word, isWordSpecificVariant(word: word, target: target, actual: actual) {
+            return true
+        }
+        
+        // 4. Check compound phoneme equivalents
+        if let equivalents = compoundPhonemeEquivalents[target], equivalents.contains(actual) {
+            return true
+        }
+        if let equivalents = compoundPhonemeEquivalents[actual], equivalents.contains(target) {
+            return true
+        }
+        
+        // 5. Check dialect equivalents
         if let equivalents = dialectPhonemeEquivalents[target], equivalents.contains(actual) {
             return true
         }
@@ -94,32 +324,38 @@ public class PronunciationScorer {
             return true
         }
         
-        // 3. Group Lookup
-        for group in phonemeSimilarityGroups {
-            if group.contains(target) && group.contains(actual) {
-                return true
-            }
-        }
-        
-        // 4. Strip Modifiers (e.g. "oː" -> "o") and check again
-        let cleanTarget = target.replacingOccurrences(of: "[ːˌˈ]", with: "", options: .regularExpression)
-        let cleanActual = actual.replacingOccurrences(of: "[ːˌˈ]", with: "", options: .regularExpression)
+        // 6. Strip modifiers and check again
+        let cleanTarget = stripModifiers(target)
+        let cleanActual = stripModifiers(actual)
         
         if cleanTarget == cleanActual { return true }
         
-        // 5. Check groups with stripped versions
-        for group in phonemeSimilarityGroups {
-            if group.contains(cleanTarget) && group.contains(cleanActual) {
-                return true
-            }
-        }
-        
-        // 6. Check dialect equivalents with stripped versions
+        // 7. Check dialect equivalents with stripped versions
         if let equivalents = dialectPhonemeEquivalents[cleanTarget], equivalents.contains(cleanActual) {
             return true
         }
         if let equivalents = dialectPhonemeEquivalents[cleanActual], equivalents.contains(cleanTarget) {
             return true
+        }
+        
+        // 8. Check compound equivalents with stripped versions
+        if let equivalents = compoundPhonemeEquivalents[cleanTarget], equivalents.contains(cleanActual) {
+            return true
+        }
+        if let equivalents = compoundPhonemeEquivalents[cleanActual], equivalents.contains(cleanTarget) {
+            return true
+        }
+        
+        // 9. Only check similarity groups if enabled
+        if usePhonemeSimilarityGroups {
+            for group in phonemeSimilarityGroups {
+                if group.contains(target) && group.contains(actual) {
+                    return true
+                }
+                if group.contains(cleanTarget) && group.contains(cleanActual) {
+                    return true
+                }
+            }
         }
         
         return false
@@ -128,39 +364,35 @@ public class PronunciationScorer {
     // MARK: - Scoring Methods
     
     /// Default scoring method - uses multi-dialect support by default for best accuracy.
-    /// Accepts US, UK, and generic English pronunciations.
     func alignAndScore(
         decodedPhonemes: [PhonemePrediction],
         targetSentence: String
     ) -> PronunciationEvalResult {
-        // Use multi-dialect scoring by default
         return alignAndScoreMultiDialect(
             decodedPhonemes: decodedPhonemes,
             targetSentence: targetSentence
         )
     }
     
-    /// Multi-dialect scoring - tries all three English dialects and returns best match.
-    /// This is now called by default from alignAndScore().
+    /// Multi-dialect scoring - tries both dialects and returns best match.
     private func alignAndScoreMultiDialect(
         decodedPhonemes: [PhonemePrediction],
         targetSentence: String
     ) -> PronunciationEvalResult {
         
-        // Get phonemes for all three dialects
+        // Get phonemes for all dialects
         let allDialectPhonemes = espeakManager.getPhonemesForAllDialects(for: targetSentence)
         
-        // Debug: Print input phonemes (what user said)
+        // Debug output
         print("═══════════════════════════════════════════════════════════════")
         print("🎤 TARGET SENTENCE: \"\(targetSentence)\"")
         print("═══════════════════════════════════════════════════════════════")
         print("")
-        print("📥 USER INPUT (Decoded Phonemes - Unaligned):")
+        print("📥 USER INPUT (Decoded Phonemes):")
         let userPhonemes = decodedPhonemes.map { $0.topPrediction.phoneme }
         print("   \(userPhonemes.joined(separator: " "))")
         print("")
         
-        // Debug: Print ideal phonemes for each dialect
         print("📚 IDEAL PHONEMES BY DIALECT:")
         for (dialect, phonemes) in allDialectPhonemes {
             let flatPhonemes = phonemes.flatMap { $0 }
@@ -228,8 +460,6 @@ public class PronunciationScorer {
                 dialect: dialect
             )
             
-            print("📊 Dialect \(dialect.rawValue): Score = \(String(format: "%.2f", result.totalScore))")
-            
             if result.totalScore > bestScore {
                 bestScore = result.totalScore
                 bestResult = result
@@ -285,11 +515,15 @@ public class PronunciationScorer {
     ) -> PronunciationEvalResult {
         
         // Split the sentence into individual target words
-        var targetWords: [String] = []
-        targetSentence.enumerateSubstrings(in: targetSentence.startIndex..., options: .byWords) { (substring, _, _, _) in
-            if let word = substring {
-                targetWords.append(word)
-            }
+        // IMPORTANT: Must match EspeakManager's word parsing (split on whitespace only)
+        // Swift's .byWords treats hyphens as separators, causing misalignment
+        let targetWords = extractWordsMatchingEspeak(from: targetSentence)
+        
+        // Debug: verify word count matches phoneme groups
+        if targetWords.count != idealPhonemes.count {
+            print("⚠️ WARNING: Word count mismatch!")
+            print("   targetWords (\(targetWords.count)): \(targetWords)")
+            print("   idealPhonemes groups (\(idealPhonemes.count)): \(idealPhonemes.map { $0.joined(separator: "") })")
         }
         
         // Flatten and Normalize inputs
@@ -321,6 +555,12 @@ public class PronunciationScorer {
         
         var currentWordBoundary = wordLengths[0]
         var currentWordIndex = 0
+        
+        /// Returns the current word being processed
+        func getCurrentWord() -> String {
+            guard currentWordIndex < targetWords.count else { return "" }
+            return targetWords[currentWordIndex]
+        }
         
         func checkWordBoundary() {
             if targetPhonemeIndex == currentWordBoundary {
@@ -366,31 +606,55 @@ public class PronunciationScorer {
                 }
                 
             case .replace:
-                // Mismatch (could be similar or wrong)
+                // Mismatch - check if it's acceptable variant
                 for i in opcode.targetRange {
                     let targetPhoneme = targetPhonemesFlat[i]
                     var phonemeScoreToAdd: Double = 0.0
+                    let currentWord = getCurrentWord()
                     
                     if gopIndex < decodedPhonemes.count {
                         let actualItem = decodedPhonemes[gopIndex]
                         let actualPhoneme = actualItem.topPrediction.phoneme
                         
-                        // 1. Check Phonetic Similarity (now includes dialect variations!)
-                        if checkPhonemeSimilarity(target: targetPhoneme, actual: actualPhoneme) {
-                            // Similar: Use actual score but cap lower to be stricter
-                            phonemeScoreToAdd = min(actualItem.score, 0.70)
+                        // Check if phonemes are similar/acceptable variants
+                        // Use word-aware checking for function word reductions
+                        if checkPhonemeSimilarityWithContext(target: targetPhoneme, actual: actualPhoneme, word: currentWord) {
+                            // Check variant type for scoring
+                            let isVoicingVariant = areVoicingPair(phoneme1: targetPhoneme, phoneme2: actualPhoneme)
+                            let isCompoundMatch = isCompoundPhonemeMatch(target: targetPhoneme, actual: actualPhoneme)
+                            let isFunctionWordReduction = isWordSpecificVariant(word: currentWord, target: targetPhoneme, actual: actualPhoneme)
+                            
+                            // Determine credit and note based on variant type
+                            let maxCredit: Double
+                            let note: String
+                            
+                            if isCompoundMatch {
+                                maxCredit = 0.90
+                                note = "Compound/dialect variant"
+                            } else if isFunctionWordReduction {
+                                maxCredit = 0.85
+                                note = "Function word reduction"
+                            } else if isVoicingVariant {
+                                maxCredit = 0.85
+                                note = "Voicing variant"
+                            } else {
+                                maxCredit = 0.70
+                                note = "Similar variant"
+                            }
+                            
+                            phonemeScoreToAdd = min(actualItem.score, maxCredit)
                             
                             alignedScores.append(AlignedPhoneme(
                                 type: .match,
                                 target: targetPhoneme,
                                 actual: actualPhoneme,
                                 score: phonemeScoreToAdd,
-                                note: "Similar/dialect variant"
+                                note: note
                             ))
                             totalScore += phonemeScoreToAdd
                             
                         } else {
-                            // 2. Wrong phoneme - no forgiveness
+                            // Real mispronunciation
                             phonemeScoreToAdd = 0.0
                             
                             alignedScores.append(AlignedPhoneme(
@@ -398,7 +662,7 @@ public class PronunciationScorer {
                                 target: targetPhoneme,
                                 actual: actualPhoneme,
                                 score: 0.0,
-                                note: "Wrong (said '\(actualPhoneme)')"
+                                note: "Mispronounced (said '\(actualPhoneme)')"
                             ))
                         }
                         
@@ -408,7 +672,7 @@ public class PronunciationScorer {
                         currentWordPhonemeCount += 1
                         
                     } else {
-                        // Missing phoneme
+                        // Ran out of actual phonemes
                         alignedScores.append(AlignedPhoneme(
                             type: .delete,
                             target: targetPhoneme,
@@ -416,7 +680,10 @@ public class PronunciationScorer {
                             score: 0.0,
                             note: nil
                         ))
-                        scoreCount += 1
+                        if isImportantPhoneme(targetPhoneme) {
+                            scoreCount += 1
+                            currentWordPhonemeCount += 1
+                        }
                     }
                     
                     targetPhonemeIndex += 1
@@ -432,15 +699,20 @@ public class PronunciationScorer {
                         target: targetPhoneme,
                         actual: nil,
                         score: 0.0,
-                        note: nil
+                        note: isImportantPhoneme(targetPhoneme) ? "Missing sound" : "Minor omission"
                     ))
-                    scoreCount += 1
+                    
+                    if isImportantPhoneme(targetPhoneme) {
+                        scoreCount += 1
+                        currentWordPhonemeCount += 1
+                    }
+                    
                     targetPhonemeIndex += 1
                     checkWordBoundary()
                 }
                 
             case .insert:
-                // Extra phoneme
+                // Extra phoneme - don't penalize
                 for _ in opcode.actualRange {
                     let actualItem = decodedPhonemes[gopIndex]
                     alignedScores.append(AlignedPhoneme(
@@ -448,7 +720,7 @@ public class PronunciationScorer {
                         target: nil,
                         actual: actualItem.topPrediction.phoneme,
                         score: actualItem.score,
-                        note: nil
+                        note: "Extra sound (ignored)"
                     ))
                     gopIndex += 1
                 }
@@ -472,6 +744,88 @@ public class PronunciationScorer {
     
     // MARK: - Helper functions
     
+    /// Checks if two phonemes match via compound phoneme equivalence
+    private func isCompoundPhonemeMatch(target: String, actual: String) -> Bool {
+        if let equivalents = compoundPhonemeEquivalents[target], equivalents.contains(actual) {
+            return true
+        }
+        if let equivalents = compoundPhonemeEquivalents[actual], equivalents.contains(target) {
+            return true
+        }
+        
+        // Also check stripped versions
+        let cleanTarget = stripModifiers(target)
+        let cleanActual = stripModifiers(actual)
+        
+        if let equivalents = compoundPhonemeEquivalents[cleanTarget], equivalents.contains(cleanActual) {
+            return true
+        }
+        if let equivalents = compoundPhonemeEquivalents[cleanActual], equivalents.contains(cleanTarget) {
+            return true
+        }
+        
+        return false
+    }
+    
+    /// Determines if a phoneme is "important" for pronunciation scoring
+    private func isImportantPhoneme(_ phoneme: String) -> Bool {
+        let unimportantPhonemes: Set<String> = [
+            "ə",    // Schwa
+            "ɚ",    // R-colored schwa
+            "ᵻ",    // Barred i
+            "ɪ",    // Can be reduced
+            "ʔ",    // Glottal stop
+        ]
+        
+        if unimportantPhonemes.contains(phoneme) {
+            return false
+        }
+        
+        return true
+    }
+    
+    /// Extracts words from text using the same logic as EspeakManager
+    /// This ensures word boundaries match between target words and ideal phoneme groups
+    ///
+    /// Key difference from Swift's .byWords:
+    /// - This splits on WHITESPACE ONLY
+    /// - Swift's .byWords treats hyphens, punctuation as word boundaries
+    /// - "in-person" → this: ["in-person"], .byWords: ["in", "person"]
+    private func extractWordsMatchingEspeak(from text: String) -> [String] {
+        // First, clean punctuation the same way EspeakManager does
+        let punctuationToStrip = CharacterSet.punctuationCharacters
+            .subtracting(CharacterSet(charactersIn: "'-"))  // Keep apostrophes and hyphens
+        
+        var cleaned = ""
+        for char in text {
+            if char.unicodeScalars.allSatisfy({ punctuationToStrip.contains($0) }) {
+                continue
+            }
+            cleaned.append(char)
+        }
+        
+        // Split on whitespace only
+        var words: [String] = []
+        var currentWord = ""
+        
+        for char in cleaned {
+            if char.isWhitespace {
+                if !currentWord.isEmpty {
+                    words.append(currentWord)
+                    currentWord = ""
+                }
+            } else {
+                currentWord.append(char)
+            }
+        }
+        
+        if !currentWord.isEmpty {
+            words.append(currentWord)
+        }
+        
+        return words
+    }
+    
     private func splitAlignedPhonemesByWord(alignedPhonemes: [AlignedPhoneme], guide: [[String]]) -> [[AlignedPhoneme]] {
         var result: [[AlignedPhoneme]] = []
         var alignedIndex = 0
@@ -481,7 +835,6 @@ public class PronunciationScorer {
             var currentWordChunk: [AlignedPhoneme] = []
             var consumedTargetCount = 0
             
-            // 1. Consume Targets
             while alignedIndex < alignedPhonemes.count && consumedTargetCount < expectedTargetCount {
                 let current = alignedPhonemes[alignedIndex]
                 currentWordChunk.append(current)
@@ -491,7 +844,6 @@ public class PronunciationScorer {
                 }
             }
             
-            // 2. Consume Trailing Inserts (Attach to CURRENT word, not next)
             while alignedIndex < alignedPhonemes.count {
                 if alignedPhonemes[alignedIndex].type == .insert {
                     currentWordChunk.append(alignedPhonemes[alignedIndex])
@@ -506,7 +858,6 @@ public class PronunciationScorer {
             }
         }
         
-        // Attach any remaining tail to the last word
         if alignedIndex < alignedPhonemes.count {
             if result.isEmpty {
                 result.append(Array(alignedPhonemes[alignedIndex...]))
@@ -535,13 +886,13 @@ func levenshteinOpcodes(from source: [String], to target: [String], similarityCh
     let m = source.count
     let n = target.count
     
-    // Safety for empty inputs
     if m == 0 && n == 0 { return [] }
     if m == 0 { return [EditOperation(type: .insert, targetRange: 0..<0, actualRange: 0..<n)] }
     if n == 0 { return [EditOperation(type: .delete, targetRange: 0..<m, actualRange: 0..<0)] }
     
-    let insertCost = 1
-    let deleteCost = 2
+    // Costs tuned so similar_replace is always preferred over delete + insert
+    let insertCost = 2
+    let deleteCost = 3
     
     var dp = Array(repeating: Array(repeating: 0, count: n + 1), count: m + 1)
     
@@ -568,7 +919,7 @@ func levenshteinOpcodes(from source: [String], to target: [String], similarityCh
         }
     }
     
-    // BACKTRACKING
+    // Backtracking - prefer replace over insert/delete
     var operations: [EditOperation] = []
     var i = m
     var j = n
@@ -576,21 +927,7 @@ func levenshteinOpcodes(from source: [String], to target: [String], similarityCh
     while i > 0 || j > 0 {
         let currentVal = dp[i][j]
         
-        // CHECK 1: Insert
-        if j > 0 && currentVal == dp[i][j-1] + insertCost {
-            operations.insert(EditOperation(type: .insert, targetRange: i..<i, actualRange: (j-1)..<j), at: 0)
-            j -= 1
-            continue
-        }
-        
-        // CHECK 2: Delete
-        if i > 0 && currentVal == dp[i-1][j] + deleteCost {
-            operations.insert(EditOperation(type: .delete, targetRange: (i-1)..<i, actualRange: j..<j), at: 0)
-            i -= 1
-            continue
-        }
-        
-        // CHECK 3: Match / Replace
+        // Check match/replace FIRST
         if i > 0 && j > 0 {
             let s = source[i-1]
             let t = target[j-1]
@@ -605,6 +942,20 @@ func levenshteinOpcodes(from source: [String], to target: [String], similarityCh
                 j -= 1
                 continue
             }
+        }
+        
+        // Delete
+        if i > 0 && currentVal == dp[i-1][j] + deleteCost {
+            operations.insert(EditOperation(type: .delete, targetRange: (i-1)..<i, actualRange: j..<j), at: 0)
+            i -= 1
+            continue
+        }
+        
+        // Insert
+        if j > 0 && currentVal == dp[i][j-1] + insertCost {
+            operations.insert(EditOperation(type: .insert, targetRange: i..<i, actualRange: (j-1)..<j), at: 0)
+            j -= 1
+            continue
         }
         
         break

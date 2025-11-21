@@ -3,7 +3,8 @@
 //  C7-Pronunciation
 //
 //  Created by Savio Enoson on 13/11/25.
-//  Improved version with context-aware phoneme generation and multi-dialect support
+//  Improved version with context-aware phoneme generation and dual-dialect support
+//  FIXED: Simplified to 2 dialects (en, en-us), minimal context corrections
 //
 
 import Foundation
@@ -62,17 +63,23 @@ public class EspeakManager {
     /// Loaded vocabulary for filtering phonemes.
     private var validPhonemes: Set<String> = []
     
-    /// Available dialect voices
-    public enum Dialect: String {
+    /// Track the currently active dialect to avoid redundant switches
+    private var currentDialect: Dialect? = nil
+    
+    /// Available dialect voices (simplified to 2)
+    public enum Dialect: String, CaseIterable {
         case us = "en-us"
-        case uk = "en-gb"
         case generic = "en"
         
         var voiceName: String {
+            return self.rawValue
+        }
+        
+        /// Display name for UI/logging
+        var displayName: String {
             switch self {
-            case .us: return "en-us"
-            case .uk: return "en-gb"
-            case .generic: return "en"
+            case .us: return "American English"
+            case .generic: return "Generic English"
             }
         }
     }
@@ -105,8 +112,13 @@ public class EspeakManager {
         // 5. Set Synchronous Mode (Retrieval Mode)
         espeak_ng_InitializeOutput(ENOUTPUT_MODE_SYNCHRONOUS, 0, nil)
         
-        // 6. Configuration
-        espeak_ng_SetVoiceByName("en")
+        // 6. Configuration - start with generic English
+        let voiceResult = espeak_ng_SetVoiceByName("en")
+        if voiceResult == ENS_OK {
+            currentDialect = .generic
+        } else {
+            print("EspeakManager: WARNING - Failed to set initial voice 'en'")
+        }
         
         // Set pitch range to 0 to get a more monotonic (robotic) voice
         espeak_ng_SetParameter(espeakRANGE, 0, 0)
@@ -125,7 +137,26 @@ public class EspeakManager {
         // Load vocabulary for filtering (optional)
         loadVocabulary()
         
-        print("EspeakManager: Initialized successfully with IPA output and multi-dialect support.")
+        // Print available voices for debugging
+        printAvailableVoices()
+        
+        print("EspeakManager: Initialized successfully with IPA output and dual-dialect support.")
+    }
+    
+    /// Debug helper to print available voices
+    private func printAvailableVoices() {
+        print("EspeakManager: Checking available English voices...")
+        
+        // Test each dialect
+        for dialect in Dialect.allCases {
+            let result = espeak_ng_SetVoiceByName(dialect.voiceName)
+            let status = result == ENS_OK ? "✓ Available" : "✗ NOT Available"
+            print("   [\(dialect.rawValue)]: \(status)")
+        }
+        
+        // Reset to generic
+        espeak_ng_SetVoiceByName("en")
+        currentDialect = .generic
     }
     
     // MARK: - Backward Compatible API (OLD SIGNATURE)
@@ -154,9 +185,13 @@ public class EspeakManager {
     internal func getPhonemesForAllDialects(for text: String) -> [Dialect: [[String]]] {
         var result: [Dialect: [[String]]] = [:]
         
-        for dialect in [Dialect.us, .uk, .generic] {
+        for dialect in Dialect.allCases {
             let wordPhonemes = getPhonemesDetailed(for: text, dialect: dialect)
             result[dialect] = wordPhonemes.map { $0.phonemes }
+            
+            // Debug: print what we got for each dialect
+            let flatPhonemes = wordPhonemes.flatMap { $0.phonemes }
+            print("EspeakManager: [\(dialect.rawValue)] synthesized: \(flatPhonemes.joined(separator: " "))")
         }
         
         return result
@@ -170,8 +205,11 @@ public class EspeakManager {
     ///   - dialect: The English dialect to use (defaults to generic English)
     /// - Returns: Array of WordPhonemes with detailed position information
     public func getPhonemesDetailed(for text: String, dialect: Dialect = .generic) -> [WordPhonemes] {
-        // 1. Set the voice for the desired dialect
-        setDialect(dialect)
+        // 1. Set the voice for the desired dialect (with verification)
+        let dialectSet = setDialect(dialect)
+        if !dialectSet {
+            print("EspeakManager: WARNING - Could not set dialect \(dialect.rawValue), using fallback")
+        }
         
         // 2. Clean the text but preserve structure
         let cleanedText = cleanText(text)
@@ -193,8 +231,10 @@ public class EspeakManager {
             ))
         }
         
-        // 5. Apply context-aware corrections to common function words
-        result = applyContextCorrections(to: result)
+        // 5. Apply MINIMAL context-aware corrections
+        // IMPORTANT: Only correct articles, NOT content words!
+        // Let eSpeak's output stand for most words to preserve dialect differences
+        result = applyMinimalContextCorrections(to: result)
         
         return result
     }
@@ -216,265 +256,155 @@ public class EspeakManager {
         return currentPhonemes.map { $0.phoneme }
     }
     
-    /// Applies context-aware corrections to phonemes for common function words
-    private func applyContextCorrections(to wordPhonemes: [WordPhonemes]) -> [WordPhonemes] {
+    /// Applies MINIMAL context-aware corrections to phonemes
+    ///
+    /// PHILOSOPHY: Only correct words where the citation (dictionary) form would sound
+    /// WRONG or FOREIGN in connected speech - not just "careful" or "emphatic".
+    ///
+    /// CRITERIA FOR CORRECTION:
+    /// 1. The citation form would sound unnatural/foreign in connected speech
+    /// 2. Native speakers virtually never use the citation form in normal speech
+    /// 3. Using the citation form changes perceived meaning (implies unintended emphasis)
+    ///
+    /// ARTICLES ONLY meet this criteria:
+    /// - "a" /eɪ/ → /ə/: Saying "I am /eɪ/ boy" sounds like spelling the letter
+    /// - "an" /æn/ → /ən/: Similar to "a"
+    /// - "the" /ðiː/ → /ðə/: Using /ðiː/ before consonants implies contrast
+    ///
+    /// EVERYTHING ELSE is left alone because both forms are acceptable:
+    /// - "for" /fɔːr/ vs /fər/: Both fine; full form = careful speech, not wrong
+    /// - "to" /tuː/ vs /tə/: Both acceptable
+    /// - "of" /ʌv/ vs /əv/: Both acceptable
+    /// - "and" /ænd/ vs /ənd/: Both common
+    /// - "can", "you", "are", etc.: All have acceptable full forms
+    ///
+    /// The PronunciationScorer's similarity checking handles these variants.
+    private func applyMinimalContextCorrections(to wordPhonemes: [WordPhonemes]) -> [WordPhonemes] {
         var result = wordPhonemes
         
         for (index, wordPhoneme) in wordPhonemes.enumerated() {
             let word = wordPhoneme.word.lowercased()
             let isNotFirstWord = index > 0
             let isNotLastWord = index < wordPhonemes.count - 1
+            let isInContext = isNotFirstWord || isNotLastWord
             
-            // Get next word if available
+            // Get next word if available (for "the" rule)
             let nextWord = isNotLastWord ? wordPhonemes[index + 1].word.lowercased() : ""
             let nextWordStartsWithVowel = nextWord.first.map { "aeiou".contains($0) } ?? false
             
-            var correctedPhonemes = wordPhoneme.phonemes
+            var correctedPhonemes: [String]? = nil
             
-            // Apply context-based corrections
             switch word {
-            // Article "a" - becomes schwa in context
+                
+            // ═══════════════════════════════════════════════════════════════
+            // ARTICLE "a"
+            // Citation: /eɪ/ (like the letter name)
+            // Connected: /ə/ (schwa)
+            //
+            // WHY CORRECT: Saying "I want /eɪ/ cookie" sounds like you're
+            // spelling out the letter or making a contrast ("I want A cookie,
+            // not THE cookie"). Native speakers essentially never use /eɪ/
+            // in normal connected speech.
+            // ═══════════════════════════════════════════════════════════════
             case "a":
-                if isNotFirstWord || isNotLastWord {
+                if isInContext {
                     correctedPhonemes = ["ə"]
                 }
                 
-            // Article "the" - /ðiː/ before vowels, /ðə/ before consonants
-            case "the":
-                if nextWordStartsWithVowel {
-                    correctedPhonemes = ["ð", "iː"]
-                } else {
-                    correctedPhonemes = ["ð", "ə"]
-                }
-                
-            // Preposition "to" - becomes /tə/ when unstressed
-            case "to":
-                if isNotFirstWord && isNotLastWord {
-                    correctedPhonemes = ["t", "ə"]
-                }
-                
-            // Auxiliary "can" - becomes /kən/ when unstressed
-            case "can":
-                if isNotLastWord && !isEmphatic(word: word, inContext: wordPhonemes, at: index) {
-                    correctedPhonemes = ["k", "ə", "n"]
-                }
-                
-            // Modal "will" - becomes /wəl/ when unstressed
-            case "will":
-                if isNotLastWord && !isEmphatic(word: word, inContext: wordPhonemes, at: index) {
-                    correctedPhonemes = ["w", "ə", "l"]
-                }
-                
-            // Auxiliary "have" - becomes /həv/ or /əv/ when unstressed
-            case "have":
-                if isNotLastWord && !isEmphatic(word: word, inContext: wordPhonemes, at: index) {
-                    correctedPhonemes = ["h", "ə", "v"]
-                }
-                
-            // Auxiliary "has" - becomes /həz/ or /əz/ when unstressed
-            case "has":
-                if isNotLastWord && !isEmphatic(word: word, inContext: wordPhonemes, at: index) {
-                    correctedPhonemes = ["h", "ə", "z"]
-                }
-                
-            // Auxiliary "had" - becomes /həd/ or /əd/ when unstressed
-            case "had":
-                if isNotLastWord && !isEmphatic(word: word, inContext: wordPhonemes, at: index) {
-                    correctedPhonemes = ["h", "ə", "d"]
-                }
-                
-            // Auxiliary "would" - becomes /wəd/ when unstressed
-            case "would":
-                if isNotLastWord && !isEmphatic(word: word, inContext: wordPhonemes, at: index) {
-                    correctedPhonemes = ["w", "ə", "d"]
-                }
-                
-            // Auxiliary "should" - becomes /ʃəd/ when unstressed
-            case "should":
-                if isNotLastWord && !isEmphatic(word: word, inContext: wordPhonemes, at: index) {
-                    correctedPhonemes = ["ʃ", "ə", "d"]
-                }
-                
-            // Auxiliary "could" - becomes /kəd/ when unstressed
-            case "could":
-                if isNotLastWord && !isEmphatic(word: word, inContext: wordPhonemes, at: index) {
-                    correctedPhonemes = ["k", "ə", "d"]
-                }
-                
-            // Preposition "of" - becomes /əv/ when unstressed
-            case "of":
-                correctedPhonemes = ["ə", "v"]
-                
-            // Preposition "for" - becomes /fər/ or /fɚ/ when unstressed
-            case "for":
-                if isNotLastWord && !isEmphatic(word: word, inContext: wordPhonemes, at: index) {
-                    correctedPhonemes = ["f", "ɚ"]
-                }
-                
-            // Conjunction "and" - becomes /ənd/ or /ən/ when unstressed
-            case "and":
-                if isNotLastWord {
-                    correctedPhonemes = ["ə", "n", "d"]
-                }
-                
-            // Pronoun "you" - becomes /jə/ when unstressed
-            case "you":
-                if isNotLastWord && !isEmphatic(word: word, inContext: wordPhonemes, at: index) {
-                    correctedPhonemes = ["j", "ə"]
-                }
-                
-            // Auxiliary "are" - becomes /ɚ/ or /ər/ when unstressed
-            case "are":
-                if isNotLastWord && !isEmphatic(word: word, inContext: wordPhonemes, at: index) {
-                    correctedPhonemes = ["ɚ"]
-                }
-                
-            // Auxiliary "is" - becomes /z/ or /s/ when contracted
-            case "is":
-                if isNotFirstWord && !isEmphatic(word: word, inContext: wordPhonemes, at: index) {
-                    correctedPhonemes = ["ɪ", "z"]
-                }
-                
-            // Preposition "at" - becomes /ət/ when unstressed
-            case "at":
-                if !isEmphatic(word: word, inContext: wordPhonemes, at: index) {
-                    correctedPhonemes = ["ə", "t"]
-                }
-                
-            // Preposition "from" - becomes /frəm/ when unstressed
-            case "from":
-                if !isEmphatic(word: word, inContext: wordPhonemes, at: index) {
-                    correctedPhonemes = ["f", "r", "ə", "m"]
-                }
-                
-            // Pronoun "he" - becomes /i/ when unstressed
-            case "he":
-                if isNotLastWord && !isEmphatic(word: word, inContext: wordPhonemes, at: index) {
-                    correctedPhonemes = ["i"]
-                }
-                
-            // Pronoun "she" - becomes /ʃi/ when unstressed
-            case "she":
-                if isNotLastWord && !isEmphatic(word: word, inContext: wordPhonemes, at: index) {
-                    correctedPhonemes = ["ʃ", "i"]
-                }
-                
-            // Pronoun "we" - becomes /wi/ when unstressed
-            case "we":
-                if isNotLastWord && !isEmphatic(word: word, inContext: wordPhonemes, at: index) {
-                    correctedPhonemes = ["w", "i"]
-                }
-                
-            // Auxiliary "do" - becomes /də/ when unstressed
-            case "do":
-                if isNotLastWord && !isEmphatic(word: word, inContext: wordPhonemes, at: index) {
-                    correctedPhonemes = ["d", "ə"]
-                }
-                
-            // Auxiliary "does" - becomes /dəz/ when unstressed
-            case "does":
-                if isNotLastWord && !isEmphatic(word: word, inContext: wordPhonemes, at: index) {
-                    correctedPhonemes = ["d", "ə", "z"]
-                }
-                
-            // Preposition "than" - becomes /ðən/ when unstressed
-            case "than":
-                correctedPhonemes = ["ð", "ə", "n"]
-                
-            // Conjunction "as" - becomes /əz/ when unstressed
-            case "as":
-                if !isEmphatic(word: word, inContext: wordPhonemes, at: index) {
-                    correctedPhonemes = ["ə", "z"]
-                }
-                
-            // Conjunction "but" - becomes /bət/ when unstressed
-            case "but":
-                if !isEmphatic(word: word, inContext: wordPhonemes, at: index) {
-                    correctedPhonemes = ["b", "ə", "t"]
-                }
-                
-            // Pronoun "them" - becomes /ðəm/ when unstressed
-            case "them":
-                if !isEmphatic(word: word, inContext: wordPhonemes, at: index) {
-                    correctedPhonemes = ["ð", "ə", "m"]
-                }
-                
-            // Pronoun "him" - becomes /ɪm/ when unstressed
-            case "him":
-                if !isEmphatic(word: word, inContext: wordPhonemes, at: index) {
-                    correctedPhonemes = ["ɪ", "m"]
-                }
-                
-            // Pronoun "her" - becomes /ɚ/ or /hɚ/ when unstressed
-            case "her":
-                if !isEmphatic(word: word, inContext: wordPhonemes, at: index) {
-                    correctedPhonemes = ["h", "ɚ"]
-                }
-                
-            // Existential "there" - becomes /ðɚ/ when unstressed
-            case "there":
-                if !isEmphatic(word: word, inContext: wordPhonemes, at: index) {
-                    correctedPhonemes = ["ð", "ɚ"]
-                }
-                
-            // Possession "his" - becomes /ɪz/ when unstressed
-            case "his":
-                if !isEmphatic(word: word, inContext: wordPhonemes, at: index) {
-                    correctedPhonemes = ["ɪ", "z"]
-                }
-                
-            // Preposition "with" - becomes /wɪð/ or /wɪθ/ (can be /wɪt/ in fast speech)
-            case "with":
-                if !isEmphatic(word: word, inContext: wordPhonemes, at: index) {
-                    correctedPhonemes = ["w", "ɪ", "ð"]
-                }
-                
-            // Article "an" - becomes /ən/ when unstressed
+            // ═══════════════════════════════════════════════════════════════
+            // ARTICLE "an"
+            // Citation: /æn/
+            // Connected: /ən/
+            //
+            // WHY CORRECT: Same as "a" - the full vowel sounds emphatic/foreign
+            // in connected speech. "I want /æn/ apple" implies contrast.
+            // ═══════════════════════════════════════════════════════════════
             case "an":
-                if !isEmphatic(word: word, inContext: wordPhonemes, at: index) {
+                if isInContext {
                     correctedPhonemes = ["ə", "n"]
                 }
                 
+            // ═══════════════════════════════════════════════════════════════
+            // ARTICLE "the" - DO NOT CORRECT
+            //
+            // Both /ðiː/ and /ðə/ are acceptable in natural speech:
+            // - "the /ðə/ book" ✓
+            // - "the /ðiː/ book" ✓ (slightly emphatic but not wrong)
+            // - "the /ðiː/ apple" ✓ (before vowels)
+            // - "the /ðə/ apple" ✓ (casual, also fine)
+            //
+            // Unlike "a/an", using either form doesn't sound foreign or wrong.
+            // Native speakers mix these freely. Let eSpeak's output stand and
+            // the scorer will accept both via wordSpecificVariants.
+            // ═══════════════════════════════════════════════════════════════
+            // case "the": -- REMOVED, both forms acceptable
+                
+            // ═══════════════════════════════════════════════════════════════
+            // EVERYTHING ELSE: NO CORRECTION
+            // ═══════════════════════════════════════════════════════════════
             default:
                 break
             }
             
-            result[index] = WordPhonemes(
-                word: wordPhoneme.word,
-                phonemes: correctedPhonemes,
-                startPosition: wordPhoneme.startPosition,
-                endPosition: wordPhoneme.endPosition
-            )
+            // Only update if we have a correction
+            if let phonemes = correctedPhonemes {
+                result[index] = WordPhonemes(
+                    word: wordPhoneme.word,
+                    phonemes: phonemes,
+                    startPosition: wordPhoneme.startPosition,
+                    endPosition: wordPhoneme.endPosition
+                )
+            }
         }
         
         return result
     }
     
-    /// Determines if a word is emphatic (stressed) in context
-    private func isEmphatic(word: String, inContext context: [WordPhonemes], at index: Int) -> Bool {
-        // Simple heuristic: if it's the last word or first word, might be emphatic
-        // This is a simplified check - real emphasis detection would need prosody analysis
-        return index == 0 || index == context.count - 1
-    }
-    
     // MARK: - Private Helpers
     
     /// Sets the eSpeak voice to the specified dialect
-    private func setDialect(_ dialect: Dialect) {
-        espeak_ng_SetVoiceByName(dialect.voiceName)
+    /// Returns success/failure and only changes if different from current
+    @discardableResult
+    private func setDialect(_ dialect: Dialect) -> Bool {
+        // Skip if already set to this dialect
+        if currentDialect == dialect {
+            return true
+        }
+        
+        let result = espeak_ng_SetVoiceByName(dialect.voiceName)
+        
+        if result == ENS_OK {
+            currentDialect = dialect
+            return true
+        } else {
+            print("EspeakManager: ERROR - Failed to set voice '\(dialect.voiceName)', error code: \(result)")
+            
+            // Fallback to generic if US fails
+            if dialect == .us {
+                print("EspeakManager: Trying fallback to generic 'en'...")
+                let fallbackResult = espeak_ng_SetVoiceByName("en")
+                if fallbackResult == ENS_OK {
+                    currentDialect = .generic
+                    print("EspeakManager: Fallback to 'en' succeeded")
+                }
+            }
+            
+            return false
+        }
     }
     
     /// Cleans text while preserving word structure
     private func cleanText(_ text: String) -> String {
-        // Define punctuation to remove, but KEEP apostrophes
+        // Define punctuation to remove, but KEEP apostrophes and hyphens
+        // Hyphens are important for compound words like "in-person"
         let punctuationToStrip = CharacterSet.punctuationCharacters
-            .subtracting(CharacterSet(charactersIn: "'"))
+            .subtracting(CharacterSet(charactersIn: "'-"))
         
         // Remove extra punctuation but keep spacing
         var cleaned = ""
         for char in text.lowercased() {
             if char.unicodeScalars.allSatisfy({ punctuationToStrip.contains($0) }) {
-                // Skip punctuation (except apostrophes)
+                // Skip punctuation (except apostrophes and hyphens)
                 continue
             }
             cleaned.append(char)
@@ -520,24 +450,44 @@ public class EspeakManager {
             return
         }
         
-        // 2. Clean stress markers only
-        let cleanedPhoneme = phoneme
-            .replacingOccurrences(of: "ˈ", with: "")
-            .replacingOccurrences(of: "ˌ", with: "")
+        // 2. Clean stress markers and eSpeak-specific annotations
+        var cleanedPhoneme = phoneme
+            .replacingOccurrences(of: "ˈ", with: "")  // Primary stress
+            .replacingOccurrences(of: "ˌ", with: "")  // Secondary stress
         
-        // 3. If the string was only a marker, skip it
+        // 3. Remove eSpeak-specific annotation characters
+        // H = aspiration marker (attached to phonemes like ɔːɹH)
+        // ʰ = aspiration superscript
+        // ʲ = palatalization
+        // ⁿ = nasal release
+        // ˡ = lateral release
+        // These are phonetic details we don't need for pronunciation scoring
+        let espeakAnnotations: [String] = ["H", "ʰ", "ʲ", "ⁿ", "ˡ", "ʷ", "ˠ", "ˤ", "̚"]
+        for annotation in espeakAnnotations {
+            cleanedPhoneme = cleanedPhoneme.replacingOccurrences(of: annotation, with: "")
+        }
+        
+        // 4. Filter out corrupted/invalid Unicode characters
+        cleanedPhoneme = String(cleanedPhoneme.unicodeScalars.filter { scalar in
+            // Filter out replacement characters and control characters
+            return scalar.value != 0xFFFD && // Replacement character �
+                   scalar.value != 0x0000 && // Null
+                   scalar.value >= 0x0020    // Filter control chars
+        })
+        
+        // 5. If the string was only a marker or is now empty, skip it
         if cleanedPhoneme.isEmpty {
             return
         }
         
-        // 4. Append the cleaned phoneme with its position
+        // 6. Append the cleaned phoneme with its position
         currentPhonemes.append(PhonemeWithPosition(
             phoneme: cleanedPhoneme,
             textPosition: textPosition
         ))
     }
     
-        /// (Called by C callback) Marks a word boundary
+    /// (Called by C callback) Marks a word boundary
     internal func markWordBoundary(textPosition: Int, length: Int) {
         wordBoundaries.append((position: textPosition, length: length))
     }

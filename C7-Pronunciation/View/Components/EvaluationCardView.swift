@@ -12,7 +12,7 @@ struct EvaluationCardView: View {
     var onTapWord: (WordScore) -> Void
     
     private var errorCount: Int {
-        result.wordScores.filter { $0.score < 0.6 }.count
+        result.wordScores.filter { $0.score < ERROR_THRESHOLD }.count
     }
     
     private var hasErrors: Bool {
@@ -98,7 +98,7 @@ struct EvaluationCardView: View {
         FlexibleFlowLayout(
             data: words.enumerated().map { WordItem(index: $0.offset, word: $0.element) }
         ) { item in
-            if let score = indexedScores[item.index], score.score < 0.6 {
+            if let score = indexedScores[item.index], score.score < ERROR_THRESHOLD {
                 Text(item.word + " ")
                     .font(.title3)
                     .underline(true, color: .red)

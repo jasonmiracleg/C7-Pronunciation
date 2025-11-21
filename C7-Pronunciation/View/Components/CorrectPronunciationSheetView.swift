@@ -85,9 +85,9 @@ struct CorrectPronunciationSheetView: View {
         let score = phonemes[safeIndex].score
         
         // 5. Return Color based on your thresholds
-        if score < 0.4 {
+        if score < ERROR_THRESHOLD/2 {
             return .red
-        } else if score < 0.6 {
+        } else if score < ERROR_THRESHOLD {
             return .orange
         } else {
             return .primary

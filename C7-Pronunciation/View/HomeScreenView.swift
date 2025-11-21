@@ -64,7 +64,7 @@ struct HomeScreenView: View {
         let imgName: String
         let desc: String
         let gradientColor: [Color]
-        var onTap: (() -> Void)? = nil   // <— NEW
+        var onTap: (() -> Void)? = nil
         
         var body: some View {
             HStack(spacing: 20) {
@@ -85,11 +85,14 @@ struct HomeScreenView: View {
                 .padding(.trailing)
                 .padding(.vertical, 10)
                 .foregroundColor(Color.white)
+                
+                Spacer(minLength: 0)
             }
             .onTapGesture {
                 onTap?()
             }
             .padding(.horizontal)
+            .frame(maxWidth: .infinity)
             .frame(height: 180)
             .background(
                 LinearGradient(

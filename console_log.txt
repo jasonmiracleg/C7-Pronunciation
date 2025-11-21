@@ -1,0 +1,62 @@
+═══════════════════════════════════════════════════════════════
+🎤 TARGET SENTENCE: "Would you prefer a virtual or in-person meeting?"
+═══════════════════════════════════════════════════════════════
+
+📥 USER INPUT (Decoded Phonemes):
+   w uː dʒ uː p ɹ ɹ ᵻ f ɚ ɐ f ɜː tʃ uː əl l ɔːɹ ɹ ɛ n p ɜː s ə n
+
+📚 IDEAL PHONEMES BY DIALECT:
+   [en-us]: w ʊ d j uː p ɹ ɪ f ɜː ə v ɜː tʃ uː əl ɔːɹ3 ɪ n p ɚ s ə n m iː ɾ ɪ ŋ
+   [en]: w ʊ d j uː p ɹ ɪ f ɜː ə v ɜː tʃ uː əl ɔː ɪ n p ə s ə n m iː t ɪ ŋ
+
+📊 DIALECT SCORES:
+   [en]: 0.50
+   [en-us]: 0.49
+
+🏆 BEST DIALECT: en with score 0.50
+
+📋 ALIGNED PHONEMES BY WORD:
+───────────────────────────────────────────────────────────────
+❌ "Would" - Score: 0.29
+     ✓ target: w | actual: w | score: 0.88
+     − target: ʊ | actual: ∅ | score: 0.00 (Missing sound)
+     ✗ target: d | actual: uː | score: 0.00 (Mispronounced (said 'uː'))
+❌ "you" - Score: 0.46
+     ✗ target: j | actual: dʒ | score: 0.00 (Mispronounced (said 'dʒ'))
+     ✓ target: uː | actual: uː | score: 0.91
+⚠️ "prefer" - Score: 0.59
+     ✓ target: p | actual: p | score: 0.98
+     + target: ∅ | actual: ɹ | score: 0.55 (Extra sound (ignored))
+     ✓ target: ɹ | actual: ɹ | score: 0.97
+     ✗ target: ɪ | actual: ᵻ | score: 0.00 (Mispronounced (said 'ᵻ'))
+     ✓ target: f | actual: f | score: 0.98
+     ✗ target: ɜː | actual: ɚ | score: 0.00 (Mispronounced (said 'ɚ'))
+⚠️ "a" - Score: 0.70
+     ✓ target: ə | actual: ɐ | score: 0.70 (Similar variant)
+⚠️ "virtual" - Score: 0.71
+     ✓ target: v | actual: f | score: 0.85 (Voicing variant)
+     ✓ target: ɜː | actual: ɜː | score: 0.55
+     ✓ target: tʃ | actual: tʃ | score: 0.85
+     ✓ target: uː | actual: uː | score: 0.72
+     ✓ target: əl | actual: əl | score: 0.57
+     + target: ∅ | actual: l | score: 0.71 (Extra sound (ignored))
+❌ "or" - Score: 0.27
+     ✓ target: ɔː | actual: ɔːɹ | score: 0.27 (Compound/dialect variant)
+     + target: ∅ | actual: ɹ | score: 0.74 (Extra sound (ignored))
+⚠️ "in" - Score: 0.69
+     ✗ target: ɪ | actual: ɛ | score: 0.00 (Mispronounced (said 'ɛ'))
+     ✓ target: n | actual: n | score: 0.99
+     ✓ target: p | actual: p | score: 0.98
+     ✗ target: ə | actual: ɜː | score: 0.00 (Mispronounced (said 'ɜː'))
+     ✓ target: s | actual: s | score: 0.98
+     ✓ target: ə | actual: ə | score: 0.94
+     ✓ target: n | actual: n | score: 0.94
+❌ "person" - Score: 0.00
+     − target: m | actual: ∅ | score: 0.00 (Missing sound)
+     − target: iː | actual: ∅ | score: 0.00 (Missing sound)
+     − target: t | actual: ∅ | score: 0.00 (Missing sound)
+     − target: ɪ | actual: ∅ | score: 0.00 (Minor omission)
+     − target: ŋ | actual: ∅ | score: 0.00 (Missing sound)
+───────────────────────────────────────────────────────────────
+📊 TOTAL SCORE: 0.50
+═══════════════════════════════════════════════════════════════
