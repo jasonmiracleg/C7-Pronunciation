@@ -11,6 +11,14 @@ struct EvaluationCardView: View {
     let result: PronunciationEvalResult
     var onTapWord: (WordScore) -> Void
     
+    private var errorCount: Int {
+        result.wordScores.filter { $0.score < 0.6 }.count
+    }
+    
+    private var hasErrors: Bool {
+        errorCount > 0
+    }
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .center, spacing: 8) {
@@ -30,20 +38,29 @@ struct EvaluationCardView: View {
                         .font(.system(size: 28))
                         .foregroundStyle(Color.white)
                 }
-                .glassEffect( .regular.tint(Color.accentColor))
+                .glassEffect(.regular.tint(Color.accentColor))
                 .padding(.leading, 4)
+            }
+            
+            // Caption
+            HStack {
+                Spacer()
+                Text(hasErrors ? "\(errorCount) Error\(errorCount == 1 ? "" : "s")" : "Perfect Pronunciation!")
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .foregroundStyle(Color.gray)
             }
         }
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color(UIColor.systemGray6))
+                .fill(hasErrors ? Color("SoftOrange") : Color("SoftGreen"))
         )
     }
         
     func clean(_ word: String) -> String {
         word
-            .replacingOccurrences(of: "’", with: "'")
+            .replacingOccurrences(of: "â€™", with: "'")
             .trimmingCharacters(in: .punctuationCharacters)
             .lowercased()
     }
@@ -60,7 +77,7 @@ struct EvaluationCardView: View {
 
         let _ = {
             words = fullText
-                .replacingOccurrences(of: "’", with: "'")
+                .replacingOccurrences(of: "â€™", with: "'")
                 .split(separator: " ")
                 .map { String($0) }
 
@@ -84,7 +101,8 @@ struct EvaluationCardView: View {
             if let score = indexedScores[item.index], score.score < 0.6 {
                 Text(item.word + " ")
                     .font(.title3)
-                    .underline(true, color: score.score < 0.4 ? .red : .orange)
+                    .underline(true, color: .red)
+                    .foregroundColor(Color.red)
                     .onTapGesture { onTap(score) }
             } else {
                 Text(item.word + " ")

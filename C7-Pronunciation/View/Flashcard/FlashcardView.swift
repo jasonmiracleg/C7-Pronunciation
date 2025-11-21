@@ -1,10 +1,3 @@
-//
-//  FlashcardView.swift
-//  C7-Pronunciation
-//
-//  Created by Abelito Faleyrio Visese on 17/11/25.
-//
-
 import SwiftUI
 
 struct FlashcardView: View {
@@ -15,16 +8,15 @@ struct FlashcardView: View {
     
     var body: some View {
         ZStack(alignment: .topTrailing) {
-            // Card Background
+            // Background
             RoundedRectangle(cornerRadius: 24)
                 .fill(Color(UIColor.tertiarySystemBackground))
                 .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 5)
             
-            // Content
+            // Main Content
             VStack {
                 Spacer()
                 
-                // 2. Use FlowLayout instead of Text concatenation
                 FlowLayout(spacing: 6) {
                     if viewModel.wordScores.isEmpty {
                         // Fallback if no scores yet (just raw text)
@@ -45,14 +37,27 @@ struct FlashcardView: View {
             }
             .frame(maxWidth: .infinity)
             
-            // Speaker            
+            // Speaker button
             Button(action: onPlayAudio) {
                 Image(systemName: "speaker.wave.2.circle.fill")
                     .font(.system(size: 36))
                     .foregroundColor(.white)
             }
-            .glassEffect( .regular.tint(Color.accent))
+            .glassEffect(.regular.tint(Color.accent))
             .padding(16)
+            
+            // CTA Text
+            if viewModel.isEvaluated {
+                Text("Click on the underlined words to see evaluation details.")
+                    .font(.subheadline)
+                    .foregroundColor(Color.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.bottom, 24)
+                    .padding(.horizontal, 16)
+                    .frame(maxWidth: .infinity)
+                    .frame(maxHeight: .infinity, alignment: .bottom)
+                    .transition(.opacity)
+            }
         }
     }
     

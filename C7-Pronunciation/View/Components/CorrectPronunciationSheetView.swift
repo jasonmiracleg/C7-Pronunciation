@@ -16,7 +16,7 @@ struct CorrectPronunciationSheetView: View {
     
     var body: some View {
         NavigationStack {
-            VStack(alignment: .center, spacing: 16) {
+            VStack(alignment: .center, spacing: 8) {
                 VStack {
                     HStack(spacing: 0) {
                         let chars = Array(wordScore.word)
@@ -43,11 +43,11 @@ struct CorrectPronunciationSheetView: View {
                     SpeechSynthesizer.shared.speak(text: wordScore.word.lowercased())
                 }) {
                     Image(systemName: "speaker.wave.2.circle.fill")
-                        .font(.system(size: 36))
+                        .font(.system(size: 48))
                         .foregroundColor(.white)
                 }
                 .glassEffect( .regular.tint(Color.accent))
-                .padding(.bottom, 20)
+                .padding(.bottom, 24)
             }
             .navigationTitle("Evaluation")
             .navigationBarTitleDisplayMode(.inline)
