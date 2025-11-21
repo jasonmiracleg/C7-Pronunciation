@@ -260,26 +260,19 @@ struct FlashcardPageView: View {
     // MARK: - Helpers
 
     func speak(text: String) {
-        // 1. Stop any current speech
         if synthesizer.isSpeaking {
             synthesizer.stopSpeaking(at: .immediate)
         }
-        
-        // --- START OF FIX ---
         
         // Create a mutable copy of the text for modification
         var modifiedText = text
         
         // Regular expression to find isolated, single capital letters.
-        // It looks for a single uppercase letter (A-Z) that is not immediately
-        // followed or preceded by another letter or number.
         let pattern = "\\b([A-Z])\\b"
         
         do {
             let regex = try NSRegularExpression(pattern: pattern, options: [])
             
-            // Find all matches and replace the capitalized letter with its lowercase version.
-            // The block is executed for each match. $1 is the captured group (the capital letter).
             modifiedText = regex.stringByReplacingMatches(
                 in: modifiedText,
                 options: [],
@@ -289,29 +282,21 @@ struct FlashcardPageView: View {
             
         } catch {
             print("Regex error: \(error)")
-            // Fallback to original text if regex fails
             modifiedText = text
         }
 
-        // Use the modified text for speaking
         let textToSpeak = modifiedText
         
-        // --- END OF FIX ---
-
-        // 2. Configure Audio Session to force output to the main Speaker
         do {
             let audioSession = AVAudioSession.sharedInstance()
             
             // We use .playAndRecord with .defaultToSpeaker so we don't break the microphone permission/setup
-            // but strictly route audio to the loud speaker.
             try audioSession.setCategory(.playback, mode: .default)
             try audioSession.setActive(true)
         } catch {
             print("Failed to setup audio session: \(error)")
         }
 
-        // 3. Create and configure the utterance
-        // NOTE: Replace 'text' with 'textToSpeak' here
         let utterance = AVSpeechUtterance(string: textToSpeak)
         utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
         utterance.rate = 0.5
