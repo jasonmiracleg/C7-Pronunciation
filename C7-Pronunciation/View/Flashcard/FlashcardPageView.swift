@@ -67,16 +67,6 @@ struct FlashcardPageView: View {
                     }
                 }
 
-                // MARK: - Error Overlay
-                if let error = viewModel.errorMessage {
-                    VStack {
-                        Text(error)
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(Color.red)
-                            .cornerRadius(10)
-                    }
-                }
                 
                 // MARK: - Error Overlay
                 if let error = viewModel.errorMessage {
@@ -275,6 +265,39 @@ struct FlashcardPageView: View {
             synthesizer.stopSpeaking(at: .immediate)
         }
         
+        // --- START OF FIX ---
+        
+        // Create a mutable copy of the text for modification
+        var modifiedText = text
+        
+        // Regular expression to find isolated, single capital letters.
+        // It looks for a single uppercase letter (A-Z) that is not immediately
+        // followed or preceded by another letter or number.
+        let pattern = "\\b([A-Z])\\b"
+        
+        do {
+            let regex = try NSRegularExpression(pattern: pattern, options: [])
+            
+            // Find all matches and replace the capitalized letter with its lowercase version.
+            // The block is executed for each match. $1 is the captured group (the capital letter).
+            modifiedText = regex.stringByReplacingMatches(
+                in: modifiedText,
+                options: [],
+                range: NSRange(location: 0, length: modifiedText.utf16.count),
+                withTemplate: "$1".lowercased()
+            )
+            
+        } catch {
+            print("Regex error: \(error)")
+            // Fallback to original text if regex fails
+            modifiedText = text
+        }
+
+        // Use the modified text for speaking
+        let textToSpeak = modifiedText
+        
+        // --- END OF FIX ---
+
         // 2. Configure Audio Session to force output to the main Speaker
         do {
             let audioSession = AVAudioSession.sharedInstance()
@@ -288,7 +311,8 @@ struct FlashcardPageView: View {
         }
 
         // 3. Create and configure the utterance
-        let utterance = AVSpeechUtterance(string: text)
+        // NOTE: Replace 'text' with 'textToSpeak' here
+        let utterance = AVSpeechUtterance(string: textToSpeak)
         utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
         utterance.rate = 0.5
         utterance.volume = 1.0
