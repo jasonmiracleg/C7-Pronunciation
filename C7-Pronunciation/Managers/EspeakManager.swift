@@ -290,7 +290,6 @@ public class EspeakManager {
             
             // Get next word if available (for "the" rule)
             let nextWord = isNotLastWord ? wordPhonemes[index + 1].word.lowercased() : ""
-            let nextWordStartsWithVowel = nextWord.first.map { "aeiou".contains($0) } ?? false
             
             var correctedPhonemes: [String]? = nil
             

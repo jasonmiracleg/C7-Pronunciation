@@ -62,15 +62,34 @@ struct FlashcardView: View {
             
             // CTA Text
             if viewModel.isEvaluated {
-                Text("Tap on the underlined words to see evaluation details.")
-                    .font(.subheadline)
-                    .foregroundColor(Color.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.bottom, 24)
-                    .padding(.horizontal, 16)
-                    .frame(maxWidth: .infinity)
-                    .frame(maxHeight: .infinity, alignment: .bottom)
-                    .transition(.opacity)
+                let hasErrors = viewModel.wordScores.contains { $0.score <= ERROR_THRESHOLD }
+                
+                VStack {
+                    Spacer()
+                    
+                    if hasErrors {
+                        // Default
+                        Text("Tap on the underlined words to see evaluation details.")
+                            .foregroundColor(Color.secondary)
+                    } else {
+                        // No errors
+                        Text("Perfect Pronunciation! Great Job.")
+                            .foregroundColor(.green)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .fill(Color("SoftGreen"))
+                            )
+                    }
+                }
+                .font(.subheadline)
+                .multilineTextAlignment(.center)
+                
+                .padding(.bottom, 24)
+                .padding(.horizontal, 16)
+                .frame(maxWidth: .infinity)
+                .transition(.opacity)
             }
         }
     }

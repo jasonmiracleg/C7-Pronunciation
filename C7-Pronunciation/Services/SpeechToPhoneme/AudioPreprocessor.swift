@@ -1,6 +1,6 @@
 //
-//  AudioPreprocessor.swift (FIXED - Smart Chunking)
-//  Only processes chunks with actual speech content
+//  AudioPreprocessor.swift (FIXED - Correct Normalization)
+//  Zero-mean unit-variance normalization for wav2vec2 compatibility
 //
 
 import AVFoundation
@@ -15,7 +15,11 @@ struct AudioPreprocessor {
     // Energy threshold for valid chunks
     static let minChunkEnergy: Float = 0.01
     
+    // Epsilon for numerical stability (matches HuggingFace)
+    private static let epsilon: Float = 1e-5
+    
     /// Load and preprocess audio file
+    /// Returns raw samples - normalization happens per-chunk in splitIntoChunks
     static func loadAudio(from url: URL) throws -> [Float] {
         print("Loading audio from: \(url.lastPathComponent)")
         
@@ -51,26 +55,23 @@ struct AudioPreprocessor {
             )
         }
         
-        // Check signal energy BEFORE normalization
+        // Check signal energy
         let signalEnergy = calculateRMS(monoSamples)
         print("  Signal RMS energy: \(signalEnergy)")
         
-        // REMOVED: Don't throw error for quiet audio, just warn
         if signalEnergy < 0.001 {
             print("  ⚠️ WARNING: Audio is very quiet!")
         }
         
-        // Normalize to [-1, 1]
-        normalize(&monoSamples)
-        
-        let maxAfterNorm = monoSamples.map { abs($0) }.max() ?? 0
-        print("  Normalized: max amplitude = \(maxAfterNorm)")
+        // DO NOT normalize here - normalization happens per-chunk in splitIntoChunks
+        // This ensures each chunk is independently normalized before padding
         
         return monoSamples
     }
     
     /// Calculate RMS (Root Mean Square) energy of signal
-    private static func calculateRMS(_ samples: [Float]) -> Float {
+    static func calculateRMS(_ samples: [Float]) -> Float {
+        guard !samples.isEmpty else { return 0 }
         var sum: Float = 0
         vDSP_svesq(samples, 1, &sum, vDSP_Length(samples.count))
         return sqrt(sum / Float(samples.count))
@@ -131,19 +132,43 @@ struct AudioPreprocessor {
         return outputSamples
     }
     
-    /// Normalize samples to [-1, 1] range
-    private static func normalize(_ samples: inout [Float]) {
-        var maxVal: Float = 0
-        vDSP_maxmgv(samples, 1, &maxVal, vDSP_Length(samples.count))
+    // MARK: - Zero-Mean Unit-Variance Normalization (CRITICAL FIX)
+    
+    /// Normalize samples using zero-mean unit-variance normalization
+    /// This matches HuggingFace Wav2Vec2FeatureExtractor and is REQUIRED for wav2vec2-lv60 models
+    /// Formula: (x - mean) / sqrt(variance + epsilon)
+    static func normalize(_ samples: [Float]) -> [Float] {
+        guard !samples.isEmpty else { return samples }
         
-        if maxVal > 0 {
-            var divisor = maxVal
-            vDSP_vsdiv(samples, 1, &divisor, &samples, 1, vDSP_Length(samples.count))
-        }
+        // Calculate mean using Accelerate
+        var mean: Float = 0
+        vDSP_meanv(samples, 1, &mean, vDSP_Length(samples.count))
+        
+        // Calculate variance: E[X^2] - E[X]^2
+        var sumOfSquares: Float = 0
+        vDSP_svesq(samples, 1, &sumOfSquares, vDSP_Length(samples.count))
+        let meanOfSquares = sumOfSquares / Float(samples.count)
+        let variance = meanOfSquares - (mean * mean)
+        
+        // Standard deviation with epsilon for numerical stability
+        let std = sqrt(variance + epsilon)
+        
+        // Normalize: (x - mean) / std
+        var result = [Float](repeating: 0, count: samples.count)
+        var negativeMean = -mean
+        
+        // Subtract mean
+        vDSP_vsadd(samples, 1, &negativeMean, &result, 1, vDSP_Length(samples.count))
+        
+        // Divide by std
+        var stdReciprocal = 1.0 / std
+        vDSP_vsmul(result, 1, &stdReciprocal, &result, 1, vDSP_Length(result.count))
+        
+        return result
     }
     
-    /// Split audio into 5-second chunks - IMPROVED VERSION
-    /// Only creates chunks with actual speech content
+    /// Split audio into 5-second chunks with proper normalization
+    /// Each chunk is normalized BEFORE padding to match HuggingFace behavior
     static func splitIntoChunks(
         samples: [Float],
         overlapSeconds: Double = 0.5
@@ -152,18 +177,23 @@ struct AudioPreprocessor {
         print("  Total samples: \(samples.count)")
         print("  Duration: \(Double(samples.count) / targetSampleRate)s")
         
-        // If audio is <= 5 seconds, return as single chunk (padded)
+        // If audio is <= 5 seconds, return as single chunk (normalized then padded)
         if samples.count <= chunkSize {
             print("  ✓ Audio fits in single chunk")
-            var chunk = samples
+            
+            // Calculate energy BEFORE normalization
+            let energy = calculateRMS(samples)
+            print("  Chunk energy (pre-norm): \(energy)")
+            
+            // NORMALIZE the actual audio content FIRST
+            var chunk = normalize(samples)
+            
+            // THEN pad with zeros (zeros stay as zeros, which is correct)
             if chunk.count < chunkSize {
                 let paddingNeeded = chunkSize - chunk.count
-                print("  Padding with \(paddingNeeded) zeros")
+                print("  Padding with \(paddingNeeded) zeros (after normalization)")
                 chunk.append(contentsOf: [Float](repeating: 0, count: paddingNeeded))
             }
-            
-            let energy = calculateRMS(chunk)
-            print("  Chunk energy: \(energy)")
             
             return [chunk]
         }
@@ -179,20 +209,20 @@ struct AudioPreprocessor {
         
         while startIndex < samples.count {
             let endIndex = min(startIndex + chunkSize, samples.count)
-            var chunk = Array(samples[startIndex..<endIndex])
+            let rawChunk = Array(samples[startIndex..<endIndex])
             
-            // Calculate energy BEFORE padding
-            let chunkEnergy = calculateRMS(chunk)
-            let actualDuration = Double(chunk.count) / targetSampleRate
+            // Calculate energy BEFORE normalization
+            let chunkEnergy = calculateRMS(rawChunk)
+            let actualDuration = Double(rawChunk.count) / targetSampleRate
             
             print("\n  Chunk \(chunks.count + 1):")
             print("    Start: \(startIndex), End: \(endIndex)")
             print("    Duration: \(String(format: "%.2f", actualDuration))s")
-            print("    Energy: \(chunkEnergy)")
+            print("    Energy (pre-norm): \(chunkEnergy)")
             
             // Only pad if this is the last chunk AND it has enough content
-            if chunk.count < chunkSize {
-                let percentFilled = Double(chunk.count) / Double(chunkSize) * 100
+            if rawChunk.count < chunkSize {
+                let percentFilled = Double(rawChunk.count) / Double(chunkSize) * 100
                 print("    Content: \(String(format: "%.1f", percentFilled))% filled")
                 
                 // Skip if mostly padding (less than 50% real audio)
@@ -206,23 +236,20 @@ struct AudioPreprocessor {
                     print("    ⚠️ SKIPPING: Energy too low (\(chunkEnergy) < \(minChunkEnergy))")
                     break
                 }
-                
+            }
+            
+            // NORMALIZE the raw audio content FIRST (before padding)
+            var chunk = normalize(rawChunk)
+            
+            // THEN pad if needed (padding stays as zeros)
+            if chunk.count < chunkSize {
                 let paddingNeeded = chunkSize - chunk.count
-                print("    Padding with \(paddingNeeded) zeros")
+                print("    Padding with \(paddingNeeded) zeros (after normalization)")
                 chunk.append(contentsOf: [Float](repeating: 0, count: paddingNeeded))
             }
             
-            // Verify final chunk has reasonable energy
-            let finalEnergy = calculateRMS(chunk)
-            print("    Final energy: \(finalEnergy)")
-            
-            if finalEnergy >= minChunkEnergy {
-                chunks.append(chunk)
-                print("    ✓ Chunk added")
-            } else {
-                print("    ⚠️ SKIPPING: Final energy too low")
-                break
-            }
+            chunks.append(chunk)
+            print("    ✓ Chunk added (normalized)")
             
             // Break if we've processed the entire audio
             if endIndex >= samples.count {

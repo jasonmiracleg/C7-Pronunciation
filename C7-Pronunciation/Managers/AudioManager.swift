@@ -7,8 +7,6 @@ import Foundation
 import AVFoundation
 import Combine
 
-// Ensure AudioError is defined (either here or in a shared file)
-// [Reference: AudioError enum from your previous file]
 
 class AudioManager: NSObject, ObservableObject, AVAudioRecorderDelegate {
     static let shared = AudioManager()
@@ -147,7 +145,7 @@ class AudioManager: NSObject, ObservableObject, AVAudioRecorderDelegate {
         // 1. Preprocess (remains here as it uses AVFoundation)
         let samples = try loadAndPreprocessAudio(from: url)
         
-        // 2. Delegate to Manager
+        // 2. Delegate to Manager (normalization happens per-chunk there)
         return try await wav2vecManager.process(samples: samples)
     }
     
@@ -165,10 +163,9 @@ class AudioManager: NSObject, ObservableObject, AVAudioRecorderDelegate {
         let audioFile = try AVAudioFile(forReading: url)
         let format = audioFile.processingFormat
         
-        // Handle empty files
+        // Handle empty files - return empty array, Wav2VecManager will handle gracefully
         if audioFile.length == 0 {
-            // Return 5s of silence if empty to prevent crash
-            return [Float](repeating: 0, count: 80000)
+            return []
         }
         
         let frameCount = AVAudioFrameCount(audioFile.length)
@@ -184,11 +181,16 @@ class AudioManager: NSObject, ObservableObject, AVAudioRecorderDelegate {
             samples = resample(samples: samples, fromRate: format.sampleRate, toRate: 16000)
         }
         
-        if let maxVal = samples.map({ abs($0) }).max(), maxVal > 0 {
-            samples = samples.map { $0 / maxVal }
-        }
+        // REMOVED: Min-max normalization was INCORRECT for wav2vec2
+        // The model requires zero-mean unit-variance normalization which
+        // is now applied per-chunk in Wav2VecManager.splitIntoChunks()
+        //
+        // OLD (WRONG):
+        // if let maxVal = samples.map({ abs($0) }).max(), maxVal > 0 {
+        //     samples = samples.map { $0 / maxVal }
+        // }
         
-        if samples.isEmpty { return [Float](repeating: 0, count: 80000) }
+        if samples.isEmpty { return [] }
         
         return samples
     }

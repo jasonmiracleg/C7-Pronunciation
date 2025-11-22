@@ -3,11 +3,12 @@
 //  PronunciationScorer
 //
 //  Created by Savio Enoson on 19/11/25.
-//  FIXED: Overlap handling to prevent duplicate phonemes at chunk boundaries
+//  FIXED: Zero-mean unit-variance normalization + overlap handling
 //
 
 import Foundation
 import CoreML
+import Accelerate
 
 /// Responsible strictly for ML Model interaction and decoding logic.
 class Wav2VecManager {
@@ -25,6 +26,9 @@ class Wav2VecManager {
     // This creates ~25 logit frames of overlap (8000 / 320 ≈ 25)
     private let overlapSamples = 8000
     private let samplesPerFrame = 320  // Wav2Vec2 downsampling factor (typically 320 for base model)
+    
+    // Epsilon for numerical stability (matches HuggingFace)
+    private let epsilon: Float = 1e-5
     
     // Track if we are already loaded so we don't reload
     private var isLoaded = false
@@ -68,13 +72,31 @@ class Wav2VecManager {
         }
     }
     
+    /// Minimum samples required for meaningful recognition (~100ms at 16kHz)
+    private let minimumSamples = 1600
+    
     /// Main entry point: Takes raw float samples and returns phoneme predictions
     func process(samples: [Float]) throws -> [[PhonemePrediction]] {
         guard let decoder = decoder, model != nil else {
             throw AudioError.modelNotLoaded
         }
+        
+        // Handle short/empty recordings gracefully
+        // Return empty result instead of crashing downstream
+        if samples.count < minimumSamples {
+            print("⚠️ Recording too short (\(samples.count) samples < \(minimumSamples) minimum). Returning empty result.")
+            return []
+        }
+        
+        // Check if audio has any actual content (not just silence)
+        var maxAmplitude: Float = 0
+        vDSP_maxmgv(samples, 1, &maxAmplitude, vDSP_Length(samples.count))
+        if maxAmplitude < 0.001 {
+            print("⚠️ Recording is silent (max amplitude: \(maxAmplitude)). Returning empty result.")
+            return []
+        }
 
-        // 1. Split large audio into chunks the model can handle
+        // 1. Split large audio into chunks (with proper normalization)
         let chunks = splitIntoChunks(samples: samples)
         
         // If only one chunk, no overlap handling needed
@@ -90,7 +112,42 @@ class Wav2VecManager {
         return decoder.decodeChunks([mergedLogits])
     }
     
-    // MARK: - Overlap Handling (NEW)
+    // MARK: - Zero-Mean Unit-Variance Normalization (CRITICAL FIX)
+    
+    /// Normalize samples using zero-mean unit-variance normalization
+    /// This matches HuggingFace Wav2Vec2FeatureExtractor and is REQUIRED for wav2vec2-lv60 models
+    /// Formula: (x - mean) / sqrt(variance + epsilon)
+    private func normalize(_ samples: [Float]) -> [Float] {
+        guard !samples.isEmpty else { return samples }
+        
+        // Calculate mean using Accelerate
+        var mean: Float = 0
+        vDSP_meanv(samples, 1, &mean, vDSP_Length(samples.count))
+        
+        // Calculate variance: E[X^2] - E[X]^2
+        var sumOfSquares: Float = 0
+        vDSP_svesq(samples, 1, &sumOfSquares, vDSP_Length(samples.count))
+        let meanOfSquares = sumOfSquares / Float(samples.count)
+        let variance = meanOfSquares - (mean * mean)
+        
+        // Standard deviation with epsilon for numerical stability
+        let std = sqrt(variance + epsilon)
+        
+        // Normalize: (x - mean) / std
+        var result = [Float](repeating: 0, count: samples.count)
+        var negativeMean = -mean
+        
+        // Subtract mean
+        vDSP_vsadd(samples, 1, &negativeMean, &result, 1, vDSP_Length(samples.count))
+        
+        // Divide by std
+        var stdReciprocal = 1.0 / std
+        vDSP_vsmul(result, 1, &stdReciprocal, &result, 1, vDSP_Length(result.count))
+        
+        return result
+    }
+    
+    // MARK: - Overlap Handling
     
     /// Process multiple chunks and merge their logits, handling overlap regions
     /// This prevents duplicate phonemes at chunk boundaries
@@ -156,27 +213,38 @@ class Wav2VecManager {
         return convertToLogits(outputArray)
     }
     
+    /// Split audio into chunks with proper zero-mean unit-variance normalization
+    /// CRITICAL: Each chunk is normalized BEFORE padding to match HuggingFace behavior
     private func splitIntoChunks(samples: [Float]) -> [[Float]] {
-        // Short audio: single chunk with padding
+        // Short audio: normalize THEN pad
         if samples.count < chunkSize {
-            var chunk = samples
+            // NORMALIZE the actual audio content FIRST
+            var chunk = normalize(samples)
+            // THEN pad with zeros (zeros stay as zeros)
             chunk.append(contentsOf: [Float](repeating: 0, count: chunkSize - chunk.count))
+            print("📊 Single chunk: normalized \(samples.count) samples, padded to \(chunkSize)")
             return [chunk]
         }
         
-        // Exact fit: no chunking needed
-        if samples.count == chunkSize { return [samples] }
+        // Exact fit: just normalize
+        if samples.count == chunkSize {
+            print("📊 Exact fit: normalized \(samples.count) samples")
+            return [normalize(samples)]
+        }
         
-        // Long audio: split with overlap
+        // Long audio: split with overlap, normalize each chunk
         let stride = chunkSize - overlapSamples
         var chunks: [[Float]] = []
         var startIndex = 0
         
         while startIndex < samples.count {
             let endIndex = min(startIndex + chunkSize, samples.count)
-            var chunk = Array(samples[startIndex..<endIndex])
+            let rawChunk = Array(samples[startIndex..<endIndex])
             
-            // Pad last chunk if needed
+            // NORMALIZE the raw audio content FIRST (before padding)
+            var chunk = normalize(rawChunk)
+            
+            // THEN pad if needed (padding stays as zeros)
             if chunk.count < chunkSize {
                 chunk.append(contentsOf: [Float](repeating: 0, count: chunkSize - chunk.count))
             }
@@ -189,7 +257,7 @@ class Wav2VecManager {
             startIndex += stride
         }
         
-        print("📊 Split \(samples.count) samples into \(chunks.count) chunks (stride: \(stride), overlap: \(overlapSamples))")
+        print("📊 Split \(samples.count) samples into \(chunks.count) normalized chunks (stride: \(stride), overlap: \(overlapSamples))")
         return chunks
     }
     

@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		2CB5371E2ED03EC000535FC3 /* console_log.txt in Sources */ = {isa = PBXBuildFile; fileRef = 2CB5371D2ED03EBE00535FC3 /* console_log.txt */; };
 		2CE6B0782EC6223F001986CD /* espeak-ng-data in Frameworks */ = {isa = PBXBuildFile; productRef = 2CE6B0772EC6223F001986CD /* espeak-ng-data */; };
 		2CE6B07A2EC6223F001986CD /* libespeak-ng in Frameworks */ = {isa = PBXBuildFile; productRef = 2CE6B0792EC6223F001986CD /* libespeak-ng */; };
 /* End PBXBuildFile section */
@@ -30,7 +29,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		2CB5371D2ED03EBE00535FC3 /* console_log.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = console_log.txt; sourceTree = "<group>"; };
 		6A7F0D7D2EC5687C003D503F /* C7-Pronunciation.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "C7-Pronunciation.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6A7F0D8C2EC5687C003D503F /* C7-PronunciationTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "C7-PronunciationTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6A7F0D962EC5687C003D503F /* C7-PronunciationUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "C7-PronunciationUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -105,7 +103,6 @@
 		6A7F0D742EC5687C003D503F = {
 			isa = PBXGroup;
 			children = (
-				2CB5371D2ED03EBE00535FC3 /* console_log.txt */,
 				2C775DBA2EC5E86C00B12CFA /* Resources */,
 				6A7F0D7F2EC5687C003D503F /* C7-Pronunciation */,
 				6A7F0D8F2EC5687C003D503F /* C7-PronunciationTests */,
@@ -274,7 +271,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2CB5371E2ED03EC000535FC3 /* console_log.txt in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
