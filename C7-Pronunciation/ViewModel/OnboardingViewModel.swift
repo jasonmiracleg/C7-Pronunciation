@@ -29,7 +29,7 @@ class OnboardingViewModel: ObservableObject {
         pages = [
             OnboardingPage(
                 imageName: "Onboarding(1)",
-                title: "A Personal Speaking Tutor At Your Fingertips",
+                title: "A Personal Speaking Tutor at Your Fingertips",
                 description: "Master your speaking skills with focused practice; anytime, anywhere."
             ),
             OnboardingPage(

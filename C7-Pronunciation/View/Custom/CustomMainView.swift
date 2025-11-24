@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct CustomMainView: View {
+    // Adding this so github updates this file
     @Environment(\.dismiss) private var dismiss
     @ObservedObject var viewModel: CustomViewModel
     
