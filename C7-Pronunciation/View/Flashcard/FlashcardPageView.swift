@@ -40,7 +40,7 @@ struct FlashcardPageView: View {
                         Spacer().frame(height: 40)  // Slight but consistent padding up top
                         
                         // MARK: - Instructions
-                        Text("Let's practice by tapping the record button and speaking the words below out loud.")
+                        Text("Start by tapping the record button and speaking the words below out loud.")
                             .multilineTextAlignment(.center)
                             .fixedSize(horizontal: false, vertical: true)
                             .padding(.horizontal, 40)
