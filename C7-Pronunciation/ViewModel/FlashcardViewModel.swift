@@ -33,8 +33,6 @@ class FlashcardViewModel: ObservableObject {
             .assign(to: \.isRecording, on: self)
             .store(in: &cancellables)
         
-        // 2. Initialize with default text
-        updateTargetSentence("Hello world")
     }
     
     // MARK: - Setup Logic

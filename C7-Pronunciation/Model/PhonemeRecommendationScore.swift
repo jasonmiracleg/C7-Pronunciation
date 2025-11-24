@@ -19,6 +19,8 @@ final class PhonemeRecommendationScore {
     
     var score: Double = 0.5
     
+    var lastUpdated: Date = Date()
+    
     init(
         phoneme: String,
         score: Double = 0.5,
@@ -31,10 +33,15 @@ final class PhonemeRecommendationScore {
     }
     
     
-    func updateScore(evalScore: Double, learningRate: Double = 0.4){
+    func updateScore(evalScore: Double){
+        let dynamicRate = max(0.1, 0.5 - (Double(attempts) * 0.02))
+        
         let evalScoreNormalized = evalScore/100
-        let newScore = score * (1 - learningRate) + evalScoreNormalized * learningRate
+        let newScore = score * (1 - dynamicRate) + evalScore * dynamicRate // Using eval instead of normalized eval
+        
         attempts += 1
         score = newScore
+        
+        lastUpdated = Date()
     }
 }

@@ -4,15 +4,17 @@
 //
 //  Created by Gerald Gavin Lienardi on 17/11/25.
 //
+
 import Foundation
 import Combine
 import SwiftData
 
 class User: ObservableObject {
     
-    var phonemeScores: [PhonemeRecommendationScore] = []
+    @Published var phonemeScores: [PhonemeRecommendationScore] = []
     @Published var phraseQueue: [Phrase] = []
     var successfullyLoadedPhonemes = true
+    private var recentPhraseHistory: Set<String> = []
     
     init() {
         let context = DataBankManager.shared.context
@@ -66,18 +68,18 @@ class User: ObservableObject {
 
     // CALL THIS TO UPDATE GLOBAL PHONEME SCORES
     func updateScores(with phonemes: [AlignedPhoneme]) {
-        print("Phoneme scores updated!!!!! YAY YIPPIE LOV LOV LOV")
+        objectWillChange.send()
         for entry in phonemes {
             
-            // checks only if the target and actual are actually valid to check
             if entry.type != .match && entry.type != .replace { continue }
-            guard let target = entry.target else { continue }
+            guard let target = entry.actual else { continue }
             
-            // find the index of the existing phoneme
             if let index = phonemeScores.firstIndex(where: { $0.phoneme == target}) {
+                let oldScore = phonemeScores[index].score
                 phonemeScores[index].updateScore(evalScore: entry.score)
-            } else { // this else is an edge case theres a completely new phoneme
-                var newPhoneme = PhonemeRecommendationScore(
+                print("✅ Updated [\(target)]: \(String(format: "%.2f", oldScore)) -> \(String(format: "%.2f", phonemeScores[index].score))")
+            } else {
+                let newPhoneme = PhonemeRecommendationScore(
                     phoneme: target
                 )
                 newPhoneme.updateScore(evalScore: entry.score)
@@ -85,7 +87,6 @@ class User: ObservableObject {
             }
             
         }
-        // saving into swift data after going through all phonemes
         try? DataBankManager.shared.context.save()
     }
     
@@ -103,27 +104,46 @@ class User: ObservableObject {
         print("Did not find the phoneme")
     }
     
-    func addPhrasesToQueue(basedOn: PhraseSearchType = .mixed){
-        var generatedPhrases: [Phrase] = []
+    func addPhrasesToQueue(basedOn: PhraseSearchType = .mixed) {
+        var targetPhonemes: [String] = []
+        
         switch basedOn {
-            case .urgency:
-                generatedPhrases = Array(
-                    DataBankManager.shared.getPhrasesContainingPhoneme(getMostUrgentPhonemes())
-                    .prefix(5)
-                )
-            case .attempts:
-                generatedPhrases = Array(
-                    DataBankManager.shared.getPhrasesContainingPhoneme(getLeastAttemptedPhonemes())
-                    .prefix(5)
-                )
-            case .mixed:
-                generatedPhrases = Array(
-                    DataBankManager.shared.getPhrasesContainingPhoneme(getMixedUrgencyPhoneme())
-                    .prefix(5)
-                )
-
+        case .urgency:
+            targetPhonemes = getMostUrgentPhonemes()
+        case .attempts:
+            targetPhonemes = getLeastAttemptedPhonemes()
+        case .mixed:
+            targetPhonemes = getMixedUrgencyPhoneme()
         }
-        phraseQueue.append(contentsOf: generatedPhrases)
+        
+        var candidates: [Phrase] = []
+        
+        for phoneme in targetPhonemes {
+            let matches = DataBankManager.shared.getPhrasesContainingPhoneme([phoneme])
+            candidates.append(contentsOf: matches)
+        }
+        
+        let uniqueCandidates = Array(Set(candidates))
+        
+        let availableCandidates = uniqueCandidates.filter { candidate in
+            !phraseQueue.contains(where: { $0.text == candidate.text })
+        }
+        
+        if availableCandidates.isEmpty {
+            print("⚠️ Recommendation returned 0 results. Using fallback random phrases.")
+            let randomPicks = DataBankManager.shared.getRandomPhrasePicks()
+            
+            var fallbackPhrases: [Phrase] = []
+            fallbackPhrases.append(contentsOf: randomPicks.formal)
+            fallbackPhrases.append(contentsOf: randomPicks.informal)
+            
+            phraseQueue.append(contentsOf: fallbackPhrases.shuffled())
+        } else {
+            let selectedPhrases = Array(availableCandidates.shuffled().prefix(5))
+            phraseQueue.append(contentsOf: selectedPhrases)
+        }
+        
+        print("✅ Added \(phraseQueue.count) phrases to queue. Strategy: \(basedOn)")
     }
     
     func nextCard() -> Phrase {
@@ -146,11 +166,19 @@ class User: ObservableObject {
         return mixedPhonemes
     }
     
-    func getMostUrgentPhonemes(limit: Int = 3) -> [String]{
+    func getMostUrgentPhonemes(limit: Int = 3) -> [String] {
         return phonemeScores
-            .sorted { $0.score < $1.score }
+            .map { scoreObj -> (String, Double) in
+                // If it's been a long time since last update, artificially lower the score to bubble it up to the top of the list.
+                let daysSinceLastPractice = Date().timeIntervalSince(scoreObj.lastUpdated) / 86400
+                let decayFactor = 0.05 * daysSinceLastPractice
+                
+                let adjustedScore = scoreObj.score - decayFactor
+                return (scoreObj.phoneme, adjustedScore)
+            }
+            .sorted { $0.1 < $1.1 } // Sort by the Adjusted Score
             .prefix(limit)
-            .map { $0.phoneme }
+            .map { $0.0 }
     }
     
     func getLeastAttemptedPhonemes(limit: Int = 3) -> [String]{
@@ -174,6 +202,14 @@ class User: ObservableObject {
                 .sorted { $0.score > $1.score }   // highest first
                 .prefix(limit)
         )
+    }
+    
+    private func addToHistory(_ text: String) {
+        recentPhraseHistory.insert(text)
+        // Remember the last 50 phrases :D
+        if recentPhraseHistory.count > 50 {
+            recentPhraseHistory.removeFirst()
+        }
     }
 
 }
