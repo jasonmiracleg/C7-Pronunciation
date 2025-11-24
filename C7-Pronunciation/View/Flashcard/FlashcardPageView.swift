@@ -67,16 +67,6 @@ struct FlashcardPageView: View {
                     }
                 }
 
-                // MARK: - Error Overlay
-                if let error = viewModel.errorMessage {
-                    VStack {
-                        Text(error)
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(Color.red)
-                            .cornerRadius(10)
-                    }
-                }
                 
                 // MARK: - Error Overlay
                 if let error = viewModel.errorMessage {
@@ -270,25 +260,44 @@ struct FlashcardPageView: View {
     // MARK: - Helpers
 
     func speak(text: String) {
-        // 1. Stop any current speech
         if synthesizer.isSpeaking {
             synthesizer.stopSpeaking(at: .immediate)
         }
         
-        // 2. Configure Audio Session to force output to the main Speaker
+        // Create a mutable copy of the text for modification
+        var modifiedText = text
+        
+        // Regular expression to find isolated, single capital letters.
+        let pattern = "\\b([A-Z])\\b"
+        
+        do {
+            let regex = try NSRegularExpression(pattern: pattern, options: [])
+            
+            modifiedText = regex.stringByReplacingMatches(
+                in: modifiedText,
+                options: [],
+                range: NSRange(location: 0, length: modifiedText.utf16.count),
+                withTemplate: "$1".lowercased()
+            )
+            
+        } catch {
+            print("Regex error: \(error)")
+            modifiedText = text
+        }
+
+        let textToSpeak = modifiedText
+        
         do {
             let audioSession = AVAudioSession.sharedInstance()
             
             // We use .playAndRecord with .defaultToSpeaker so we don't break the microphone permission/setup
-            // but strictly route audio to the loud speaker.
             try audioSession.setCategory(.playback, mode: .default)
             try audioSession.setActive(true)
         } catch {
             print("Failed to setup audio session: \(error)")
         }
 
-        // 3. Create and configure the utterance
-        let utterance = AVSpeechUtterance(string: text)
+        let utterance = AVSpeechUtterance(string: textToSpeak)
         utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
         utterance.rate = 0.5
         utterance.volume = 1.0
