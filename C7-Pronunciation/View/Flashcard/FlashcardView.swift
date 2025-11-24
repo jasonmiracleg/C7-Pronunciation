@@ -1,10 +1,3 @@
-//
-//  FlashcardView.swift
-//  C7-Pronunciation
-//
-//  Created by Abelito Faleyrio Visese on 17/11/25.
-//
-
 import SwiftUI
 
 struct FlashcardView: View {
@@ -15,22 +8,35 @@ struct FlashcardView: View {
     
     var body: some View {
         ZStack(alignment: .topTrailing) {
-            // Card Background
+            // Background
             RoundedRectangle(cornerRadius: 24)
                 .fill(Color(UIColor.tertiarySystemBackground))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 24)
+                        .stroke(Color.accentColor, lineWidth: 6)
+                )
                 .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 5)
             
-            // Content
+            // Logo
+            Image("card_logo")
+                .resizable()
+                .scaledToFit()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding(.vertical, 24)
+                .padding(.horizontal, 48)
+                .opacity(0.1)
+            
+            // Main Content
             VStack {
                 Spacer()
                 
-                // 2. Use FlowLayout instead of Text concatenation
                 FlowLayout(spacing: 6) {
                     if viewModel.wordScores.isEmpty {
                         // Fallback if no scores yet (just raw text)
                         ForEach(viewModel.targetSentence.split(separator: " ").map(String.init), id: \.self) { word in
                             Text(word)
                                 .font(.system(size: 28, weight: .medium))
+                            
                         }
                     } else {
                         // Render Evaluated/Scored words
@@ -45,28 +51,57 @@ struct FlashcardView: View {
             }
             .frame(maxWidth: .infinity)
             
-            // Speaker            
+            // Speaker button
             Button(action: onPlayAudio) {
                 Image(systemName: "speaker.wave.2.circle.fill")
                     .font(.system(size: 36))
                     .foregroundColor(.white)
             }
-            .glassEffect( .regular.tint(Color.accent))
+            .glassEffect(.regular.tint(Color.accent))
             .padding(16)
+            
+            // CTA Text
+            if viewModel.isEvaluated {
+                let hasErrors = viewModel.wordScores.contains { $0.score <= ERROR_THRESHOLD }
+                
+                VStack {
+                    Spacer()
+                    
+                    if hasErrors {
+                        // Default
+                        Text("Tap on the underlined words to see evaluation details.")
+                            .foregroundColor(Color.secondary)
+                    } else {
+                        // No errors
+                        Text("Perfect Pronunciation! Great Job.")
+                            .foregroundColor(.green)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .fill(Color("SoftGreen"))
+                            )
+                    }
+                }
+                .font(.subheadline)
+                .multilineTextAlignment(.center)
+                
+                .padding(.bottom, 24)
+                .padding(.horizontal, 16)
+                .frame(maxWidth: .infinity)
+                .transition(.opacity)
+            }
         }
     }
     
     @ViewBuilder
     private func wordView(for wordScore: WordScore) -> some View {
-        let isLowScore = wordScore.score <= 0.7
+        let isLowScore = wordScore.score <= ERROR_THRESHOLD
         
         Text(wordScore.word)
             .font(.system(size: 28, weight: .medium))
-            // Color logic: If evaluated, use score color. If low score, ensure it's visible.
-            .foregroundColor(Color.primary)
-            // Underline logic: Only if evaluated and score is bad
+            .foregroundColor(wordScore.color)
             .underline(wordScore.isEvaluated && isLowScore, color: wordScore.color)
-            // Interaction logic: Only tappable if evaluated and score is bad
             .onTapGesture {
                 if wordScore.isEvaluated && isLowScore {
                     onTapWord(wordScore)

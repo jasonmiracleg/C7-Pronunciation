@@ -35,7 +35,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		2CB536902ECE12D400535FC3 /* Exceptions for "C7-Pronunciation" folder in "C7-Pronunciation" target */ = {
+		2CB537252ED0414600535FC3 /* Exceptions for "C7-Pronunciation" folder in "C7-Pronunciation" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -56,7 +56,7 @@
 		6A7F0D7F2EC5687C003D503F /* C7-Pronunciation */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				2CB536902ECE12D400535FC3 /* Exceptions for "C7-Pronunciation" folder in "C7-Pronunciation" target */,
+				2CB537252ED0414600535FC3 /* Exceptions for "C7-Pronunciation" folder in "C7-Pronunciation" target */,
 			);
 			path = "C7-Pronunciation";
 			sourceTree = "<group>";
@@ -357,6 +357,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
@@ -415,6 +416,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;

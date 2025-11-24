@@ -54,38 +54,25 @@ extension CustomViewModel {
         let wordCount = Double(currentSentence.components(separatedBy: .whitespaces).count)
         
         // Math: Calculate expected duration based on WPM
-        // 60 seconds / WPM = Seconds per word
         let secondsPerWord = 60.0 / self.wordsPerMinute
         let expectedDuration = wordCount * secondsPerWord
         
-        // MIN DURATION: 50% of expected time + 1s buffer.
-        // (e.g., if sentence takes 4s, don't jump before 3s)
         let minDuration = (expectedDuration * 0.5) + 1.0
-        
-        // MAX DURATION: 250% of expected time + 2s buffer.
-        // (e.g., if sentence takes 4s, force jump after 12s)
         let maxDuration = (expectedDuration * 2.5) + 2.0
         
         let timeElapsed = Date().timeIntervalSince(startTime)
         
-        // --- GATE 1: TOO EARLY (The "Double Jump" Preventer) ---
-        if timeElapsed < minDuration {
-            // We haven't been on this sentence long enough.
-            // Ignore all matching to prevent accidental double-jumps.
-            return
-        }
+        // --- GATE 1: TOO EARLY ---
+        if timeElapsed < minDuration { return }
         
-        // --- GATE 2: TIMEOUT (The "Stuck" Preventer) ---
+        // --- GATE 2: TIMEOUT ---
         if timeElapsed > maxDuration {
             print("⏰ Auto-Advanced: Max duration exceeded")
             advanceSentence()
             return
         }
         
-        // --- GATE 3: TEXT MATCHING (The Normal Flow) ---
-        // Only if we are in the "Goldilocks Zone" (Between Min and Max time)
-        // do we actually check the spoken text.
-        
+        // --- GATE 3: TEXT MATCHING ---
         checkForTextTriggers(spokenText: spokenText, currentSentence: currentSentence)
     }
     
@@ -96,7 +83,7 @@ extension CustomViewModel {
         
         var shouldAdvance = false
         
-        // 1. Lookahead (Start of NEXT sentence)
+        // 1. Lookahead
         if currentSentenceIndex + 1 < teleprompterSentences.count {
             let nextSentence = teleprompterSentences[currentSentenceIndex + 1]
             let nextWords = normalizeText(nextSentence).components(separatedBy: " ")
@@ -111,7 +98,7 @@ extension CustomViewModel {
             }
         }
         
-        // 2. Suffix Match (End of CURRENT sentence)
+        // 2. Suffix Match
         if !shouldAdvance {
             let suffixLength = min(currentWords.count, 5)
             let currentSuffix = Array(currentWords.suffix(suffixLength))
@@ -129,68 +116,123 @@ extension CustomViewModel {
     }
     
     private func advanceSentence() {
-        // Ensure UI updates on Main Thread
         Task { @MainActor in
             withAnimation {
                 currentSentenceIndex += 1
             }
-            // RESET THE CLOCK
             currentSentenceStartTime = Date()
             
-            // Re-enable autoscroll if user wasn't manually holding it
             if autoScrollTimer == nil {
                 shouldAutoScroll = true
             }
         }
     }
 
-    // MARK: - Helpers & Boilerplate
-    // (Keep these consistent with previous implementation)
+    // MARK: - Robust Speech Recognition
     
     func startSpeechRecognition() {
-        // ... (Copy from previous answer: Standard Speech Recognition Setup) ...
-        // Ensure you call processTeleprompterLogic(spokenText: text) in the callback
+        // 1. Clean up any existing tasks first
         stopSpeechRecognition()
         
-        audioEngine = AVAudioEngine()
-        guard let audioEngine = audioEngine,
-              let inputNode = audioEngine.inputNode as AVAudioInputNode? else { return }
+        // 2. Configure Audio Session (CRITICAL STEP TO PREVENT CRASH)
+        do {
+            let audioSession = AVAudioSession.sharedInstance()
+            // .measurement mode optimizes for speech recognition (no signal processing like gain control)
+            try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
+            try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
+        } catch {
+            print("❌ Audio Session Error: \(error.localizedDescription)")
+            return
+        }
         
-        recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
-        guard let recognitionRequest = recognitionRequest else { return }
-        recognitionRequest.shouldReportPartialResults = true
-        if #available(iOS 13.0, *) { recognitionRequest.requiresOnDeviceRecognition = true }
-        
-        recognitionTask = speechRecognizer?.recognitionTask(with: recognitionRequest) { [weak self] result, error in
+        // 3. Request Authorization
+        SFSpeechRecognizer.requestAuthorization { [weak self] authStatus in
             guard let self = self else { return }
-            if let result = result {
-                Task { @MainActor in
-                    self.recognizedText = result.bestTranscription.formattedString
-                    self.processTeleprompterLogic(spokenText: self.recognizedText)
+            if authStatus != .authorized {
+                print("❌ Speech recognition not authorized")
+                return
+            }
+            
+            // 4. Initialize Engine and Request
+            self.audioEngine = AVAudioEngine()
+            self.recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
+            
+            guard let audioEngine = self.audioEngine,
+                  let recognitionRequest = self.recognitionRequest else { return }
+            
+            recognitionRequest.shouldReportPartialResults = true
+            if #available(iOS 13.0, *) { recognitionRequest.requiresOnDeviceRecognition = true }
+            
+            let inputNode = audioEngine.inputNode
+            
+            // 5. Setup Recognition Task
+            self.recognitionTask = self.speechRecognizer?.recognitionTask(with: recognitionRequest) { [weak self] result, error in
+                guard let self = self else { return }
+                
+                if let result = result {
+                    Task { @MainActor in
+                        self.recognizedText = result.bestTranscription.formattedString
+                        self.processTeleprompterLogic(spokenText: self.recognizedText)
+                    }
+                }
+                
+                if error != nil || (result?.isFinal ?? false) {
+                    self.stopSpeechRecognition()
                 }
             }
-            if error != nil { self.stopSpeechRecognition() }
+            
+            // 6. Install Tap Safely
+            let recordingFormat = inputNode.outputFormat(forBus: 0)
+            
+            // CRASH FIX: Ensure format is valid before installing tap
+            if recordingFormat.sampleRate == 0 || recordingFormat.channelCount == 0 {
+                print("❌ Hardware Error: Invalid Audio Format (0Hz).")
+                self.stopSpeechRecognition()
+                return
+            }
+            
+            inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { buffer, _ in
+                recognitionRequest.append(buffer)
+            }
+            
+            // 7. Start Engine
+            do {
+                audioEngine.prepare()
+                try audioEngine.start()
+                print("🎙️ Speech Recognition Started")
+            } catch {
+                print("❌ Audio Engine Start Error: \(error.localizedDescription)")
+                self.stopSpeechRecognition()
+            }
         }
-        
-        let recordingFormat = inputNode.outputFormat(forBus: 0)
-        inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { buffer, _ in
-            recognitionRequest.append(buffer)
-        }
-        
-        audioEngine.prepare()
-        try? audioEngine.start()
     }
     
     func stopSpeechRecognition() {
-        audioEngine?.stop()
-        audioEngine?.inputNode.removeTap(onBus: 0)
+        // Safe Cleanup Order
+        if let audioEngine = audioEngine {
+            if audioEngine.isRunning {
+                audioEngine.stop()
+            }
+            // Only remove tap if the node actually has one attached
+            // Note: Removing tap on a node without one can sometimes throw warnings or errors
+            audioEngine.inputNode.removeTap(onBus: 0)
+        }
+        
         recognitionRequest?.endAudio()
         recognitionTask?.cancel()
+        
         audioEngine = nil
         recognitionRequest = nil
         recognitionTask = nil
+        
+        // Deactivate session to return control to other apps (optional, but good citizenship)
+        try? AVAudioSession.sharedInstance().setActive(false)
+        
+        print("🛑 Speech Recognition Stopped")
     }
 
+    // MARK: - Helpers
+    
     func parseSentences(from text: String) -> [String] {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         let components = trimmed.components(separatedBy: CharacterSet(charactersIn: ".!?\n"))

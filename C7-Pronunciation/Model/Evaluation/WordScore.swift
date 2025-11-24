@@ -9,7 +9,7 @@ import SwiftUI
 
 struct WordScore: Identifiable {
     let id = UUID()
-    let word: String
+    var word: String
     var score: Double 
     var alignedPhonemes: [AlignedPhoneme]
     
@@ -44,3 +44,4 @@ struct WordScore: Identifiable {
         self.color = color
     }
 }
+

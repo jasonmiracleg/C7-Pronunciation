@@ -12,17 +12,32 @@ struct HomeScreenView: View {
     @State private var isFlashCardPresented = false
     @EnvironmentObject var user: User
     
+    var timeBasedGreeting: String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        
+        switch hour {
+        case 0..<12:
+            return "Good Morning!"
+        case 12..<17:
+            return "Good Afternoon!"
+        default:
+            return "Good Evening!"
+        }
+    }
+    
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 20) {
-                Text("Welcome back!")
-                    .font(.title)
-                    .fontWeight(.bold)
-                
-                Text("How would you like to practice today?")
-                    .font(.headline)
-                    .foregroundColor(.secondary)
-                    .padding(.bottom, 10)
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(timeBasedGreeting)
+                        .font(.title)
+                        .fontWeight(.bold)
+                    
+                    Text("How would you like to practice today?")
+                        .font(.headline)
+                        .foregroundColor(.secondary)
+                }
+                .padding(.vertical, 10)
                 
                 NavigationCard(title: "Flash Cards", imgName: "Home Card_1", desc: "Short, bite-sized chunks of practice. Helps you get used to saying common phrases.", gradientColor: [Color("DarkBlue"), .accentColor]) {
                     isFlashCardPresented.toggle()
@@ -44,12 +59,12 @@ struct HomeScreenView: View {
         }
     }
     
-    struct NavigationCard: View {   
+    struct NavigationCard: View {
         let title: String
         let imgName: String
         let desc: String
         let gradientColor: [Color]
-        var onTap: (() -> Void)? = nil   // <— NEW
+        var onTap: (() -> Void)? = nil
         
         var body: some View {
             HStack(spacing: 20) {
@@ -70,11 +85,14 @@ struct HomeScreenView: View {
                 .padding(.trailing)
                 .padding(.vertical, 10)
                 .foregroundColor(Color.white)
+                
+                Spacer(minLength: 0)
             }
             .onTapGesture {
                 onTap?()
             }
             .padding(.horizontal)
+            .frame(maxWidth: .infinity)
             .frame(height: 180)
             .background(
                 LinearGradient(

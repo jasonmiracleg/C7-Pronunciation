@@ -14,11 +14,16 @@ struct FlashcardPageView: View {
     @StateObject private var viewModel = FlashcardViewModel()
     @State private var phrase: Phrase?
     @State private var isLoadingPhrases = true
-    @State private var isEvaluated = false
     @State private var selectedWord: WordScore? = nil
-
-    private let synthesizer = AVSpeechSynthesizer()
-
+    
+    @State private var nextButtonScale: CGFloat = 0.0
+    @State private var nextButtonOffset: CGFloat = 0.0
+    
+    // MARK: - View Logic Helpers
+    var showWaveform: Bool {
+        return viewModel.isRecording || viewModel.isLoading
+    }
+    
     var body: some View {
         NavigationStack {
             ZStack {
@@ -30,16 +35,15 @@ struct FlashcardPageView: View {
                     ProgressView("Loading phrases...")
                 }
                 else {
-                    VStack(spacing: 20) {
-                        Spacer()
+                    // Sama layout hierarchy nya kayak custom view (for button / text placement consistency)
+                    VStack(spacing: 0) {
+                        Spacer().frame(height: 40)  // Slight but consistent padding up top
                         
                         // MARK: - Instructions
-                        Text("Let's practice your pronunciation by reading the sentences on the cards below.")
-                            .font(.subheadline)
+                        Text("Start by tapping the record button and speaking the words below out loud.")
                             .multilineTextAlignment(.center)
                             .fixedSize(horizontal: false, vertical: true)
                             .padding(.horizontal, 40)
-                            .padding(.bottom, 16)
                         
                         // MARK: - Card Display
                         if let currentPhrase = phrase {
@@ -50,23 +54,17 @@ struct FlashcardPageView: View {
                                     selectedWord = word
                                 }
                             )
+                            .padding(.top, 40)
                             .padding(.horizontal, 24)
                             .frame(height: 400)
                         }
                         
                         Spacer()
                         
-                        // MARK: - Buttons (Microphone / Next / Retry)
-                        buttonStack
-                            .padding(.bottom, 40)
-                    }
-                    .onChange(of: viewModel.isEvaluated) { _, newValue in
-                        if newValue == true {
-                            isEvaluated = true
-                        }
+                        // MARK: - Controls Area
+                        controlsArea
                     }
                 }
-
                 
                 // MARK: - Error Overlay
                 if let error = viewModel.errorMessage {
@@ -87,6 +85,7 @@ struct FlashcardPageView: View {
                     }
                 }
             }
+            .ignoresSafeArea(.keyboard, edges: .bottom)
             .navigationTitle("Flash Cards")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -102,62 +101,90 @@ struct FlashcardPageView: View {
                 loadPhrases()
             }
             .sheet(item: $selectedWord) { word in
-                CorrectPronunciationSheetView(wordScore: word) 
+                CorrectPronunciationSheetView(wordScore: word)
                     .presentationDetents([.fraction(0.25)])
             }
         }
     }
     
     // MARK: - Subviews
-    
-    var headerView: some View {
-        HStack {
-            Spacer()
-            Text("Flash Cards")
-                .font(.headline)
-                .fontWeight(.semibold)
-            Spacer()
-            
-            Button(action: { dismiss() }) {
-                Image(systemName: "xmark")
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(.gray)
-                    .padding(8)
-                    .background(Color.gray.opacity(0.2))
-                    .clipShape(Circle())
-            }
-        }
-    }
-    
-    var buttonStack: some View {
-        ZStack {
-            // 1. Main Action Button
-            if isEvaluated {
-                retryButton
-                    .transition(.opacity)
+    var controlsArea: some View {
+        VStack {
+            if viewModel.isEvaluated {
+                // MARK: - Done State (Retry & Next)
+                ZStack {
+                    Button(action: viewModel.startRecording) {
+                        Image(systemName: "arrow.clockwise.circle.fill")
+                            .font(.system(size: 64))
+                            .foregroundStyle(Color.white)
+                    }
+                    .glassEffect(.regular.tint(Color.accentColor))
+                    
+                    // 2. Right: Next Button
+                    if viewModel.isEvaluated {
+                        Button(action: {
+                            withAnimation(.easeOut(duration: 0.15)) {
+                                nextButtonScale = 0.0
+                                nextButtonOffset = 0.0
+                            } completion: {
+                                loadNextPhrase()
+                            }
+                        }) {
+                            Image(systemName: "arrow.forward.circle.fill")
+                                .font(.system(size: 36))
+                                .foregroundStyle(.white)
+                        }
+                        .glassEffect(.regular.tint(Color.accentColor))
+                        .offset(x: nextButtonOffset)
+                        .scaleEffect(nextButtonScale)
+                        .opacity(nextButtonScale)
+                        .onAppear {
+                            withAnimation(.spring(response: 0.4, dampingFraction: 0.5).delay(0.15)) {
+                                nextButtonScale = 1.0
+                                nextButtonOffset = 90.0
+                            }
+                        }
+                        .onDisappear {
+                            nextButtonScale = 0.0
+                            nextButtonOffset = 0.0
+                        }
+                    }
+                }
+                .padding(.horizontal)
+                
             } else {
-                recordingButton
-                    .transition(.opacity)
-            }
-            
-            // 2. Next Button
-            if isEvaluated {
-                nextButton
-                    .offset(x: 90)
-                    .transition(.scale.combined(with: .opacity))
+                // MARK: - Recording/Idle State
+                VStack {
+                    if showWaveform {
+                        WaveformView(levels: viewModel.audioLevels)
+                            .padding(.horizontal, 40)
+                            .transition(.scale.animation(.spring(response: 0.4, dampingFraction: 0.5, blendDuration: 0)))
+                    } else {
+                        Color.clear.frame(height: 60)
+                    }
+                    
+                    Button(action: {
+                        viewModel.toggleRecording()
+                    }) {
+                        Image(systemName: (!viewModel.isRecording && !viewModel.isLoading) ? "microphone.circle.fill" : "stop.circle.fill")
+                            .font(.system(size: 64))
+                            .foregroundColor(.white)
+                    }
+                    .glassEffect(viewModel.isLoading ? .regular.tint(Color.secondary) : .regular.tint(Color.accentColor))
+                    .disabled(viewModel.isLoading)
+                }
             }
         }
-        .frame(height: 100)
+        .padding(.bottom, 40)
+        .animation(.easeInOut(duration: 0.3), value: viewModel.isEvaluated)
+        .animation(.easeInOut(duration: 0.3), value: showWaveform)
     }
-
-
+    
     // MARK: - Data Loading
-
+    
     private func loadPhrases() {
-        Task { @MainActor in
+        Task {
             isLoadingPhrases = true
-            isEvaluated = false
-            
             
             if user.phraseQueue.isEmpty {
                 user.addPhrasesToQueue(basedOn: .mixed)
@@ -173,13 +200,11 @@ struct FlashcardPageView: View {
             } else {
                 phrase = nil
             }
-
-            isLoadingPhrases = false
             
-            print("✅ Loaded phrase for practice")
+            isLoadingPhrases = false
         }
     }
-
+    
     private func loadNextPhrase() {
         // A. Capture the scores from the current attempt
         let currentPhonemes = viewModel.getCurrentPhonemes()
@@ -187,131 +212,19 @@ struct FlashcardPageView: View {
         // B. Update the User profile
         user.updateScores(with: currentPhonemes)
         
-        print("💾 Saved scores for \(currentPhonemes.count) phonemes")
-
-        // C. Reset UI state
-        isEvaluated = false
-        
-        // D. Load the next phrase
+        // C. Load the next phrase
         loadPhrases()
     }
-
+    
     private func resetCard() {
         guard let currentPhrase = phrase else { return }
-        
-        // 1. Reset UI state
-        isEvaluated = false
-        
-        // 2. Tell the ViewModel to reset its scores/state
         viewModel.updateTargetSentence(currentPhrase.text)
     }
     
-    var recordingButton: some View {
-        Group {
-            if viewModel.isLoading {
-                ProgressView()
-                    .progressViewStyle(.circular)
-                    .tint(.white)
-                    .scaleEffect(1.5)
-                    .frame(width: 120, height: 120)
-            } else {
-                VStack {
-                    Button(action: {
-                        viewModel.toggleRecording()
-                    }) {
-                        Image(systemName: viewModel.isRecording
-                              ? "stop.circle.fill"
-                              : "microphone.circle.fill")
-                            .font(.system(size: 64))
-                            .foregroundStyle(.white)
-                    }
-                    .glassEffect( .regular.tint(Color.accent))
-                }
-                .frame(width: 120, height: 120)
-            }
-        }
-    }
+    // MARK: - Audio Helpers
     
-    var retryButton: some View {
-        Button(action: resetCard) {
-            
-            Image(systemName: "arrow.clockwise.circle.fill")
-                .font(.system(size: 64))
-                .foregroundStyle(.white)
-
-        }
-        // Disable interaction if loading
-        .glassEffect( .regular.tint(Color.accent))
-        .disabled(viewModel.isLoading)
-        
-        
-    }
-    
-    var nextButton: some View {
-        Button(action: loadNextPhrase) {
-            Image(systemName: "arrow.forward.circle.fill")
-                .font(.system(size: 36))
-                .foregroundColor(.white)
-        }
-        .glassEffect( .regular.tint(Color.accent))
-        .disabled(viewModel.isLoading)
-    }
-
-    // MARK: - Helpers
-
     func speak(text: String) {
-        if synthesizer.isSpeaking {
-            synthesizer.stopSpeaking(at: .immediate)
-        }
-        
-        // Create a mutable copy of the text for modification
-        var modifiedText = text
-        
-        // Regular expression to find isolated, single capital letters.
-        let pattern = "\\b([A-Z])\\b"
-        
-        do {
-            let regex = try NSRegularExpression(pattern: pattern, options: [])
-            
-            modifiedText = regex.stringByReplacingMatches(
-                in: modifiedText,
-                options: [],
-                range: NSRange(location: 0, length: modifiedText.utf16.count),
-                withTemplate: "$1".lowercased()
-            )
-            
-        } catch {
-            print("Regex error: \(error)")
-            modifiedText = text
-        }
-
-        let textToSpeak = modifiedText
-        
-        do {
-            let audioSession = AVAudioSession.sharedInstance()
-            
-            // We use .playAndRecord with .defaultToSpeaker so we don't break the microphone permission/setup
-            try audioSession.setCategory(.playback, mode: .default)
-            try audioSession.setActive(true)
-        } catch {
-            print("Failed to setup audio session: \(error)")
-        }
-
-        let utterance = AVSpeechUtterance(string: textToSpeak)
-        utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
-        utterance.rate = 0.5
-        utterance.volume = 1.0
-        
-        synthesizer.speak(utterance)
-    }
-}
-
-// Preview
-struct FlashcardPageView_Previews: PreviewProvider {
-    static var previews: some View {
-    let user = User()
-    
-    FlashcardPageView()
-        .environmentObject(user)
+        // Use the Singleton SpeechSynthesizer
+        SpeechSynthesizer.shared.speak(text: text)
     }
 }

@@ -16,7 +16,7 @@ struct EvaluationView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
-                Text("Press the underlined words to see the correct pronunciation")
+                Text("Tap on the underlined words to see the correct pronunciation.")
                     .font(.subheadline)
                     .multilineTextAlignment(.center)
                     .foregroundStyle(Color(UIColor.systemGray2))
