@@ -108,8 +108,8 @@ struct CustomMainView: View {
         } else {
             ZStack(alignment: .top) {
                 VStack(spacing: 4) {
-                    Text("Write Anything on Your Mind Below")
-                    Text("Hit Record to Check Your Pronunciation")
+                    Text("Write anything on your mind below.")
+                    Text("Tap the record button to start practicing.")
                 }
                 .offset(y: focusField ? 20 : -80)
                 .zIndex(0)

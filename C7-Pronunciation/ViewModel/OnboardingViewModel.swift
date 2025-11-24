@@ -36,8 +36,7 @@ class OnboardingViewModel: ObservableObject {
                 imageName: "Onboarding(2)",
                 title: "Your First Step to Mastery",
                 description: """
-                Learn to say the key phrases for your career. Our intelligent system keeps track of specific pain points 
-                and caters your exercises to focus on exactly what you need.
+                Learn to say the key phrases for your career. Our intelligent system caters your exercises to focus on exactly what you need.
                 """
             ),
             OnboardingPage(
