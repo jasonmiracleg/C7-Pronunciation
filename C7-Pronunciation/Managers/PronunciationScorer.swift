@@ -3,6 +3,19 @@
 //  C7-Pronunciation
 //
 //  Created by Savio Enoson on 15/11/25.
+//  v10.7: True dual-dialect scoring per word
+//      - v4-v9: Base functionality, rhotic matching, coarticulation, gemination
+//      - v10-v10.6: Two-tier scoring, dialect equivalences, expanded whitelist
+//      - v10.7 NEW: Scores against BOTH UK and US dialects for each word
+//          * Takes the HIGHER score for each word (not pre-selecting one dialect)
+//          * Allows mixed dialect usage (e.g., US "privacy" /praɪvəsi/ vs UK /prɪvəsi/)
+//          * Users can naturally mix British and American pronunciations
+//      - v10.7 FIX: Added safety checks for empty/short recordings
+//
+//  DESIGN PHILOSOPHY:
+//  - Function words (whitelisted): LENIENT - accept dialect variants, reductions
+//  - All other words: STRICT - only accept eSpeak's two dialect outputs + core equivalences
+//  - DUAL DIALECT: Each word scored against BOTH UK and US, best score wins
 //
 
 import Foundation
@@ -511,7 +524,7 @@ public class PronunciationScorer {
         ],
         "each": ["iː": ["i", "ɪ"]],
         "every": ["ɛ": ["ə", "ɪ"]],
-        "no": ["əʊ": ["oʊ", "ə"], "oʊ": ["əʊ"]],
+        
         "not": [
             "ɒ": ["ɑ", "ɑː", "ʌ"],
             "ɑ": ["ɒ", "ɑː"],
@@ -657,6 +670,26 @@ public class PronunciationScorer {
         "able": ["eɪ": ["ə"]],
         "upon": ["ə": ["ʌ"], "ɒ": ["ɔ", "ɑ"]],
         "per": ["ɜː": ["ɚ", "ɝ"], "ɝ": ["ɜː"]],
+        
+        // ══════════════════════════════════════════════════════════════════════
+        // COMMON GREETINGS (vowel variations are common in casual speech)
+        // ══════════════════════════════════════════════════════════════════════
+        "hello": [
+            "ə": ["ɛ", "ɪ"],  // First vowel can be schwa, DRESS, or KIT
+            "ɛ": ["ə", "ɪ"],
+        ],
+        "hi": ["aɪ": ["a"]],
+        "hey": ["eɪ": ["e", "ɛ"]],
+        "yeah": ["ɛ": ["e", "æ"]],
+        "yes": ["ɛ": ["e"]],
+        "no": ["əʊ": ["oʊ"], "oʊ": ["əʊ"]],
+        "okay": [
+            "əʊ": ["oʊ"],
+            "oʊ": ["əʊ"],
+            "eɪ": ["e"],
+        ],
+        "thanks": ["æ": ["a"]],
+        "please": ["iː": ["i"], "z": ["s"]],
     ]
     
     /// Voicing pairs - consonants differing only in voicing
@@ -1148,16 +1181,24 @@ public class PronunciationScorer {
             // 2. Duplicate detection with improved heuristics
             // ══════════════════════════════════════════════════════════════
             if currentPhoneme == lastPhoneme {
-                // Check if next phoneme is a vowel
+                // Check surrounding context
                 let nextIsVowel = (i + 1 < phonemes.count) &&
                     isVowelPhoneme(phonemes[i + 1].topPrediction.phoneme)
                 
-                // Check if two positions back was a vowel
                 let twoBackWasVowel = filtered.count >= 2 &&
                     isVowelPhoneme(filtered[filtered.count - 2].topPrediction.phoneme)
                 
-                // CASE 1: Word boundary gemination (keep duplicate)
-                // Pattern: V C C V (e.g., "us successful" → ʌ s s ə)
+                let prevWasVowel = filtered.count >= 1 &&
+                    isVowelPhoneme(filtered[filtered.count - 1].topPrediction.phoneme)
+                
+                // CASE 1: Duplicate vowel (ALWAYS REMOVE - very rare in English)
+                if isVowel {
+                    i += 1
+                    continue
+                }
+                
+                // CASE 2: Word boundary gemination pattern V C C V (KEEP)
+                // e.g., "us successful" → ʌ s s ə
                 if !isVowel && twoBackWasVowel && nextIsVowel {
                     filtered.append(prediction)
                     lastPhoneme = currentPhoneme
@@ -1165,32 +1206,27 @@ public class PronunciationScorer {
                     continue
                 }
                 
-                // CASE 2: Duplicate at word START (remove it)
-                // If we have very few phonemes so far, this is likely start of word
+                // CASE 3: Pattern V C C (no vowel after) - likely duplicate (REMOVE)
+                // e.g., "hello" → h ɛ l l (no vowel after second l)
+                if !isVowel && prevWasVowel && !nextIsVowel {
+                    i += 1
+                    continue
+                }
+                
+                // CASE 4: Duplicate at word START (filtered.count ≤ 2) (REMOVE)
                 if filtered.count <= 2 {
-                    // Skip duplicate
                     i += 1
                     continue
                 }
                 
-                // CASE 3: Duplicate vowel (very rare in English, likely artifact)
-                if isVowel {
-                    // Skip duplicate vowel
+                // CASE 5: Consonant at END with no following vowel (REMOVE)
+                // e.g., trailing "h" in "h ɛ l oʊ h"
+                if !isVowel && i == phonemes.count - 1 {
                     i += 1
                     continue
                 }
                 
-                // CASE 4: Default for consonants - skip duplicate
-                // Exception: if next is vowel and we haven't seen many phonemes yet
-                if nextIsVowel && filtered.count < 5 {
-                    // Might be word boundary, keep it
-                    filtered.append(prediction)
-                    lastPhoneme = currentPhoneme
-                    i += 1
-                    continue
-                }
-                
-                // Skip this duplicate
+                // CASE 6: Default - still looks suspicious, skip it
                 i += 1
                 continue
             }
@@ -1222,8 +1258,20 @@ public class PronunciationScorer {
         decodedPhonemes: [PhonemePrediction],
         targetSentence: String
     ) -> PronunciationEvalResult {
+        // Debug: Show before filtering
+        print("\n🔍 DEBUG - Before filtering:")
+        print("   Raw: \(decodedPhonemes.map { $0.topPrediction.phoneme }.joined(separator: " "))")
+        
+        // Apply filtering
+        let filtered = filterConsecutiveDuplicates(decodedPhonemes)
+        
+        // Debug: Show after filtering
+        print("🔍 DEBUG - After filtering:")
+        print("   Filtered: \(filtered.map { $0.topPrediction.phoneme }.joined(separator: " "))")
+        print("")
+        
         return alignAndScoreMultiDialect(
-            decodedPhonemes: decodedPhonemes,
+            decodedPhonemes: filtered,
             targetSentence: targetSentence
         )
     }
