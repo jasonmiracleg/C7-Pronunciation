@@ -13,6 +13,8 @@ struct C7_PronunciationApp: App {
     @AppStorage("hasCompletedOnboarding") var hasCompletedOnboarding: Bool = false
     @StateObject private var user = User()
     @State private var isModelLoaded = false
+    
+    @State private var showDebug = false
 
     var body: some Scene {
         WindowGroup {
@@ -30,6 +32,28 @@ struct C7_PronunciationApp: App {
                         }
                     }
                     .transition(.opacity.animation(.easeIn(duration: 1.0)))
+                    
+                    // God Mode DEBUGGG
+//                    if hasCompletedOnboarding {
+//                        VStack {
+//                            HStack {
+//                                Spacer()
+//                                Button(action: {
+//                                    showDebug = true
+//                                }) {
+//                                    Text("🧠")
+//                                        .font(.largeTitle)
+//                                        .padding()
+//                                        .background(Color.black.opacity(0.2))
+//                                        .clipShape(Circle())
+//                                }
+//                                .padding(.top, 50)
+//                                .padding(.trailing, 20)
+//                            }
+//                            Spacer()
+//                        }
+//                        .zIndex(2) 
+//                    }
                 }
                 
                 if !isModelLoaded {
@@ -39,6 +63,10 @@ struct C7_PronunciationApp: App {
                 }
             }
             .modelContainer(DataBankManager.shared.modelContainer)
+            .sheet(isPresented: $showDebug) {
+                DebugPhonemeView()
+                    .environmentObject(user)
+            }
             .task {
                 await AudioManager.shared.preloadModel()
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
