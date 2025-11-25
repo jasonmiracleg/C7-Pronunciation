@@ -10,6 +10,12 @@ class FlashcardViewModel: ObservableObject {
     @Published var targetSentence: String = ""
     @Published var wordScores: [WordScore] = []
     
+    // for the generating shit
+    @Published var currentCardNumber: Int = 0
+    @Published var cardsPerCycle: Int = 5
+    @Published var canGenerateNewCards: Bool = true
+    @Published var firstTimeThrough: Bool = true
+    
     // State matching CustomViewModel
     @Published var isRecording: Bool = false
     @Published var isLoading: Bool = false
@@ -178,5 +184,21 @@ class FlashcardViewModel: ObservableObject {
     
     func getCurrentPhonemes() -> [AlignedPhoneme] {
         return wordScores.flatMap { $0.alignedPhonemes }
+    }
+    
+    func generateNewCards() {
+        canGenerateNewCards = false
+        iterateCardIndex()
+        currentCardNumber = 0
+        firstTimeThrough = false
+    }
+    
+    func iterateCardIndex() {
+        currentCardNumber += 1
+        
+        if currentCardNumber >= cardsPerCycle {
+            canGenerateNewCards = true
+            currentCardNumber = cardsPerCycle
+        }
     }
 }

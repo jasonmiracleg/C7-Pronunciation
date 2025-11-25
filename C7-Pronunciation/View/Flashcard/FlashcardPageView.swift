@@ -45,8 +45,12 @@ struct FlashcardPageView: View {
                             .fixedSize(horizontal: false, vertical: true)
                             .padding(.horizontal, 40)
                         
-                        // MARK: - Card Display
-                        if let currentPhrase = phrase {
+                        if viewModel.canGenerateNewCards {
+                            FlashcardGeneratorView(viewModel: viewModel)
+                                .padding(.top, 40)
+                                .padding(.horizontal, 24)
+                                .frame(height: 400)
+                        } else if let currentPhrase = phrase {
                             FlashcardView(
                                 viewModel: viewModel,
                                 onPlayAudio: { speak(text: currentPhrase.text) },
@@ -58,6 +62,28 @@ struct FlashcardPageView: View {
                             .padding(.horizontal, 24)
                             .frame(height: 400)
                         }
+                        
+                        Text("Test")
+                        Text("Phrases in queue: \(user.phraseQueue.count)")
+                        
+                        // MARK: - Card Display
+//                        if let currentPhrase = phrase {
+//                            FlashcardView(
+//                                viewModel: viewModel,
+//                                onPlayAudio: { speak(text: currentPhrase.text) },
+//                                onTapWord: { word in
+//                                    selectedWord = word
+//                                }
+//                            )
+//                            .padding(.top, 40)
+//                            .padding(.horizontal, 24)
+//                            .frame(height: 400)
+//                        } else {
+//                            FlashcardGeneratorView(viewModel: viewModel)
+//                                .padding(.top, 40)
+//                                .padding(.horizontal, 24)
+//                                .frame(height: 400)
+//                        }
                         
                         Spacer()
                         
@@ -110,7 +136,19 @@ struct FlashcardPageView: View {
     // MARK: - Subviews
     var controlsArea: some View {
         VStack {
-            if viewModel.isEvaluated {
+            if viewModel.canGenerateNewCards {
+                // MARK: - Generate New Cards
+                Button(action: {
+                    generateNewCards() // or your generate action
+                }) {
+                    Image(systemName: "shuffle.circle.fill")
+                        .font(.system(size: 64))
+                        .foregroundColor(.white)
+                }
+                .glassEffect(viewModel.isLoading ? .regular.tint(Color.secondary) : .regular.tint(Color.accentColor))
+                .disabled(viewModel.isLoading)
+                
+            } else if viewModel.isEvaluated {
                 // MARK: - Done State (Retry & Next)
                 ZStack {
                     Button(action: viewModel.startRecording) {
@@ -187,7 +225,7 @@ struct FlashcardPageView: View {
             isLoadingPhrases = true
             
             if user.phraseQueue.isEmpty {
-                user.addPhrasesToQueue(basedOn: .mixed)
+                viewModel.canGenerateNewCards = true
             }
             
             if !user.phraseQueue.isEmpty {
@@ -202,6 +240,7 @@ struct FlashcardPageView: View {
             }
             
             isLoadingPhrases = false
+            
         }
     }
     
@@ -214,6 +253,19 @@ struct FlashcardPageView: View {
         
         // C. Load the next phrase
         loadPhrases()
+        
+        // D. update index in view model
+        viewModel.iterateCardIndex()
+    }
+    
+    private func generateNewCards(){
+        print("ADDING PHRASES")
+        user.addPhrasesToQueue(basedOn: .mixed)
+        if !user.phraseQueue.isEmpty {
+            print("PHRASE QUEUE NOT EMPTY")
+            viewModel.generateNewCards()
+            loadPhrases()
+        }
     }
     
     private func resetCard() {

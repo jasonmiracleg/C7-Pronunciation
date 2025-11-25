@@ -146,11 +146,15 @@ class User: ObservableObject {
         print("✅ Added \(phraseQueue.count) phrases to queue. Strategy: \(basedOn)")
     }
     
-    func nextCard() -> Phrase {
-        let newPhrase = phraseQueue.removeFirst()
-        if phraseQueue.count <= 2 {
-            addPhrasesToQueue(basedOn: .attempts)
+    func nextCard() -> Phrase? {
+        if phraseQueue.isEmpty {
+            return nil
         }
+        
+        let newPhrase = phraseQueue.removeFirst()
+//        if phraseQueue.count <= 2 {
+//            addPhrasesToQueue(basedOn: .attempts)
+//        }
         return newPhrase
     }
     
