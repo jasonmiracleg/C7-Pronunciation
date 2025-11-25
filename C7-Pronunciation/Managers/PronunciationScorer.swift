@@ -40,9 +40,17 @@ public class PronunciationScorer {
     
     // MARK: - Core Dialect Equivalences (Accepted in Strict Mode)
     
+    /// These are FUNDAMENTAL UK/US vowel differences that must be accepted even in strict mode.
+    /// CRITICAL: These must be TRUE EQUIVALENCES - the same phoneme category across dialects,
+    /// NOT "similar sounding" phonemes that happen to be confused.
+    ///
     /// Word-specific variations (like "what" using ʌ in US) should go in functionWordReductions,
     /// not here, to maintain strictness for other words.
     private let coreDialectEquivalences: [String: Set<String>] = [
+        // ══════════════════════════════════════════════════════════════════════
+        // NOTATION DIFFERENCES - Same exact sound, different IPA symbols
+        // ══════════════════════════════════════════════════════════════════════
+        
         // GOAT diphthong: UK əʊ = US oʊ (IDENTICAL sound, notation only!)
         "əʊ": ["oʊ", "o", "oː"],
         "oʊ": ["əʊ", "o", "oː"],
@@ -60,11 +68,21 @@ public class PronunciationScorer {
         "ɹ": ["r", "ɾ"],
         "r": ["ɹ", "ɾ"],
         
+        // ══════════════════════════════════════════════════════════════════════
+        // TRUE UK/US PHONEME CATEGORY DIFFERENCES
+        // These represent the same lexical set across dialects
+        // ══════════════════════════════════════════════════════════════════════
+        
         // LOT vowel: UK ɒ = US ɑː/ɑ (e.g., "lot", "hot", "policy", "problem")
         // NOTE: Does NOT include ʌ - that's word-specific (what, was, because)
         "ɒ": ["ɑː", "ɑ", "ɔ"],
         "ɑː": ["ɒ", "ɑ"],
-        "ɑ": ["ɒ", "ɑː"],
+        "ɑ": ["ɒ", "ɑː", "ɔː"],  // ADDED: ɔː for THOUGHT-LOT merger
+        
+        // THOUGHT vowel: UK/US ɔː can merge with LOT ɑ in some US dialects
+        // This is the famous "cot-caught" merger
+        "ɔː": ["ɔ", "ɑ", "ɑː"],  // e.g., "caused", "thought", "caught" → [kɑzd], [θɑt], [kɑt]
+        "ɔ": ["ɔː", "ɑ"],
         
         // SQUARE vowel: UK eə/ɛə = US ɛ (+ rhotic ɹ follows)
         // In American English, "aware" = /əˈwɛɹ/, "care" = /kɛɹ/
@@ -83,14 +101,18 @@ public class PronunciationScorer {
         "u": ["uː"],
         "uː": ["u"],
         
+        // ══════════════════════════════════════════════════════════════════════
         // RHOTIC VOWEL EQUIVALENCES (handled separately in isRhoticVowelVariant)
         // Listed here as backup for direct lookups
+        // ══════════════════════════════════════════════════════════════════════
         
         // CURE vowel: UK ʊə = US ʊɹ/ɚ (sure, poor, tour)
         "ʊə": ["ɚ", "ʊɹ", "ɔː", "ɔːɹ", "uː", "uːɹ"],
         "ɚ": ["ʊə", "ə", "ɜː", "ʊɹ"],
         
+        // ══════════════════════════════════════════════════════════════════════
         // SYLLABIC CONSONANTS (model segmentation differences)
+        // ══════════════════════════════════════════════════════════════════════
         "əl": ["l̩", "ᵊl", "l"],
         "əm": ["m̩", "ᵊm", "m"],
         "ən": ["n̩", "ᵊn", "n"],
@@ -147,8 +169,13 @@ public class PronunciationScorer {
     /// Dialect-specific phoneme mappings - GLOBAL equivalences for ALL words
     /// BIDIRECTIONAL - both rhotic→non-rhotic AND non-rhotic→rhotic must be covered
     /// This ensures that regardless of which dialect eSpeak generates, we accept the other
+    ///
+    /// NOTE: In v10, these are ONLY used for whitelisted function words.
     /// Non-function words use STRICT matching (dialect variants from eSpeak only)
     private let dialectPhonemeEquivalents: [String: Set<String>] = [
+        // ══════════════════════════════════════════════════════════════════════
+        // R-COLORED VOWELS (US rhotic ↔ UK non-rhotic) - BIDIRECTIONAL
+        // ══════════════════════════════════════════════════════════════════════
         
         // NURSE vowel: ɝ (US) ↔ ɜː (UK)
         "ɝ": ["ɜː", "ɜ", "ɜːɹ", "ɚ"],
@@ -190,17 +217,23 @@ public class PronunciationScorer {
         "uɹ": ["ʊə", "uə", "ʊɹ"],
         "uə": ["ʊɹ", "uɹ", "ʊə"],
         
+        // ══════════════════════════════════════════════════════════════════════
         // SCHWA VARIANTS (notation differences, same phoneme)
+        // ══════════════════════════════════════════════════════════════════════
         "ə": ["ɐ", "ᵻ", "ɚ"],
         "ɐ": ["ə", "ʌ"],
         "ᵻ": ["ə", "ɪ", "ɐ"],
         
+        // ══════════════════════════════════════════════════════════════════════
         // LOT-CLOTH-THOUGHT vowels (US/UK differences)
+        // ══════════════════════════════════════════════════════════════════════
         "ɑ": ["ɒ", "ɔ", "ɑː"],
         "ɒ": ["ɑ", "ɔ", "ʌ", "ɑː"],
         "ɔ": ["ɔː", "ɒ", "ɑ"],
         
+        // ══════════════════════════════════════════════════════════════════════
         // OTHER VOWEL VARIATIONS
+        // ══════════════════════════════════════════════════════════════════════
         
         // TRAP vowel notation
         "æ": ["a"],
@@ -224,15 +257,20 @@ public class PronunciationScorer {
         // GOOSE vowel
         "uː": ["u", "ʊ"],
         
+        // ══════════════════════════════════════════════════════════════════════
         // DIPHTHONG PARTIAL MATCHES
         // When model hears only part of a diphthong, accept the partial
         // This happens with fast speech or model segmentation issues
+        // NOTE: These are ONE-WAY - we accept partial as full, not vice versa
+        // ══════════════════════════════════════════════════════════════════════
         "aɪ": ["a", "æ", "ɑ", "aː"],
         "aʊ": ["a", "æ", "ɑ"],
         "ɔɪ": ["ɔ", "ɔː", "o"],
         "eɪ": ["e", "ɛ", "eː"],
         
+        // ══════════════════════════════════════════════════════════════════════
         // CONSONANT VARIATIONS
+        // ══════════════════════════════════════════════════════════════════════
         "ɾ": ["t", "d"],
         "t": ["ɾ"],
         "ɹ": ["r", "ɾ"],
@@ -241,7 +279,9 @@ public class PronunciationScorer {
         "ɫ": ["l"],
         "ʌ": ["ɐ", "ə"],
         
+        // ══════════════════════════════════════════════════════════════════════
         // COARTICULATION PATTERNS (cross-word sound merging)
+        // ══════════════════════════════════════════════════════════════════════
         "j": ["dʒ", "tʃ"],
         "dʒ": ["j"],
         "tʃ": ["j"],
@@ -249,6 +289,8 @@ public class PronunciationScorer {
     
     /// Function word reductions - ONLY for specific words
     /// ENHANCED: Now includes rhotic ↔ non-rhotic vowel variants for common words
+    ///
+    /// v10: These words get LENIENT scoring - the full dialectPhonemeEquivalents apply
     private let functionWordReductions: [String: [String: Set<String>]] = [
         // Articles
         "a": ["eɪ": ["ə"], "æ": ["ə"]],
@@ -260,7 +302,9 @@ public class PronunciationScorer {
             "ɪ": ["ə", "iː", "i"],
         ],
         
+        // ══════════════════════════════════════════════════════════════════════
         // PREPOSITIONS - Enhanced with rhotic variants
+        // ══════════════════════════════════════════════════════════════════════
         "to": ["uː": ["ə", "ʊ", "u"], "u": ["ə", "ʊ"]],
         
         // "for" - KEY FIX: Can be /fɔː/, /fɔːɹ/, /fɜː/, /fɜːɹ/, /fə/, /fɑːɹ/
@@ -278,7 +322,9 @@ public class PronunciationScorer {
         "as": ["æ": ["ə"], "a": ["ə"]],
         "with": ["ɪ": ["ə", "ɪ̈"]],
         
+        // ══════════════════════════════════════════════════════════════════════
         // CONJUNCTIONS
+        // ══════════════════════════════════════════════════════════════════════
         "and": ["æ": ["ə", "ɛ"], "a": ["ə"], "ɛ": ["ə"]],
         "but": ["ʌ": ["ə"], "ɐ": ["ə"]],
         // "or" - KEY FIX: Can be /ɔː/, /ɔːɹ/, /ɑːɹ/
@@ -291,7 +337,9 @@ public class PronunciationScorer {
         "than": ["æ": ["ə"], "a": ["ə"]],
         "that": ["æ": ["ə"], "a": ["ə"]],
         
+        // ══════════════════════════════════════════════════════════════════════
         // INTERROGATIVES - LOT-STRUT variation (UK ɒ = US ʌ in these words)
+        // ══════════════════════════════════════════════════════════════════════
         "what": [
             "ɒ": ["ʌ", "ɑ", "ə"],  // UK "wɒt" = US "wʌt"
             "ʌ": ["ɒ", "ɑ", "ə"],  // Reverse mapping
@@ -312,7 +360,9 @@ public class PronunciationScorer {
             "ɔː": ["ɒ", "ʌ", "ə"],
         ],
         
+        // ══════════════════════════════════════════════════════════════════════
         // AUXILIARIES - Enhanced with rhotic variants
+        // ══════════════════════════════════════════════════════════════════════
         "is": ["ɪ": ["ə"]],
         "am": ["æ": ["ə"], "a": ["ə"]],
         "are": [
@@ -337,7 +387,9 @@ public class PronunciationScorer {
         "do": ["uː": ["ə", "ʊ", "u"], "u": ["ə", "ʊ"]],
         "does": ["ʌ": ["ə"], "ɐ": ["ə"]],
         
+        // ══════════════════════════════════════════════════════════════════════
         // PRONOUNS - Enhanced with rhotic variants
+        // ══════════════════════════════════════════════════════════════════════
         "you": ["uː": ["ə", "ʊ", "u"], "u": ["ə", "ʊ"]],
         
         // "your" - KEY FIX: Can be /jɔː/, /jɔːɹ/, /jʊə/, /jʊɹ/, /jɜː/, /jɜːɹ/, /jɑːɹ/
@@ -366,7 +418,9 @@ public class PronunciationScorer {
         "me": ["iː": ["ɪ", "i"]],
         "be": ["iː": ["ɪ", "i"]],
         
+        // ══════════════════════════════════════════════════════════════════════
         // CONTRACTIONS - Handle common contractions with rhotic variants
+        // ══════════════════════════════════════════════════════════════════════
         "we're": [
             "iə": ["ɪɹ", "ɪ", "iɹ", "ɪə", "ɜː"],
             "ɪɹ": ["iə", "ɪ", "ɪə", "iɹ", "ɜː"],
@@ -406,7 +460,9 @@ public class PronunciationScorer {
         "them": ["ɛ": ["ə"], "e": ["ə"]],
         "us": ["ʌ": ["ə"], "ɐ": ["ə"]],
         
+        // ══════════════════════════════════════════════════════════════════════
         // OTHER FUNCTION WORDS - Enhanced with rhotic variants
+        // ══════════════════════════════════════════════════════════════════════
         "there": [
             "ɛ": ["ə", "ɛə", "ɛɹ"],
             "ɛə": ["ə", "ɛɹ", "eɹ"],
@@ -445,7 +501,9 @@ public class PronunciationScorer {
             "æ": ["ɑː", "a"],
         ],
         
+        // ══════════════════════════════════════════════════════════════════════
         // DETERMINERS & DEMONSTRATIVES
+        // ══════════════════════════════════════════════════════════════════════
         "this": ["ɪ": ["ə"]],
         "these": ["iː": ["i", "ɪ"]],
         "those": ["əʊ": ["oʊ", "ə"], "oʊ": ["əʊ", "ə"]],
@@ -458,13 +516,15 @@ public class PronunciationScorer {
         ],
         "each": ["iː": ["i", "ɪ"]],
         "every": ["ɛ": ["ə", "ɪ"]],
-        "no": ["əʊ": ["oʊ", "ə"], "oʊ": ["əʊ"]],
+        
         "not": [
             "ɒ": ["ɑ", "ɑː", "ʌ"],
             "ɑ": ["ɒ", "ɑː"],
         ],
         
+        // ══════════════════════════════════════════════════════════════════════
         // PREPOSITIONS
+        // ══════════════════════════════════════════════════════════════════════
         "in": ["ɪ": ["ə", "ɨ"]],
         "on": [
             "ɒ": ["ɑ", "ɔ"],
@@ -489,7 +549,9 @@ public class PronunciationScorer {
         "between": ["ɪ": ["ə"], "iː": ["i", "ɪ"]],
         "against": ["ə": ["ɪ", "ɛ"], "ɛ": ["ə", "ɪ"]],
         
+        // ══════════════════════════════════════════════════════════════════════
         // CONJUNCTIONS
+        // ══════════════════════════════════════════════════════════════════════
         "so": ["əʊ": ["oʊ", "ə"], "oʊ": ["əʊ", "ə"]],
         "if": ["ɪ": ["ə"]],
         "when": ["ɛ": ["ə", "ɪ"], "e": ["ə", "ɪ"]],
@@ -499,7 +561,10 @@ public class PronunciationScorer {
         "since": ["ɪ": ["ə"]],
         "until": ["ə": ["ʌ"], "ɪ": ["ə"]],
         
+        
+        // ══════════════════════════════════════════════════════════════════════
         // PRONOUNS
+        // ══════════════════════════════════════════════════════════════════════
         "it": ["ɪ": ["ə"]],
         "they": ["eɪ": ["e", "ə"]],
         "who": ["uː": ["u", "ʊ"]],
@@ -515,7 +580,9 @@ public class PronunciationScorer {
         "nothing": ["ʌ": ["ə"], "ɪ": ["ə"]],
         "everything": ["ɛ": ["ə", "ɪ"], "ɪ": ["ə"]],
         
+        // ══════════════════════════════════════════════════════════════════════
         // AUXILIARIES & MODALS
+        // ══════════════════════════════════════════════════════════════════════
         "must": ["ʌ": ["ə"], "ɐ": ["ə"]],
         "may": ["eɪ": ["e", "ə"]],
         "might": ["aɪ": ["a"]],
@@ -547,7 +614,9 @@ public class PronunciationScorer {
         "doesn't": ["ʌ": ["ə"]],
         "didn't": ["ɪ": ["ə"]],
         
+        // ══════════════════════════════════════════════════════════════════════
         // COMMON ADVERBS
+        // ══════════════════════════════════════════════════════════════════════
         "very": ["ɛ": ["ə"]],
         "also": [
             "ɔː": ["ɔ", "ɑː"],
@@ -578,7 +647,9 @@ public class PronunciationScorer {
             "ɔː": ["ɔːɹ"],
         ],
         
+        // ══════════════════════════════════════════════════════════════════════
         // OTHER COMMON FUNCTION WORDS
+        // ══════════════════════════════════════════════════════════════════════
         "other": ["ʌ": ["ə"], "ə": ["ɚ"]],
         "another": ["ə": ["ɐ"], "ʌ": ["ə"]],
         "such": ["ʌ": ["ə"]],
@@ -591,6 +662,26 @@ public class PronunciationScorer {
         "able": ["eɪ": ["ə"]],
         "upon": ["ə": ["ʌ"], "ɒ": ["ɔ", "ɑ"]],
         "per": ["ɜː": ["ɚ", "ɝ"], "ɝ": ["ɜː"]],
+        
+        // ══════════════════════════════════════════════════════════════════════
+        // COMMON GREETINGS (vowel variations are common in casual speech)
+        // ══════════════════════════════════════════════════════════════════════
+        "hello": [
+            "ə": ["ɛ", "ɪ"],  // First vowel can be schwa, DRESS, or KIT
+            "ɛ": ["ə", "ɪ"],
+        ],
+        "hi": ["aɪ": ["a"]],
+        "hey": ["eɪ": ["e", "ɛ"]],
+        "yeah": ["ɛ": ["e", "æ"]],
+        "yes": ["ɛ": ["e"]],
+        "no": ["əʊ": ["oʊ"], "oʊ": ["əʊ"]],
+        "okay": [
+            "əʊ": ["oʊ"],
+            "oʊ": ["əʊ"],
+            "eɪ": ["e"],
+        ],
+        "thanks": ["æ": ["a"]],
+        "please": ["iː": ["i"], "z": ["s"]],
     ]
     
     /// Voicing pairs - consonants differing only in voicing
@@ -618,7 +709,7 @@ public class PronunciationScorer {
         "is", "has", "was", "does", "says", "goes",
     ]
     
-    // MARK: - Strict Mode Configuration
+    // MARK: - NEW: Strict Mode Configuration
     
     /// Words that get lenient scoring (function words)
     /// All other words use STRICT mode - only dialect variants from eSpeak are accepted
@@ -675,6 +766,7 @@ public class PronunciationScorer {
         return checkPhonemeSimilarityWithContext(target: target, actual: actual, word: nil, strictMode: false)
     }
     
+    /// NEW: Similarity check with strict mode option
     /// In strict mode, only exact matches or explicit dialect variants are accepted
     private func checkPhonemeSimilarityWithContext(
         target: String,
@@ -700,6 +792,11 @@ public class PronunciationScorer {
         if let word = word, isWordSpecificVariant(word: word, target: target, actual: actual) {
             return true
         }
+        
+        // ══════════════════════════════════════════════════════════════════════
+        // STRICT MODE GATE: After this point, if strict mode is enabled,
+        // we only accept rhotic variants (dialect differences), NOT general similarity
+        // ══════════════════════════════════════════════════════════════════════
         
         // 4. Rhotic vowel handling - accept in both modes (these are true dialect differences)
         if isRhoticVowelVariant(target: normalizedTarget, actual: normalizedActual) {
@@ -740,8 +837,10 @@ public class PronunciationScorer {
             }
         }
         
+        // ══════════════════════════════════════════════════════════════════════
         // 6. CORE DIALECT EQUIVALENCES - Accept in BOTH strict and lenient modes
         // These are fundamental UK/US vowel category differences (e.g., LOT vowel)
+        // ══════════════════════════════════════════════════════════════════════
         if let equivalents = coreDialectEquivalences[normalizedTarget], equivalents.contains(normalizedActual) {
             return true
         }
@@ -754,9 +853,11 @@ public class PronunciationScorer {
         if let equivalents = coreDialectEquivalences[cleanActual], equivalents.contains(cleanTarget) {
             return true
         }
-    
+        
+        // ══════════════════════════════════════════════════════════════════════
         // 7. UNSTRESSED VOWEL REDUCTIONS - Accept in BOTH modes
         // Natural speech reduces unstressed vowels; this shouldn't be penalized
+        // ══════════════════════════════════════════════════════════════════════
         if let reductions = unstressedVowelReductions[normalizedTarget], reductions.contains(normalizedActual) {
             return true
         }
@@ -764,8 +865,10 @@ public class PronunciationScorer {
             return true
         }
         
+        // ══════════════════════════════════════════════════════════════════════
         // 8. WORD-FINAL VOICING NEUTRALIZATION - Accept in BOTH modes
         // z→s, v→f at end of words is extremely common (e.g., "please" → [pliːs])
+        // ══════════════════════════════════════════════════════════════════════
         if isWordFinal && isWordFinalVoicingVariant(target: normalizedTarget, actual: normalizedActual) {
             return true
         }
@@ -773,7 +876,14 @@ public class PronunciationScorer {
             return true
         }
         
+        // ══════════════════════════════════════════════════════════════════════
+        // STRICT MODE STOPS HERE
+        // The following checks are ONLY applied in lenient mode
+        // ══════════════════════════════════════════════════════════════════════
+        
         if strictMode {
+            // In strict mode, we've already checked all acceptable variants
+            // If we get here, it's a mispronunciation
             return false
         }
         
@@ -1030,26 +1140,28 @@ public class PronunciationScorer {
     
     /// Filters consecutive duplicate phonemes that are likely model artifacts
     /// AND merges split rhotic vowels (e.g., "oʊ r" → "oʊɹ")
+    ///
+    /// IMPROVED v10.7: More aggressive filtering of obvious duplicates
     private func filterConsecutiveDuplicates(_ phonemes: [PhonemePrediction]) -> [PhonemePrediction] {
         guard !phonemes.isEmpty else { return [] }
         
         var filtered: [PhonemePrediction] = []
         var lastPhoneme: String? = nil
-        var lastWasVowel: Bool = false
         var i = 0
         
         while i < phonemes.count {
             let prediction = phonemes[i]
             let currentPhoneme = prediction.topPrediction.phoneme
             
-            // Check for split rhotic vowels: vowel followed by standalone "r" or "ɹ"
+            // ══════════════════════════════════════════════════════════════
+            // 1. Check for split rhotic vowels: vowel followed by standalone "r" or "ɹ"
+            // ══════════════════════════════════════════════════════════════
             if i + 1 < phonemes.count {
                 let nextPhoneme = phonemes[i + 1].topPrediction.phoneme
                 
                 if isVowelPhoneme(currentPhoneme) && (nextPhoneme == "r" || nextPhoneme == "ɹ") {
                     filtered.append(prediction)
                     lastPhoneme = currentPhoneme
-                    lastWasVowel = true
                     i += 2
                     continue
                 }
@@ -1057,42 +1169,63 @@ public class PronunciationScorer {
             
             let isVowel = isVowelPhoneme(currentPhoneme)
             
-            // Smart duplicate detection
-            if currentPhoneme == lastPhoneme && !isVowel {
+            // ══════════════════════════════════════════════════════════════
+            // 2. Duplicate detection with improved heuristics
+            // ══════════════════════════════════════════════════════════════
+            if currentPhoneme == lastPhoneme {
+                // Check surrounding context
                 let nextIsVowel = (i + 1 < phonemes.count) &&
                     isVowelPhoneme(phonemes[i + 1].topPrediction.phoneme)
                 
                 let twoBackWasVowel = filtered.count >= 2 &&
                     isVowelPhoneme(filtered[filtered.count - 2].topPrediction.phoneme)
                 
-                // Word boundary pattern: vowel + cons + cons + vowel
-                if twoBackWasVowel && nextIsVowel {
-                    filtered.append(prediction)
-                    lastPhoneme = currentPhoneme
-                    lastWasVowel = false
+                let prevWasVowel = filtered.count >= 1 &&
+                    isVowelPhoneme(filtered[filtered.count - 1].topPrediction.phoneme)
+                
+                // CASE 1: Duplicate vowel (ALWAYS REMOVE - very rare in English)
+                if isVowel {
                     i += 1
                     continue
                 }
                 
-                if !filtered.isEmpty && nextIsVowel {
-                    let lastFiltered = filtered.last!.topPrediction.phoneme
-                    if lastFiltered == currentPhoneme {
-                        filtered.append(prediction)
-                        lastPhoneme = currentPhoneme
-                        lastWasVowel = false
-                        i += 1
-                        continue
-                    }
+                // CASE 2: Word boundary gemination pattern V C C V (KEEP)
+                // e.g., "us successful" → ʌ s s ə
+                if !isVowel && twoBackWasVowel && nextIsVowel {
+                    filtered.append(prediction)
+                    lastPhoneme = currentPhoneme
+                    i += 1
+                    continue
                 }
                 
-                // Skip this duplicate consonant (likely artifact)
+                // CASE 3: Pattern V C C (no vowel after) - likely duplicate (REMOVE)
+                // e.g., "hello" → h ɛ l l (no vowel after second l)
+                if !isVowel && prevWasVowel && !nextIsVowel {
+                    i += 1
+                    continue
+                }
+                
+                // CASE 4: Duplicate at word START (filtered.count ≤ 2) (REMOVE)
+                if filtered.count <= 2 {
+                    i += 1
+                    continue
+                }
+                
+                // CASE 5: Consonant at END with no following vowel (REMOVE)
+                // e.g., trailing "h" in "h ɛ l oʊ h"
+                if !isVowel && i == phonemes.count - 1 {
+                    i += 1
+                    continue
+                }
+                
+                // CASE 6: Default - still looks suspicious, skip it
                 i += 1
                 continue
             }
             
+            // Not a duplicate, keep it
             filtered.append(prediction)
             lastPhoneme = currentPhoneme
-            lastWasVowel = isVowel
             i += 1
         }
         
@@ -1117,8 +1250,20 @@ public class PronunciationScorer {
         decodedPhonemes: [PhonemePrediction],
         targetSentence: String
     ) -> PronunciationEvalResult {
+        // Debug: Show before filtering
+        print("\n🔍 DEBUG - Before filtering:")
+        print("   Raw: \(decodedPhonemes.map { $0.topPrediction.phoneme }.joined(separator: " "))")
+        
+        // Apply filtering
+        let filtered = filterConsecutiveDuplicates(decodedPhonemes)
+        
+        // Debug: Show after filtering
+        print("🔍 DEBUG - After filtering:")
+        print("   Filtered: \(filtered.map { $0.topPrediction.phoneme }.joined(separator: " "))")
+        print("")
+        
         return alignAndScoreMultiDialect(
-            decodedPhonemes: decodedPhonemes,
+            decodedPhonemes: filtered,
             targetSentence: targetSentence
         )
     }
@@ -1498,6 +1643,11 @@ public class PronunciationScorer {
                             let isCoreDialect = isCoreDialectEquivalent(target: targetPhoneme, actual: actualPhoneme)
                             let isUnstressedReduction = isUnstressedVowelReduction(target: targetPhoneme, actual: actualPhoneme)
                             
+                            // NEW: Check for cot-caught merger (THOUGHT-LOT merger)
+                            // This is less standard than other dialect variants, so lower credit
+                            let isCotCaughtMerger = (targetPhoneme == "ɔː" && (actualPhoneme == "ɑ" || actualPhoneme == "ɑː")) ||
+                                                    ((targetPhoneme == "ɑ" || targetPhoneme == "ɑː") && actualPhoneme == "ɔː")
+                            
                             let effectiveMinConfidence: Double
                             if isRhoticVariant || isFunctionWordReduction || isCoreDialect || isUnstressedReduction || isWordFinalVoicing {
                                 effectiveMinConfidence = 0.10
@@ -1522,6 +1672,11 @@ public class PronunciationScorer {
                                     maxCredit = 0.85
                                     minCredit = 0.55
                                     note = "Rhotic variant"
+                                } else if isCotCaughtMerger {
+                                    // NEW: Cot-caught merger gets lower credit (regional variant)
+                                    maxCredit = 0.70
+                                    minCredit = 0.50
+                                    note = "Regional variant (cot-caught merger)"
                                 } else if isCoreDialect {
                                     // NEW: Core dialect differences (LOT vowel etc.) get high credit
                                     maxCredit = 0.90
