@@ -3,19 +3,6 @@
 //  C7-Pronunciation
 //
 //  Created by Savio Enoson on 15/11/25.
-//  v10.7: True dual-dialect scoring per word
-//      - v4-v9: Base functionality, rhotic matching, coarticulation, gemination
-//      - v10-v10.6: Two-tier scoring, dialect equivalences, expanded whitelist
-//      - v10.7 NEW: Scores against BOTH UK and US dialects for each word
-//          * Takes the HIGHER score for each word (not pre-selecting one dialect)
-//          * Allows mixed dialect usage (e.g., US "privacy" /praɪvəsi/ vs UK /prɪvəsi/)
-//          * Users can naturally mix British and American pronunciations
-//      - v10.7 FIX: Added safety checks for empty/short recordings
-//
-//  DESIGN PHILOSOPHY:
-//  - Function words (whitelisted): LENIENT - accept dialect variants, reductions
-//  - All other words: STRICT - only accept eSpeak's two dialect outputs + core equivalences
-//  - DUAL DIALECT: Each word scored against BOTH UK and US, best score wins
 //
 
 import Foundation
@@ -90,7 +77,12 @@ public class PronunciationScorer {
         // NOTE: Does NOT include ʌ - that's word-specific (what, was, because)
         "ɒ": ["ɑː", "ɑ", "ɔ"],
         "ɑː": ["ɒ", "ɑ"],
-        "ɑ": ["ɒ", "ɑː"],
+        "ɑ": ["ɒ", "ɑː", "ɔː"],  // ADDED: ɔː for THOUGHT-LOT merger
+        
+        // THOUGHT vowel: UK/US ɔː can merge with LOT ɑ in some US dialects
+        // This is the famous "cot-caught" merger
+        "ɔː": ["ɔ", "ɑ", "ɑː"],  // e.g., "caused", "thought", "caught" → [kɑzd], [θɑt], [kɑt]
+        "ɔ": ["ɔː", "ɑ"],
         
         // SQUARE vowel: UK eə/ɛə = US ɛ (+ rhotic ɹ follows)
         // In American English, "aware" = /əˈwɛɹ/, "care" = /kɛɹ/
@@ -1651,6 +1643,11 @@ public class PronunciationScorer {
                             let isCoreDialect = isCoreDialectEquivalent(target: targetPhoneme, actual: actualPhoneme)
                             let isUnstressedReduction = isUnstressedVowelReduction(target: targetPhoneme, actual: actualPhoneme)
                             
+                            // NEW: Check for cot-caught merger (THOUGHT-LOT merger)
+                            // This is less standard than other dialect variants, so lower credit
+                            let isCotCaughtMerger = (targetPhoneme == "ɔː" && (actualPhoneme == "ɑ" || actualPhoneme == "ɑː")) ||
+                                                    ((targetPhoneme == "ɑ" || targetPhoneme == "ɑː") && actualPhoneme == "ɔː")
+                            
                             let effectiveMinConfidence: Double
                             if isRhoticVariant || isFunctionWordReduction || isCoreDialect || isUnstressedReduction || isWordFinalVoicing {
                                 effectiveMinConfidence = 0.10
@@ -1675,6 +1672,11 @@ public class PronunciationScorer {
                                     maxCredit = 0.85
                                     minCredit = 0.55
                                     note = "Rhotic variant"
+                                } else if isCotCaughtMerger {
+                                    // NEW: Cot-caught merger gets lower credit (regional variant)
+                                    maxCredit = 0.70
+                                    minCredit = 0.50
+                                    note = "Regional variant (cot-caught merger)"
                                 } else if isCoreDialect {
                                     // NEW: Core dialect differences (LOT vowel etc.) get high credit
                                     maxCredit = 0.90
