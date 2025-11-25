@@ -81,7 +81,7 @@ struct HomeScreenView: View {
                         .bold()
                     
                     Text(desc)
-                        .font(.caption)
+                        .font(.subheadline)
                 }
                 .padding(.trailing, 5)
                 .padding(.vertical, 10)

@@ -12,7 +12,6 @@ import Speech
 import AVFoundation
 
 class CustomViewModel: ObservableObject {
-    // Adding this so github updates this file
     
     // Dependencies
     private let audioManager = AudioManager.shared

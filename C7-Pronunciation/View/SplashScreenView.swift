@@ -25,7 +25,7 @@ struct SplashScreenView: View {
                     .padding(.bottom, 50)
                     .foregroundColor(.white)
                 
-                Text("The first step to becoming a good speaker is to just be ***Talkative***.")
+                Text("The first step to becoming a great speaker is to just be ***Talkative***.")
                     .font(.body)
                     .multilineTextAlignment(.center)
                     .foregroundColor(.white)
