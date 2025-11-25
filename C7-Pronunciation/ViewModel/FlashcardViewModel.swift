@@ -3,7 +3,7 @@ import SwiftUI
 import Combine
 import AVFoundation
 
-
+@MainActor
 class FlashcardViewModel: ObservableObject {
     
     // MARK: - Published Properties
@@ -51,6 +51,7 @@ class FlashcardViewModel: ObservableObject {
     
     func toggleRecording() {
         // Tak samano kayak custom ya
+        HapticsManager.shared.playRecordHaptic()
         if AudioManager.shared.isRecording {
             stopRecordingAndEvaluate()
         } else {
@@ -69,7 +70,6 @@ class FlashcardViewModel: ObservableObject {
             wordScores[i].color = .primary
             wordScores[i].score = 1
         }
-        
         startMetering()
         AudioManager.shared.startRecording()
         self.isRecording = true

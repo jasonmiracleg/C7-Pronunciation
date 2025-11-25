@@ -110,15 +110,27 @@ struct FlashcardPageView: View {
     // MARK: - Subviews
     var controlsArea: some View {
         VStack {
-            if viewModel.isEvaluated {
-                // MARK: - Done State (Retry & Next)
+            // MARK: - Done State (Retry & Next)
+            if showWaveform {
+                WaveformView(levels: viewModel.audioLevels)
+                    .padding(.horizontal, 40)
+                    .transition(.scale.animation(.spring(response: 0.4, dampingFraction: 0.5, blendDuration: 0)))
+            } else {
+                Color.clear.frame(height: 60)
+            }
                 ZStack {
-                    Button(action: viewModel.startRecording) {
-                        Image(systemName: "arrow.clockwise.circle.fill")
-                            .font(.system(size: 64))
-                            .foregroundStyle(Color.white)
+                    VStack {
+                
+                        Button(action: {
+                            viewModel.toggleRecording()
+                        }) {
+                            Image(systemName: (!viewModel.isRecording && !viewModel.isLoading) ? "microphone.circle.fill" : "stop.circle.fill")
+                                .font(.system(size: 64))
+                                .foregroundColor(.white)
+                        }
+                        .glassEffect(viewModel.isLoading ? .regular.tint(Color.secondary) : .regular.tint(Color.accentColor))
+                        .disabled(viewModel.isLoading)
                     }
-                    .glassEffect(.regular.tint(Color.accentColor))
                     
                     // 2. Right: Next Button
                     if viewModel.isEvaluated {
@@ -151,30 +163,7 @@ struct FlashcardPageView: View {
                     }
                 }
                 .padding(.horizontal)
-                
-            } else {
-                // MARK: - Recording/Idle State
-                VStack {
-                    if showWaveform {
-                        WaveformView(levels: viewModel.audioLevels)
-                            .padding(.horizontal, 40)
-                            .transition(.scale.animation(.spring(response: 0.4, dampingFraction: 0.5, blendDuration: 0)))
-                    } else {
-                        Color.clear.frame(height: 60)
-                    }
-                    
-                    Button(action: {
-                        viewModel.toggleRecording()
-                    }) {
-                        Image(systemName: (!viewModel.isRecording && !viewModel.isLoading) ? "microphone.circle.fill" : "stop.circle.fill")
-                            .font(.system(size: 64))
-                            .foregroundColor(.white)
-                    }
-                    .glassEffect(viewModel.isLoading ? .regular.tint(Color.secondary) : .regular.tint(Color.accentColor))
-                    .disabled(viewModel.isLoading)
-                }
             }
-        }
         .padding(.bottom, 40)
         .animation(.easeInOut(duration: 0.3), value: viewModel.isEvaluated)
         .animation(.easeInOut(duration: 0.3), value: showWaveform)
