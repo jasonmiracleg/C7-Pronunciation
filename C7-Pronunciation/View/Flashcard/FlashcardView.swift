@@ -17,18 +17,8 @@ struct FlashcardView: View {
                 )
                 .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 5)
             
-            // Logo
-            Image("card_logo")
-                .resizable()
-                .scaledToFit()
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .padding(.vertical, 24)
-                .padding(.horizontal, 48)
-                .opacity(0.1)
-            
             // Main Content
             VStack {
-                
                 Spacer()
                 
                 FlowLayout(spacing: 6) {
@@ -37,7 +27,6 @@ struct FlashcardView: View {
                         ForEach(viewModel.targetSentence.split(separator: " ").map(String.init), id: \.self) { word in
                             Text(word)
                                 .font(.system(size: 28, weight: .medium))
-                            
                         }
                     } else {
                         // Render Evaluated/Scored words
@@ -95,7 +84,7 @@ struct FlashcardView: View {
                     } else {
                         // No errors
                         Text("Perfect Pronunciation! Great Job.")
-                            .foregroundColor(.green)
+                            .foregroundColor(.correctPronunciation)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
                             .background(

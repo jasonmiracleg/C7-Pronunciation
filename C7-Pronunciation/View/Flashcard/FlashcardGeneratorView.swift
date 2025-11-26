@@ -14,15 +14,6 @@ struct FlashcardGeneratorView: View {
                 )
                 .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 5)
             
-            // Logo
-            Image("card_logo")
-                .resizable()
-                .scaledToFit()
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .padding(.vertical, 24)
-                .padding(.horizontal, 48)
-                .opacity(0.1)
-            
             // Main Content
             VStack{
                 Image("congratulations")
