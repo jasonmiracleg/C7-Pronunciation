@@ -7,7 +7,7 @@ struct FlashcardView: View {
     var onTapWord: (WordScore) -> Void
     
     var body: some View {
-        ZStack(alignment: .topTrailing) {
+        ZStack {
             // Background
             RoundedRectangle(cornerRadius: 24)
                 .fill(Color(UIColor.tertiarySystemBackground))
@@ -28,6 +28,7 @@ struct FlashcardView: View {
             
             // Main Content
             VStack {
+                
                 Spacer()
                 
                 FlowLayout(spacing: 6) {
@@ -51,14 +52,34 @@ struct FlashcardView: View {
             }
             .frame(maxWidth: .infinity)
             
-            // Speaker button
-            Button(action: onPlayAudio) {
-                Image(systemName: "speaker.wave.2.circle.fill")
-                    .font(.system(size: 36))
-                    .foregroundColor(.white)
+            VStack {
+                HStack {
+                    Color.clear
+                        .frame(height: 36)
+                        .frame(width: 50)
+                        .layoutPriority(1)
+                    
+                    Spacer()
+
+                    Text("\(viewModel.currentCardNumber) of \(viewModel.cardsPerCycle)")
+                        .foregroundColor(Color.secondary)
+                    
+                    Spacer()
+
+
+                    Button(action: onPlayAudio) {
+                        Image(systemName: "speaker.wave.2.circle.fill")
+                            .font(.system(size: 36))
+                            .foregroundColor(.white)
+                    }
+                    .glassEffect(.regular.tint(Color.accent))
+
+                }
+                .padding(.top, 16)
+                .padding(.horizontal, 16)
+
+                Spacer()
             }
-            .glassEffect(.regular.tint(Color.accent))
-            .padding(16)
             
             // CTA Text
             if viewModel.isEvaluated {
@@ -108,4 +129,28 @@ struct FlashcardView: View {
                 }
             }
     }
+}
+
+// MARK: - Preview Mock Data
+
+private let mockWordScores: [WordScore] = [
+    WordScore(word: "Hello", score: 0.9, alignedPhonemes: []),
+    WordScore(word: "world", score: 0.3, alignedPhonemes: [])
+]
+
+// MARK: - Preview Provider
+
+#Preview {
+    let vm = FlashcardViewModel()
+    vm.wordScores = mockWordScores
+    vm.isEvaluated = true
+
+    return FlashcardView(
+        viewModel: vm,
+        onPlayAudio: {},
+        onTapWord: { _ in }
+    )
+    .padding(.top, 40)
+    .padding(.horizontal, 24)
+    .frame(height: 400)
 }

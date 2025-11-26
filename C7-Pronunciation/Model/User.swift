@@ -39,6 +39,8 @@ class User: ObservableObject {
         }
 
         try? context.save()
+        
+        addPhrasesToQueue(basedOn: .mixed)
     }
 
     
@@ -104,6 +106,10 @@ class User: ObservableObject {
         print("Did not find the phoneme")
     }
     
+    func clearQueue(){
+        phraseQueue.removeAll()
+    }
+    
     func addPhrasesToQueue(basedOn: PhraseSearchType = .mixed) {
         var targetPhonemes: [String] = []
         
@@ -146,11 +152,15 @@ class User: ObservableObject {
         print("✅ Added \(phraseQueue.count) phrases to queue. Strategy: \(basedOn)")
     }
     
-    func nextCard() -> Phrase {
-        let newPhrase = phraseQueue.removeFirst()
-        if phraseQueue.count <= 2 {
-            addPhrasesToQueue(basedOn: .attempts)
+    func nextCard() -> Phrase? {
+        if phraseQueue.isEmpty {
+            return nil
         }
+        
+        let newPhrase = phraseQueue.removeFirst()
+//        if phraseQueue.count <= 2 {
+//            addPhrasesToQueue(basedOn: .attempts)
+//        }
         return newPhrase
     }
     

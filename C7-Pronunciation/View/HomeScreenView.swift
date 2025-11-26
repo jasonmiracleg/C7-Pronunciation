@@ -11,6 +11,7 @@ struct HomeScreenView: View {
     @State private var isCustomPresented = false
     @State private var isFlashCardPresented = false
     @EnvironmentObject var user: User
+    @EnvironmentObject var flascardViewModel: FlashcardViewModel
     
     var timeBasedGreeting: String {
         let hour = Calendar.current.component(.hour, from: Date())
