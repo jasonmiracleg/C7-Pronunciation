@@ -104,6 +104,11 @@ struct FlashcardPageView: View {
                 }
             }
             .onAppear {
+                let customPhrases: [String] = [
+                    "This is a custom phrase",
+                    "testing if more than one works"
+                ]
+                user.addCustomPhrases(basedOn: customPhrases)
                 loadPhrases()
             }
             .onDisappear {

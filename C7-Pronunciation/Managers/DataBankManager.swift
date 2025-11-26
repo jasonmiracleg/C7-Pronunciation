@@ -76,6 +76,23 @@ class DataBankManager {
         addPhrase(text: text, phonemes: phonemeString, category: .userAdded)
     }
     
+    func createCustomPhrases(basedOn texts: [String]) -> [Phrase]{
+        var phrases: [Phrase] = []
+        
+        for text in texts {
+            let phonemeString = EspeakManager.shared.getPhonemesAsString(for: text)
+            print(phonemeString)
+            
+            guard phonemeString != "" else {
+                print("Espeak returned no phonemes for: \(text)")
+                continue
+            }
+            phrases.append(Phrase(text: text, phonemes: phonemeString, category: .userAdded))
+        }
+        
+        return phrases
+    }
+    
     // MARK: - Fetch Operations
     
     /// Fetches a specified number of random phrases for a given category.

@@ -110,6 +110,14 @@ class User: ObservableObject {
         phraseQueue.removeAll()
     }
     
+    func addCustomPhrases(basedOn texts: [String]) {
+        let phrases: [Phrase] = DataBankManager.shared.createCustomPhrases(basedOn: texts)
+        
+        for phrase in phrases{
+            phraseQueue.append(phrase)
+        }
+    }
+    
     func addPhrasesToQueue(basedOn: PhraseSearchType = .mixed) {
         var targetPhonemes: [String] = []
         
