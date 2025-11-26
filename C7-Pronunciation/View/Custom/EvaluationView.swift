@@ -15,26 +15,31 @@ struct EvaluationView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 16) {
-                Text("Tap on the underlined words to see the correct pronunciation.")
-                    .font(.subheadline)
-                    .multilineTextAlignment(.center)
-                    .foregroundStyle(Color(UIColor.systemGray2))
-                    .padding(.top)
+            ZStack {
+                Color(UIColor.systemGroupedBackground)
+                    .ignoresSafeArea()
                 
-                // Scrollable cards list
-                ScrollView {
-                    VStack(spacing: 20) {
-                        // Iterate over the sentence results array
-                        ForEach(viewModel.sentenceResults) { result in
-                            EvaluationCardView(result: result) { tapped in
-                                selectedWord = tapped
-                                showPopOver = true
+                VStack(spacing: 16) {
+                    Text("Tap on the underlined words to see the correct pronunciation.")
+                        .font(.subheadline)
+                        .multilineTextAlignment(.center)
+                        .foregroundStyle(.primary)
+                        .padding(.top)
+                    
+                    // Scrollable cards list
+                    ScrollView {
+                        VStack(spacing: 20) {
+                            // Iterate over the sentence results array
+                            ForEach(viewModel.sentenceResults) { result in
+                                EvaluationCardView(result: result) { tapped in
+                                    selectedWord = tapped
+                                    showPopOver = true
+                                }
                             }
                         }
+                        .padding(.horizontal)
+                        .padding(.bottom, 20)
                     }
-                    .padding(.horizontal)
-                    .padding(.bottom, 20)
                 }
             }
             .sheet(item: $selectedWord) { word in

@@ -48,13 +48,13 @@ struct EvaluationCardView: View {
                 Text(hasErrors ? "\(errorCount) Error\(errorCount == 1 ? "" : "s")" : "Perfect Pronunciation!")
                     .font(.caption)
                     .fontWeight(.medium)
-                    .foregroundStyle(Color.gray)
+                    .foregroundStyle(hasErrors ? Color.red : Color.green)
             }
         }
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(hasErrors ? Color("SoftOrange") : Color("SoftGreen"))
+                .fill(Color(UIColor.tertiarySystemBackground))
         )
     }
         

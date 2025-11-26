@@ -77,13 +77,14 @@ struct HomeScreenView: View {
                 
                 VStack(alignment: .leading, spacing: 10) {
                     Text(title)
+                        .lineLimit(1)
                         .font(.title2)
                         .bold()
                     
                     Text(desc)
                         .font(.subheadline)
                 }
-                .padding(.trailing)
+                .padding(.trailing, 5)
                 .padding(.vertical, 10)
                 .foregroundColor(Color.white)
                 

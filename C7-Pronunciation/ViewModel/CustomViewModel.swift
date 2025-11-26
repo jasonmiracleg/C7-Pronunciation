@@ -94,6 +94,7 @@ class CustomViewModel: ObservableObject {
     }
     
     func toggleRecording() {
+        HapticsManager.shared.playRecordHaptic()
         if audioManager.isRecording {
             isRecording = false
 //            print("🎙️ Stopping recording...")
@@ -111,7 +112,6 @@ class CustomViewModel: ObservableObject {
             isRecording = true
             hasRecorded = true
 //            print("🎙️ Starting recording...")
-            
             resetResults()
             startMetering()
             startSpeechRecognition()
