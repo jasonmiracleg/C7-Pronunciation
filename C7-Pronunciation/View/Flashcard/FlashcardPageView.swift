@@ -11,7 +11,8 @@ import SwiftUI
 struct FlashcardPageView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var user: User
-    @StateObject private var viewModel = FlashcardViewModel()
+    @EnvironmentObject private var viewModel: FlashcardViewModel
+    
     @State private var phrase: Phrase?
     @State private var isLoadingPhrases = true
     @State private var selectedWord: WordScore? = nil
@@ -45,8 +46,12 @@ struct FlashcardPageView: View {
                             .fixedSize(horizontal: false, vertical: true)
                             .padding(.horizontal, 40)
                         
-                        // MARK: - Card Display
-                        if let currentPhrase = phrase {
+                        if viewModel.canGenerateNewCards {
+                            FlashcardGeneratorView(viewModel: viewModel)
+                                .padding(.top, 40)
+                                .padding(.horizontal, 24)
+                                .frame(height: 400)
+                        } else if let currentPhrase = phrase {
                             FlashcardView(
                                 viewModel: viewModel,
                                 onPlayAudio: { speak(text: currentPhrase.text) },
@@ -100,6 +105,9 @@ struct FlashcardPageView: View {
             .onAppear {
                 loadPhrases()
             }
+            .onDisappear {
+                resetState()
+            }
             .sheet(item: $selectedWord) { word in
                 CorrectPronunciationSheetView(wordScore: word)
                     .presentationDetents([.fraction(0.25)])
@@ -110,14 +118,34 @@ struct FlashcardPageView: View {
     // MARK: - Subviews
     var controlsArea: some View {
         VStack {
-            // MARK: - Done State (Retry & Next)
-            if showWaveform {
-                WaveformView(levels: viewModel.audioLevels)
-                    .padding(.horizontal, 40)
-                    .transition(.scale.animation(.spring(response: 0.4, dampingFraction: 0.5, blendDuration: 0)))
-            } else {
-                Color.clear.frame(height: 60)
-            }
+            if viewModel.canGenerateNewCards {
+                // MARK: - Generate New Cards
+                Button(action: {
+                    withAnimation(.easeOut(duration: 0.15)) {
+                        nextButtonScale = 0.0
+                        nextButtonOffset = 0.0
+                    } completion: {
+                        generateNewCards()
+                    }
+                }) {
+                    Image(systemName: "shuffle.circle.fill")
+                        .font(.system(size: 64))
+                        .foregroundColor(.white)
+                }
+                .glassEffect(.regular.tint(Color.accentColor))
+                .onAppear {
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.5).delay(0.15)) {
+                        nextButtonScale = 1.0
+                        nextButtonOffset = 90.0
+                    }
+                }
+                .onDisappear {
+                    nextButtonScale = 0.0
+                    nextButtonOffset = 0.0
+                }
+                
+            } else if viewModel.isEvaluated {
+                // MARK: - Done State (Retry & Next)
                 ZStack {
                     VStack {
                 
@@ -175,12 +203,22 @@ struct FlashcardPageView: View {
         Task {
             isLoadingPhrases = true
             
-            if user.phraseQueue.isEmpty {
+            if viewModel.firstTimeInstantGenerate {
                 user.addPhrasesToQueue(basedOn: .mixed)
+                viewModel.firstTimeInstantGenerate = false
+            }
+            
+            if user.phraseQueue.isEmpty {
+                viewModel.canGenerateNewCards = true
+            } else {
+                viewModel.canGenerateNewCards = false
             }
             
             if !user.phraseQueue.isEmpty {
                 phrase = user.nextCard()
+                print("current phrase: \(phrase?.text)")
+                print("canGenerateNewCards: \(viewModel.canGenerateNewCards)")
+                viewModel.iterateCardIndex()
                 
                 // Set the target for the ViewModel
                 if let currentPhrase = phrase {
@@ -191,10 +229,13 @@ struct FlashcardPageView: View {
             }
             
             isLoadingPhrases = false
+            
         }
     }
     
     private func loadNextPhrase() {
+        print("LOADING NEXT PHRASE")
+        
         // A. Capture the scores from the current attempt
         let currentPhonemes = viewModel.getCurrentPhonemes()
         
@@ -205,9 +246,29 @@ struct FlashcardPageView: View {
         loadPhrases()
     }
     
+    private func generateNewCards(){
+        if !user.phraseQueue.isEmpty {
+            print("PHRASE QUEUE NOT EMPTY")
+            viewModel.canGenerateNewCards = false
+            loadNextPhrase()
+            return
+        }
+        
+        print("ADDING PHRASES")
+        user.addPhrasesToQueue(basedOn: .mixed)
+        viewModel.generateNewCards()
+        loadNextPhrase()
+    }
+    
     private func resetCard() {
         guard let currentPhrase = phrase else { return }
         viewModel.updateTargetSentence(currentPhrase.text)
+    }
+    
+    private func resetState() {
+        user.clearQueue()
+        viewModel.currentCardNumber = 0
+        viewModel.firstTimeInstantGenerate = true
     }
     
     // MARK: - Audio Helpers
