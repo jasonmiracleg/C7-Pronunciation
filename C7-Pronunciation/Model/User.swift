@@ -106,6 +106,10 @@ class User: ObservableObject {
         print("Did not find the phoneme")
     }
     
+    func clearQueue(){
+        phraseQueue.removeAll()
+    }
+    
     func addPhrasesToQueue(basedOn: PhraseSearchType = .mixed) {
         var targetPhonemes: [String] = []
         

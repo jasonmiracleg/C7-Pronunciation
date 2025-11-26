@@ -64,9 +64,6 @@ struct FlashcardPageView: View {
                             .frame(height: 400)
                         }
                         
-                        Text("Test")
-                        Text("Phrases in queue: \(user.phraseQueue.count)")
-                        
                         Spacer()
                         
                         // MARK: - Controls Area
@@ -107,6 +104,9 @@ struct FlashcardPageView: View {
             }
             .onAppear {
                 loadPhrases()
+            }
+            .onDisappear {
+                resetState()
             }
             .sheet(item: $selectedWord) { word in
                 CorrectPronunciationSheetView(wordScore: word)
@@ -280,6 +280,12 @@ struct FlashcardPageView: View {
     private func resetCard() {
         guard let currentPhrase = phrase else { return }
         viewModel.updateTargetSentence(currentPhrase.text)
+    }
+    
+    private func resetState() {
+        user.clearQueue()
+        viewModel.currentCardNumber = 0
+        viewModel.firstTimeInstantGenerate = true
     }
     
     // MARK: - Audio Helpers
