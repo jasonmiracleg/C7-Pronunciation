@@ -39,6 +39,8 @@ class User: ObservableObject {
         }
 
         try? context.save()
+        
+        addPhrasesToQueue(basedOn: .mixed)
     }
 
     

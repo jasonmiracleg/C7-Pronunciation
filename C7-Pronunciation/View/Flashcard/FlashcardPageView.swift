@@ -11,7 +11,8 @@ import SwiftUI
 struct FlashcardPageView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var user: User
-    @StateObject private var viewModel = FlashcardViewModel()
+    @EnvironmentObject private var viewModel: FlashcardViewModel
+    
     @State private var phrase: Phrase?
     @State private var isLoadingPhrases = true
     @State private var selectedWord: WordScore? = nil
@@ -65,25 +66,6 @@ struct FlashcardPageView: View {
                         
                         Text("Test")
                         Text("Phrases in queue: \(user.phraseQueue.count)")
-                        
-                        // MARK: - Card Display
-//                        if let currentPhrase = phrase {
-//                            FlashcardView(
-//                                viewModel: viewModel,
-//                                onPlayAudio: { speak(text: currentPhrase.text) },
-//                                onTapWord: { word in
-//                                    selectedWord = word
-//                                }
-//                            )
-//                            .padding(.top, 40)
-//                            .padding(.horizontal, 24)
-//                            .frame(height: 400)
-//                        } else {
-//                            FlashcardGeneratorView(viewModel: viewModel)
-//                                .padding(.top, 40)
-//                                .padding(.horizontal, 24)
-//                                .frame(height: 400)
-//                        }
                         
                         Spacer()
                         
@@ -139,14 +121,28 @@ struct FlashcardPageView: View {
             if viewModel.canGenerateNewCards {
                 // MARK: - Generate New Cards
                 Button(action: {
-                    generateNewCards() // or your generate action
+                    withAnimation(.easeOut(duration: 0.15)) {
+                        nextButtonScale = 0.0
+                        nextButtonOffset = 0.0
+                    } completion: {
+                        generateNewCards()
+                    }
                 }) {
                     Image(systemName: "shuffle.circle.fill")
                         .font(.system(size: 64))
                         .foregroundColor(.white)
                 }
-                .glassEffect(viewModel.isLoading ? .regular.tint(Color.secondary) : .regular.tint(Color.accentColor))
-                .disabled(viewModel.isLoading)
+                .glassEffect(.regular.tint(Color.accentColor))
+                .onAppear {
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.5).delay(0.15)) {
+                        nextButtonScale = 1.0
+                        nextButtonOffset = 90.0
+                    }
+                }
+                .onDisappear {
+                    nextButtonScale = 0.0
+                    nextButtonOffset = 0.0
+                }
                 
             } else if viewModel.isEvaluated {
                 // MARK: - Done State (Retry & Next)
@@ -224,12 +220,22 @@ struct FlashcardPageView: View {
         Task {
             isLoadingPhrases = true
             
+            if viewModel.firstTimeInstantGenerate {
+                user.addPhrasesToQueue(basedOn: .mixed)
+                viewModel.firstTimeInstantGenerate = false
+            }
+            
             if user.phraseQueue.isEmpty {
                 viewModel.canGenerateNewCards = true
+            } else {
+                viewModel.canGenerateNewCards = false
             }
             
             if !user.phraseQueue.isEmpty {
                 phrase = user.nextCard()
+                print("current phrase: \(phrase?.text)")
+                print("canGenerateNewCards: \(viewModel.canGenerateNewCards)")
+                viewModel.iterateCardIndex()
                 
                 // Set the target for the ViewModel
                 if let currentPhrase = phrase {
@@ -245,6 +251,8 @@ struct FlashcardPageView: View {
     }
     
     private func loadNextPhrase() {
+        print("LOADING NEXT PHRASE")
+        
         // A. Capture the scores from the current attempt
         let currentPhonemes = viewModel.getCurrentPhonemes()
         
@@ -253,19 +261,20 @@ struct FlashcardPageView: View {
         
         // C. Load the next phrase
         loadPhrases()
-        
-        // D. update index in view model
-        viewModel.iterateCardIndex()
     }
     
     private func generateNewCards(){
-        print("ADDING PHRASES")
-        user.addPhrasesToQueue(basedOn: .mixed)
         if !user.phraseQueue.isEmpty {
             print("PHRASE QUEUE NOT EMPTY")
-            viewModel.generateNewCards()
-            loadPhrases()
+            viewModel.canGenerateNewCards = false
+            loadNextPhrase()
+            return
         }
+        
+        print("ADDING PHRASES")
+        user.addPhrasesToQueue(basedOn: .mixed)
+        viewModel.generateNewCards()
+        loadNextPhrase()
     }
     
     private func resetCard() {

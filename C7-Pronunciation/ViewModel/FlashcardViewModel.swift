@@ -13,8 +13,8 @@ class FlashcardViewModel: ObservableObject {
     // for the generating shit
     @Published var currentCardNumber: Int = 0
     @Published var cardsPerCycle: Int = 5
-    @Published var canGenerateNewCards: Bool = true
-    @Published var firstTimeThrough: Bool = true
+    @Published var canGenerateNewCards: Bool = false
+    @Published var firstTimeInstantGenerate: Bool = true
     
     // State matching CustomViewModel
     @Published var isRecording: Bool = false
@@ -190,13 +190,12 @@ class FlashcardViewModel: ObservableObject {
         canGenerateNewCards = false
         iterateCardIndex()
         currentCardNumber = 0
-        firstTimeThrough = false
     }
     
     func iterateCardIndex() {
         currentCardNumber += 1
         
-        if currentCardNumber >= cardsPerCycle {
+        if currentCardNumber > cardsPerCycle {
             canGenerateNewCards = true
             currentCardNumber = cardsPerCycle
         }

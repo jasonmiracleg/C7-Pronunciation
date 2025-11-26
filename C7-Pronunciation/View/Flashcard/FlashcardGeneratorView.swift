@@ -32,14 +32,14 @@ struct FlashcardGeneratorView: View {
                     .padding(.horizontal, 100)
 
                 VStack{
-                    Text(viewModel.firstTimeThrough ? "Let's Get Started" : "Congratulations")
+                    Text("Congratulations")
                         .font(.title3)
                         .bold()
                     
-                    Text(viewModel.firstTimeThrough ? "Start by generating a few phrases" : "You have successfully practiced ")
+                    Text("You have successfully practiced ")
                         .foregroundColor(.secondary)
                         .font(.callout)
-                    + Text(viewModel.firstTimeThrough ? "" : "\(viewModel.cardsPerCycle) flashcards")
+                    + Text("\(viewModel.cardsPerCycle) flashcards")
                         .foregroundColor(.secondary)
                         .font(.callout)
                         .bold()

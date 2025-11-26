@@ -12,6 +12,7 @@ import SwiftData
 struct C7_PronunciationApp: App {
     @AppStorage("hasCompletedOnboarding") var hasCompletedOnboarding: Bool = false
     @StateObject private var user = User()
+    @StateObject private var flashcardViewModel = FlashcardViewModel()
     @State private var isModelLoaded = false
     
     @State private var showDebug = false
@@ -25,6 +26,7 @@ struct C7_PronunciationApp: App {
                         if hasCompletedOnboarding {
                             HomeScreenView()
                                 .environmentObject(user)
+                                .environmentObject(flashcardViewModel)
                         } else {
                             OnboardingView {
                                 self.hasCompletedOnboarding = true
