@@ -40,10 +40,6 @@ public class PronunciationScorer {
     
     // MARK: - Core Dialect Equivalences (Accepted in Strict Mode)
     
-    /// These are FUNDAMENTAL UK/US vowel differences that must be accepted even in strict mode.
-    /// CRITICAL: These must be TRUE EQUIVALENCES - the same phoneme category across dialects,
-    /// NOT "similar sounding" phonemes that happen to be confused.
-    ///
     /// Word-specific variations (like "what" using ʌ in US) should go in functionWordReductions,
     /// not here, to maintain strictness for other words.
     private let coreDialectEquivalences: [String: Set<String>] = [
@@ -89,6 +85,12 @@ public class PronunciationScorer {
         // The centering diphthong becomes a monophthong before /r/
         "eə": ["ɛ", "ɛə", "e"],
         "ɛə": ["ɛ", "eə", "e"],
+        
+        // PRICE + schwa: aɪə can be realized various ways
+        // e.g., "client" /klaɪənt/ → [klaɪənt], [klɑjɪnt], [klaɪɪnt]
+        // The ML model often splits this as separate phonemes
+        "aɪə": ["aɪ", "ɑj", "ɑɪ"],
+        "aɪ": ["aɪə", "ɑj"],
         
         // T-flapping: In American English, /t/ and /d/ between vowels become [ɾ]
         "ɾ": ["t", "d"],
@@ -296,6 +298,7 @@ public class PronunciationScorer {
         "a": ["eɪ": ["ə"], "æ": ["ə"]],
         "an": ["æ": ["ə"], "a": ["ə"]],
         "the": [
+            "ð": ["d"],
             "iː": ["ə", "ɪ", "i"],
             "i": ["ə", "ɪ", "iː"],
             "ə": ["iː", "ɪ", "i"],
@@ -618,6 +621,11 @@ public class PronunciationScorer {
         // COMMON ADVERBS
         // ══════════════════════════════════════════════════════════════════════
         "very": ["ɛ": ["ə"]],
+        "really": [
+            "ɹ": [""],  // R-dropping in casual speech ("really" → "illy")
+            "iə": ["ɪ", "i", "iː"],  // NEAR vowel can reduce to KIT or FLEECE
+            "ɪə": ["ɪ", "i"],
+        ],
         "also": [
             "ɔː": ["ɔ", "ɑː"],
             "əʊ": ["oʊ", "ə"],
@@ -1338,6 +1346,9 @@ public class PronunciationScorer {
             )
         }
         
+        // NOTE: Complex diphthongs like "aɪə" are already split by EspeakManager
+        // No need to preprocess them here
+        
         // Build merged ideal phonemes using best dialect per word
         // NOTE: We pre-select based on a quick match, but the actual scoring
         // will compare against BOTH dialects and use the better result
@@ -1603,7 +1614,10 @@ public class PronunciationScorer {
                     let strictMode = isCurrentWordStrict()
                     
                     // Check if this is the last phoneme of the current word
+                    // OR if it's part of a word-final consonant cluster
                     let isLastPhonemeOfWord = (phonemePositionInWord == wordLength - 1)
+                    let isInFinalCluster = (phonemePositionInWord >= wordLength - 2) && !isVowelPhoneme(targetPhoneme)
+                    let isWordFinalPosition = isLastPhonemeOfWord || isInFinalCluster
                     
                     if gopIndex < filteredPhonemes.count {
                         let actualItem = filteredPhonemes[gopIndex]
@@ -1627,11 +1641,11 @@ public class PronunciationScorer {
                             actual: actualPhoneme,
                             word: currentWord,
                             strictMode: strictMode,
-                            isWordFinal: isLastPhonemeOfWord
+                            isWordFinal: isWordFinalPosition
                         )
                         
                         let isVoicing = areVoicingPair(phoneme1: targetPhoneme, phoneme2: actualPhoneme)
-                        let isWordFinalVoicing = isLastPhonemeOfWord && isWordFinalVoicingVariant(target: targetPhoneme, actual: actualPhoneme)
+                        let isWordFinalVoicing = isWordFinalPosition && isWordFinalVoicingVariant(target: targetPhoneme, actual: actualPhoneme)
                         let isFunctionWordReduction = isWordSpecificVariant(
                             word: currentWord,
                             target: targetPhoneme,

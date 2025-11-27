@@ -8,7 +8,7 @@
 import Foundation
 
 /// Converts IPA phonetic transcriptions to human-readable respelling
-/// Optimized for Indonesian speakers (Bahasa Indonesia phonology)
+/// Optimized for clarity and distinctiveness
 public class PronunciationRespeller {
     
     public static let shared = PronunciationRespeller()
@@ -17,164 +17,235 @@ public class PronunciationRespeller {
     
     // MARK: - IPA to Respelling Mappings
     
-    /// Maps IPA symbols to respelling equivalents intuitive for Indonesian speakers
     private let ipaToRespelling: [String: String] = [
         // ═══════════════════════════════════════════════════════════════
-        // VOWELS - Monophthongs
+        // VOWELS - Monophthongs (Short)
         // ═══════════════════════════════════════════════════════════════
         
-        // KIT vowel
-        // Indo: 'i' as in 'ikan'
+        // KIT vowel (short i)
         "ɪ": "i",
-        "ᵻ": "i",
+        "ᵻ": "i",       // Unstressed KIT
+        "ɨ": "i",       // Alternative notation
         
         // DRESS vowel
-        // Indo: 'e' as in 'bebek'
-        "ɛ": "e",
-        "e": "e",
+        "ɛ": "eh",
+        "e": "e",       // Close-mid front (sometimes used for DRESS)
         
         // TRAP vowel
-        // Indo: often approximated as 'e' (cat -> ket) or 'a' (bat -> bat).
-        // 'e' is usually safer for Indo accent reduction on this vowel.
-        "æ": "e",
-        "a": "a",
+        "æ": "a",
         
-        // LOT/PALM vowel
-        // Indo: 'o' as in 'toko' / 'a' as in 'bapak'
-        "ɒ": "o",
-        "ɑ": "a",
-        "ɑː": "a",
+        // Generic low vowels
+        "a": "ah",      // Open front unrounded
         
-        // STRUT vowel (Cup, Bus)
-        // Indo: 'a' is the closest intuitive sound. (Bus -> Bas)
-        "ʌ": "a",
-        "ɐ": "a",
+        // LOT vowel (British)
+        "ɒ": "o",       // Open back rounded
         
-        // FOOT vowel (Put, Good)
-        // Indo: 'u' as in 'buku'
-        "ʊ": "u",
+        // PALM/LOT vowel (American)
+        "ɑ": "ah",      // Open back unrounded
+        // Long version
         
-        // Schwa (About, The)
-        // Indo: 'e' (pepet) as in 'kelas'
-        "ə": "e",
-        "ɚ": "er",
-        "ɝ": "er",
+        // STRUT vowel
+        "ʌ": "u",       // Open-mid back unrounded
+        "ɐ": "u",       // Near-open central
         
-        // FLEECE vowel (See, Me)
-        // Indo: 'ii' distinguishes length/tension from short 'i'
-        "iː": "ii",
-        "i": "ii",
+        // FOOT vowel
+        "ʊ": "oo",      // Near-close near-back rounded
+        "u": "oo",      // Close back rounded (short)
         
-        // GOOSE vowel (Moon, Food)
-        // Indo: 'uu' (English 'oo' reads as 'o-o' in Indo)
-        "uː": "uu",
-        "u": "uu",
-        
-        // THOUGHT/NORTH vowel
-        "ɔː": "o",
-        "ɔ": "o",
-        
-        // NURSE vowel (Bird, Turn)
-        // Indo: 'er' is the closest intuitive reading
-        "ɜː": "er",
-        "ɜ": "er",
+        // Schwa and unstressed vowels
+        "ə": "uh",      // Mid central vowel
+        "ɚ": "er",      // R-colored schwa (US)
+        "ɝ": "er",      // R-colored mid central (US)
         
         // ═══════════════════════════════════════════════════════════════
-        // VOWELS - Diphthongs
+        // VOWELS - Monophthongs (Long)
         // ═══════════════════════════════════════════════════════════════
         
-        // FACE (Day, Say)
-        // Indo: 'ei' (survei) is more accurate than 'ay' (which reads like 'ai')
-        "eɪ": "ei",
-        "eː": "ei",
+        // FLEECE vowel
+        "iː": "ee",     // Long close front unrounded
+        "i": "ee",      // Sometimes written without length mark
         
-        // PRICE (My, Lie)
-        // Indo: 'ai' (pantai)
-        "aɪ": "ai",
+        // GOOSE vowel
+        "uː": "ooh",    // Long close back rounded
         
-        // CHOICE (Boy, Noise)
-        // Indo: 'oi' (amboi)
-        "ɔɪ": "oi",
-        "oɪ": "oi",
+        // THOUGHT vowel
+        // Long open-mid back rounded
+        "ɔ": "aw",      // Short version
         
-        // GOAT (Go, No)
-        // Indo: 'ou' captures the glide better than 'o'
-        "oʊ": "ou",
-        "əʊ": "ou",
-        "oː": "ou",
+        // NURSE vowel
+        "ɜː": "ur",     // Long open-mid central unrounded
+        // Short version
         
-        // MOUTH (Now, Out)
-        // Indo: 'au' (kerbau)
-        "aʊ": "au",
+        // Other long vowels
+        "eː": "ay",     // Long close-mid front (sometimes for FACE)
+        "oː": "oh",     // Long close-mid back rounded
         
-        // NEAR (Here)
-        "ɪə": "ier",
-        "ɪɹ": "ier",
-        "iə": "ier",
+        // ═══════════════════════════════════════════════════════════════
+        // VOWELS - Diphthongs (Major)
+        // ═══════════════════════════════════════════════════════════════
         
-        // SQUARE (Hair)
-        "ɛə": "er",
-        "eə": "er",
-        "ɛɹ": "er",
+        // FACE (Day, Say, Make)
+        "eɪ": "ay",
         
-        // CURE (Tour)
-        "ʊə": "ur",
-        "ʊɹ": "ur",
+        // PRICE (My, Lie, High)
+        "aɪ": "eye",
         
-        // R-colored vowels
-        "ɑːɹ": "ar",
+        // CHOICE (Boy, Noise, Join)
+        "ɔɪ": "oy",
+        "oɪ": "oy",     // Alternative notation
+        
+        // GOAT (Go, No, Show)
+        "oʊ": "oh",     // American
+        "əʊ": "oh",     // British
+        
+        // MOUTH (Now, Out, How)
+        "aʊ": "ow",
+        
+        // ═══════════════════════════════════════════════════════════════
+        // VOWELS - Centering Diphthongs (with R-coloring)
+        // ═══════════════════════════════════════════════════════════════
+        
+        // NEAR (Here, Fear, Beer)
+        "ɪə": "eer",
+        "ɪɹ": "eer",    // With explicit R
+        "iə": "eer",    // Alternative
+        "iːə": "eer",   // Long version
+        "iɹ": "eer",    // Short with R
+        
+        // SQUARE (Hair, There, Care)
+        "ɛə": "air",
+        "eə": "air",    // Alternative
+        "ɛɹ": "air",    // With explicit R
+        "eɹ": "air",    // Alternative with R
+        // American (no diphthong, just long vowel)
+        "ɛːɹ": "air",   // American with R
+        "eːɹ": "air",   // Alternative
+        
+        // CURE (Tour, Pure, Sure)
+        "ʊə": "oor",
+        "ʊɹ": "oor",    // With explicit R
+        "uə": "oor",    // Alternative
+        "uːɹ": "oor",   // Alternative with R
+        
+        // START (Car, Far, Star)
+        "ɑː": "aa",     // Already defined above
+        "ɑːɹ": "ar",    // With R
+        "ɑɹ": "ar",     // Short version with R
+        
+        // NORTH/FORCE (Or, For, Your)
         "ɔːɹ": "or",
-        "ɑɹ": "ar",
+        "ɔɹ": "or",     // Short version
+        "oːɹ": "or",    // Alternative
+        "oɹ": "or",     // Short alternative
+        "oʊɹ": "or",    // American variant
+        
+        // LETTER (unstressed final R)
+        "əɹ": "er",
         
         // ═══════════════════════════════════════════════════════════════
-        // CONSONANTS
+        // CONSONANTS - Plosives (Stops)
         // ═══════════════════════════════════════════════════════════════
+        
+        // Voiceless
         "p": "p",
-        "b": "b",
         "t": "t",
-        "d": "d",
         "k": "k",
-        "ɡ": "g",
+        "ʔ": "",        // Glottal stop (silent)
+        
+        // Voiced
+        "b": "b",
+        "d": "d",
         "g": "g",
-        "ʔ": "",
+        "ɡ": "g",       // Alternative notation
         
+        // ═══════════════════════════════════════════════════════════════
+        // CONSONANTS - Fricatives
+        // ═══════════════════════════════════════════════════════════════
+        
+        // Voiceless
         "f": "f",
-        "v": "v",
-        "θ": "th",
-        "ð": "th",
+        "θ": "th",      // Thin, Think
         "s": "s",
-        "z": "z",
-        "ʃ": "sh",   // 'sh' is better than Indo 'sy' for English context
-        "ʒ": "zh",
+        "ʃ": "sh",      // Ship, Cash
         "h": "h",
+        "x": "kh",      // Loch (rare in English)
         
-        // Affricates
-        "tʃ": "ch",  // 'ch' prevents confusion. Indo 'c' might be read as 'k'.
-        "dʒ": "j",   // 'j' as in 'jalan' matches English 'j'
+        // Voiced
+        "v": "v",
+        "ð": "dh",      // This, That
+        "z": "z",
+        "ʒ": "zh",      // Measure, Vision
         
-        // Nasals
+        // ═══════════════════════════════════════════════════════════════
+        // CONSONANTS - Affricates
+        // ═══════════════════════════════════════════════════════════════
+        
+        "tʃ": "ch",     // Church, Match
+        "dʒ": "j",      // Judge, Age
+        
+        // ═══════════════════════════════════════════════════════════════
+        // CONSONANTS - Nasals
+        // ═══════════════════════════════════════════════════════════════
+        
         "m": "m",
         "n": "n",
-        "ŋ": "ng",   // 'ng' as in 'pisang'
+        "ŋ": "ng",      // Sing, Think
         
-        // Approximants
+        // ═══════════════════════════════════════════════════════════════
+        // CONSONANTS - Approximants
+        // ═══════════════════════════════════════════════════════════════
+        
+        // Liquids
         "l": "l",
-        "ɫ": "l",
-        "ɹ": "r",
-        "r": "r",
-        "ɾ": "r",
+        "ɫ": "l",       // Dark L (as in "ball")
+        "ɬ": "l",       // Voiceless lateral (rare)
+        
+        // Rhotics
+        "ɹ": "r",       // Approximant R (most common in English)
+        "r": "r",       // Trilled R
+        "ɾ": "r",       // Tap/Flap (American T)
+        
+        // Glides
         "w": "w",
-        "j": "y",    // Indo 'y' (yoyo) matches English /j/
+        "j": "y",       // Yes, Yellow
+        "ʍ": "wh",      // Which (for dialects that distinguish from w)
         
         // ═══════════════════════════════════════════════════════════════
         // SYLLABIC CONSONANTS
         // ═══════════════════════════════════════════════════════════════
-        "əl": "el",
-        "l̩": "el",
-        "ən": "en",
-        "n̩": "en",
-        "əm": "em",
-        "m̩": "em",
+        
+        "əl": "ul",     // Bottle
+        "l̩": "ul",      // Syllabic L
+        "ən": "un",     // Button
+        "n̩": "un",      // Syllabic N
+        "əm": "um",     // Rhythm
+        "m̩": "um",      // Syllabic M
+        
+        // ═══════════════════════════════════════════════════════════════
+        // SPECIAL CASES AND VARIANTS
+        // ═══════════════════════════════════════════════════════════════
+        
+        // Stress markers (should be removed in preprocessing, but just in case)
+        "ˈ": "",        // Primary stress
+        "ˌ": "",        // Secondary stress
+        "ː": "",        // Length mark (already handled in preprocessing)
+        
+        // Length variations
+        "aː": "aa",
+        "ɛː": "eh",
+        "ɪː": "ee",
+        "ɔː": "aw",     // Already defined
+        "ʊː": "ooh",
+        
+        // Rare/archaic
+        "ɜ": "ur",      // Short NURSE
+        "ɒː": "o",      // Long LOT (rare)
+        "ʊ̈": "oo",      // Centralized FOOT
+        
+        // Non-standard or loan words
+        "y": "ue",      // French-like vowel (rare)
+        "ø": "oe",      // Rounded front vowel (rare)
+        "œ": "oe",      // Open-mid front rounded (rare)
     ]
     
     /// Multi-character IPA sequences that should be matched first (longest first)
@@ -200,19 +271,25 @@ public class PronunciationRespeller {
     
     /// Converts a single IPA phoneme to its respelling
     public func convertPhoneme(_ phoneme: String) -> String {
-        // Normalize the input
+        // Normalize the input - remove stress marks and diacritics we don't need
         let normalized = phoneme
             .precomposedStringWithCanonicalMapping
-            .replacingOccurrences(of: "ˈ", with: "")
-            .replacingOccurrences(of: "ˌ", with: "")
-            .replacingOccurrences(of: "ː", with: "") // Handle length marks
+            .replacingOccurrences(of: "ˈ", with: "")   // Primary stress
+            .replacingOccurrences(of: "ˌ", with: "")   // Secondary stress
+            .replacingOccurrences(of: "ˑ", with: "")   // Half-long
+            .replacingOccurrences(of: "̆", with: "")    // Extra-short
+            .replacingOccurrences(of: "̃", with: "")    // Nasalization
+            .replacingOccurrences(of: "̊", with: "")    // Voiceless
+            .replacingOccurrences(of: "̥", with: "")    // Voiceless (alternative)
         
-        // Check for exact match first
-        if let respelling = ipaToRespelling[normalized] {
-            return respelling
+        // Try longest matches first (e.g., "aɪə" before "aɪ")
+        for ipaKey in sortedIPAKeys {
+            if normalized == ipaKey, let respelling = ipaToRespelling[ipaKey] {
+                return respelling
+            }
         }
         
-        // Try matching longest sequences first
+        // If no exact match, try partial replacement for complex sequences
         var result = normalized
         for ipaKey in sortedIPAKeys {
             if result.contains(ipaKey), let respelling = ipaToRespelling[ipaKey] {
@@ -220,7 +297,31 @@ public class PronunciationRespeller {
             }
         }
         
-        return result
+        // If still no match, try fallback mappings for common patterns
+        if result == normalized {
+            // Handle length marks that might still be there
+            if normalized.contains("ː") {
+                let base = normalized.replacingOccurrences(of: "ː", with: "")
+                if let respelling = ipaToRespelling[base] {
+                    return respelling
+                }
+            }
+            
+            // Handle any remaining combining diacritics
+            let stripped = normalized.unicodeScalars.filter { scalar in
+                // Keep only base characters, not combining marks
+                !CharacterSet(charactersIn: "\u{0300}"..."\u{036F}").contains(scalar)
+            }
+            let strippedString = String(String.UnicodeScalarView(stripped))
+            
+            if strippedString != normalized, let respelling = ipaToRespelling[strippedString] {
+                return respelling
+            }
+        }
+        
+        // Last resort: return the original if we can't convert it
+        // This helps us identify missing mappings
+        return result.isEmpty ? normalized : result
     }
     
     /// Creates a formatted pronunciation guide for display
