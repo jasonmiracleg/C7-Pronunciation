@@ -44,7 +44,7 @@ struct EvaluationView: View {
             }
             .sheet(item: $selectedWord) { word in
                 CorrectPronunciationSheetView(wordScore: word)
-                    .presentationDetents([.fraction(0.25)])
+                    .presentationDetents([.medium])
             }
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {

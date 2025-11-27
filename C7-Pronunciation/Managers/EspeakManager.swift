@@ -3,8 +3,6 @@
 //  C7-Pronunciation
 //
 //  Created by Savio Enoson on 13/11/25.
-//  Improved version with context-aware phoneme generation and dual-dialect support
-//  FIXED: Simplified to 2 dialects (en, en-us), minimal context corrections
 //
 
 import Foundation
@@ -353,6 +351,47 @@ public class EspeakManager {
                     startPosition: wordPhoneme.startPosition,
                     endPosition: wordPhoneme.endPosition
                 )
+            }
+        }
+        
+        // ═══════════════════════════════════════════════════════════════
+        // FINAL PASS: Split complex diphthongs for better ML alignment
+        // ═══════════════════════════════════════════════════════════════
+        // eSpeak sometimes outputs merged phonemes like "aɪə" that ML models
+        // segment differently (e.g., as "ɑ j ɪ"). We split these here so
+        // alignment works properly.
+        result = result.map { wordPhoneme in
+            let splitPhonemes = splitComplexDiphthongs(wordPhoneme.phonemes)
+            return WordPhonemes(
+                word: wordPhoneme.word,
+                phonemes: splitPhonemes,
+                startPosition: wordPhoneme.startPosition,
+                endPosition: wordPhoneme.endPosition
+            )
+        }
+        
+        return result
+    }
+    
+    /// Split complex diphthong sequences that ML models often segment differently
+    /// e.g., "aɪə" → ["aɪ", "ə"] for better alignment with ML outputs like "ɑ j ɪ"
+    private func splitComplexDiphthongs(_ phonemes: [String]) -> [String] {
+        var result: [String] = []
+        
+        for phoneme in phonemes {
+            // PRICE + schwa: "aɪə" (as in "client", "lion", "iron", "fire")
+            // eSpeak: k l aɪə n t
+            // ML often outputs: k l ɑ j ɪ n t
+            // By splitting to: k l aɪ ə n t, alignment works better
+            if phoneme == "aɪə" {
+                result.append("aɪ")
+                result.append("ə")
+            }
+            // Add more complex sequences here if needed in the future:
+            // - "aʊə" (MOUTH + schwa, as in "hour", "power")
+            // - "eɪə" (FACE + schwa, rare but possible)
+            else {
+                result.append(phoneme)
             }
         }
         
