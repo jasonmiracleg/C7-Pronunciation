@@ -105,8 +105,8 @@ struct FlashcardPageView: View {
             }
             .onAppear {
                 let customPhrases: [String] = [
-                    "This is a custom phrase",
-                    "testing if more than one works"
+                    "Your collective presence genuinely amplifies the atmosphere in this Academy",
+                    "The feedback from this conference emphasized what should be improved upon."
                 ]
                 user.addCustomPhrases(basedOn: customPhrases)
                 loadPhrases()
