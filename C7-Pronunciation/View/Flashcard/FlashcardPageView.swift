@@ -111,7 +111,7 @@ struct FlashcardPageView: View {
             }
             .sheet(item: $selectedWord) { word in
                 CorrectPronunciationSheetView(wordScore: word)
-                    .presentationDetents([.fraction(0.25)])
+                    .presentationDetents([.medium])
             }
         }
     }

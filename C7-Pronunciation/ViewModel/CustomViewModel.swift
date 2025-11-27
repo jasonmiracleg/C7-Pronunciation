@@ -215,7 +215,7 @@ class CustomViewModel: ObservableObject {
                 let average = sentenceScores.isEmpty ? 0.0 : total / Double(sentenceScores.count)
                 
                 // Auto-save low scores logic
-                if average < 0.5 && !cleanSentence.isEmpty {
+                if average < ERROR_THRESHOLD && !cleanSentence.isEmpty && cleanSentence.count >= 50 {
                     phrasesToSave.append(cleanSentence)
                 }
                 
