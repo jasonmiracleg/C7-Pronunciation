@@ -48,49 +48,15 @@ struct CorrectPronunciationSheetView: View {
                         .glassEffect(.regular.tint(Color.accentColor))
                     }
                     .padding(.horizontal)
-                    .padding(.bottom, 10)
-                    
-                    Spacer()
-                        .frame(height: 20)
+                    .padding(.vertical, 16)
                     
                     // Error details section
                     VStack(spacing: 0) {
                         Divider()
-                        
-                        // Expandable button with clear label
-                        Button(action: {
-                            withAnimation(.spring(response: 0.3)) {
-                                showBreakdown.toggle()
-                            }
-                        }) {
-                            VStack(spacing: 8) {
-                                HStack {
-                                    Text("Error Details")
-                                        .font(.body)
-                                        .fontWeight(.semibold)
-                                        .foregroundStyle(.primary)
-                                    
-                                    Image(systemName: showBreakdown ? "chevron.up.circle.fill" : "chevron.down.circle.fill")
-                                        .font(.body)
-                                        .foregroundStyle(.secondary)
-                                }
-                                
-                                if hasErrors {
-                                    Text("\(majorErrorCount) issue\(majorErrorCount == 1 ? "" : "s") detected")
-                                        .font(.subheadline)
-                                        .foregroundStyle(.secondary)
-                                }
-                            }
-                            .padding()
-                            .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-                        
-                        if showBreakdown {
-                            errorDetailsSection
-                                .transition(.opacity.combined(with: .move(edge: .top)))
-                                .padding(.top, 8)
-                        }
+                                                
+                        errorDetailsSection
+                            .transition(.opacity.combined(with: .move(edge: .top)))
+                            .padding(.top, 8)
                     }
                 }
             }
@@ -111,31 +77,35 @@ struct CorrectPronunciationSheetView: View {
     /// Complete error details with phoneme comparison
     private var errorDetailsSection: some View {
         VStack(spacing: 16) {
-            // Expected phonemes (spaced)
-            VStack(spacing: 4) {
-                Text("Expected:")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .textCase(.uppercase)
+            // Aligned phoneme display
+            VStack(spacing: 8) {
+                // Expected phonemes
+                VStack {
+                    Text("Expected: ")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .textCase(.uppercase)
+                    
+                    Text(alignedExpectedString)
+                        .font(.system(.body, design: .monospaced))
+                        .foregroundStyle(.primary)
+                }
+                .frame(maxWidth: .infinity)
                 
-                Text(idealPhonemeStringSpaced)
-                    .font(.system(.body, design: .monospaced))
-                    .foregroundStyle(.primary)
-            }
-            
-            // Actual phonemes (spaced, with highlighting)
-            VStack(spacing: 4) {
-                Text("You said:")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .textCase(.uppercase)
-                
-                actualPhonemesHighlighted
-                    .font(.system(.body, design: .monospaced))
+                // Actual phonemes
+                VStack {
+                    Text("You said: ")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .textCase(.uppercase)
+                    
+                    alignedActualText
+                        .font(.system(.body, design: .monospaced))
+                }
+                .frame(maxWidth: .infinity)
             }
             
             Divider()
-                .padding(.vertical, 4)
             
             // Error messages (without cards)
             if hasErrors {
@@ -144,41 +114,118 @@ struct CorrectPronunciationSheetView: View {
                         errorMessage(aligned: aligned)
                     }
                 }
+                .padding(.horizontal, 20)
             }
         }
         .padding()
     }
     
-    /// Highlighted actual phonemes with errors in color
-    private var actualPhonemesHighlighted: some View {
-        let phonemes = wordScore.alignedPhonemes
+    /// Aligned actual phonemes with proper spacing to match expected
+    private var alignedActualText: some View {
+        let segments = getAlignedSegments()
         
-        return HStack(spacing: 4) {
-            ForEach(Array(phonemes.enumerated()), id: \.offset) { index, aligned in
-                if aligned.type == .delete {
-                    // Skip deletions (missing sounds don't appear in "you said")
-                    EmptyView()
-                } else if let actual = aligned.actual {
-                    let isError = aligned.score < ERROR_THRESHOLD / 2 || aligned.type == .insert
-                    let respelled = PronunciationRespeller.shared.convertPhoneme(actual).lowercased()
-                    
-                    Text(respelled)
-                        .foregroundStyle(isError ? .red : .primary)
-                        .fontWeight(isError ? .semibold : .regular)
-                }
+        return HStack(spacing: 0) {
+            ForEach(Array(segments.actual.enumerated()), id: \.offset) { index, segment in
+                Text(segment.text)
+                    .foregroundStyle(segment.color)
+                    .fontWeight(segment.isBold ? .semibold : .regular)
             }
         }
     }
     
+    // MARK: - Alignment Logic
+    
+    struct PhonemeSegment {
+        let text: String
+        let color: Color
+        let isBold: Bool
+    }
+    
+    /// Calculate aligned segments for both expected and actual phonemes
+    private func getAlignedSegments() -> (expected: [PhonemeSegment], actual: [PhonemeSegment]) {
+        let phonemes = wordScore.alignedPhonemes
+        var expectedSegments: [PhonemeSegment] = []
+        var actualSegments: [PhonemeSegment] = []
+        
+        for (index, aligned) in phonemes.enumerated() {
+            let isError = aligned.score < ERROR_THRESHOLD / 2 || aligned.type == .insert
+            
+            // Get respellings
+            let targetRespelled = aligned.target.map { PronunciationRespeller.shared.convertPhoneme($0).lowercased() } ?? ""
+            let actualRespelled = aligned.actual.map { PronunciationRespeller.shared.convertPhoneme($0).lowercased() } ?? ""
+            
+            // Determine max width for this position
+            let maxWidth = max(targetRespelled.count, actualRespelled.count)
+            
+            switch aligned.type {
+            case .delete:
+                // Missing sound: expected shows phoneme, actual shows underscore
+                let paddedTarget = targetRespelled.padding(toLength: maxWidth, withPad: " ", startingAt: 0)
+                let paddedActual = "_".padding(toLength: maxWidth, withPad: " ", startingAt: 0)
+                
+                expectedSegments.append(PhonemeSegment(
+                    text: paddedTarget + " ",
+                    color: .primary,
+                    isBold: false
+                ))
+                actualSegments.append(PhonemeSegment(
+                    text: paddedActual + " ",
+                    color: .red,
+                    isBold: true
+                ))
+                
+            case .insert:
+                // Extra sound: expected shows spaces, actual shows phoneme
+                let paddedTarget = "".padding(toLength: maxWidth, withPad: " ", startingAt: 0)
+                let paddedActual = actualRespelled.padding(toLength: maxWidth, withPad: " ", startingAt: 0)
+                
+                expectedSegments.append(PhonemeSegment(
+                    text: paddedTarget + " ",
+                    color: .primary,
+                    isBold: false
+                ))
+                actualSegments.append(PhonemeSegment(
+                    text: paddedActual + " ",
+                    color: .orange,
+                    isBold: true
+                ))
+                
+            case .match, .replace:
+                // Normal or mispronounced: both show phonemes, padded to same width
+                let paddedTarget = targetRespelled.padding(toLength: maxWidth, withPad: " ", startingAt: 0)
+                let paddedActual = actualRespelled.padding(toLength: maxWidth, withPad: " ", startingAt: 0)
+                
+                expectedSegments.append(PhonemeSegment(
+                    text: paddedTarget + " ",
+                    color: .primary,
+                    isBold: false
+                ))
+                actualSegments.append(PhonemeSegment(
+                    text: paddedActual + " ",
+                    color: isError ? .red : .primary,
+                    isBold: isError
+                ))
+            }
+        }
+        
+        return (expectedSegments, actualSegments)
+    }
+    
+    /// Build aligned expected string
+    private var alignedExpectedString: String {
+        let segments = getAlignedSegments()
+        return segments.expected.map { $0.text }.joined()
+    }
+    
     /// Simple error message without card
     private func errorMessage(aligned: AlignedPhoneme) -> some View {
-        HStack(spacing: 4) {
+        HStack(spacing: 8) {
             Image(systemName: errorIcon(aligned: aligned))
                 .foregroundStyle(errorColor(aligned: aligned))
-                .font(.subheadline)
+                .font(.body)
             
             errorMessageText(aligned: aligned)
-                .font(.subheadline)
+                .font(.body)
                 .foregroundStyle(.secondary)
         }
     }
@@ -248,12 +295,6 @@ struct CorrectPronunciationSheetView: View {
             }
             return aligned.score < ERROR_THRESHOLD / 2
         }
-    }
-    
-    /// The ideal pronunciation with spaces between phonemes
-    private var idealPhonemeStringSpaced: String {
-        let targetPhonemes = wordScore.alignedPhonemes.compactMap { $0.target }
-        return targetPhonemes.map { PronunciationRespeller.shared.convertPhoneme($0).lowercased() }.joined(separator: " ")
     }
     
     /// Returns color based on phoneme score

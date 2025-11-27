@@ -3,12 +3,13 @@
 //  C7-Pronunciation
 //
 //  Created by Savio Enoson on 21/11/25.
+//  IMPROVED: More descriptive respellings for better user understanding
 //
 
 import Foundation
 
 /// Converts IPA phonetic transcriptions to human-readable respelling
-/// Optimized for clarity and distinctiveness
+/// Optimized for clarity and user comprehension
 public class PronunciationRespeller {
     
     public static let shared = PronunciationRespeller()
@@ -17,238 +18,189 @@ public class PronunciationRespeller {
     
     // MARK: - IPA to Respelling Mappings
     
+    /// Maps IPA symbols to descriptive respelling equivalents
+    /// Each respelling is designed to be distinctive and interpretable
     private let ipaToRespelling: [String: String] = [
-        // ═══════════════════════════════════════════════════════════════
         // VOWELS - Monophthongs (Short)
-        // ═══════════════════════════════════════════════════════════════
+        "ɪ": "ih",          // KIT: bit, sit (short i)
+        "ᵻ": "ih",          // Unstressed KIT
+        "ɨ": "ih",
         
-        // KIT vowel (short i)
-        "ɪ": "i",
-        "ᵻ": "i",       // Unstressed KIT
-        "ɨ": "i",       // Alternative notation
+        "ɛ": "eh",          // DRESS: bet, set (short e)
+        "e": "ay",          // Close-mid: sometimes for FACE
         
-        // DRESS vowel
-        "ɛ": "eh",
-        "e": "e",       // Close-mid front (sometimes used for DRESS)
+        "æ": "aa",          // TRAP: bat, cat (short a)
+        "a": "ah",          // Generic open front
         
-        // TRAP vowel
-        "æ": "a",
+        "ɒ": "aw",          // LOT (British): got, hot
         
-        // Generic low vowels
-        "a": "ah",      // Open front unrounded
+        "ɑ": "ah",          // PALM/LOT (American): father, hot
+        "ɑː": "ahh",        // Long version
         
-        // LOT vowel (British)
-        "ɒ": "o",       // Open back rounded
+        "ʌ": "uh",          // STRUT: but, cup (short u)
+        "ɐ": "uh",
         
-        // PALM/LOT vowel (American)
-        "ɑ": "ah",      // Open back unrounded
-        // Long version
+        "ʊ": "uu",          // FOOT: put, good (short oo)
+        "u": "uu",
         
-        // STRUT vowel
-        "ʌ": "u",       // Open-mid back unrounded
-        "ɐ": "u",       // Near-open central
+        "ə": "uh",          // Schwa: about, comma (unstressed)
+        "ɚ": "er",          // R-colored schwa (US)
+        "ɝ": "er",
         
-        // FOOT vowel
-        "ʊ": "oo",      // Near-close near-back rounded
-        "u": "oo",      // Close back rounded (short)
-        
-        // Schwa and unstressed vowels
-        "ə": "uh",      // Mid central vowel
-        "ɚ": "er",      // R-colored schwa (US)
-        "ɝ": "er",      // R-colored mid central (US)
-        
-        // ═══════════════════════════════════════════════════════════════
         // VOWELS - Monophthongs (Long)
-        // ═══════════════════════════════════════════════════════════════
+        "iː": "ee",         // FLEECE: beat, see (long e)
+        "i": "ee",
         
-        // FLEECE vowel
-        "iː": "ee",     // Long close front unrounded
-        "i": "ee",      // Sometimes written without length mark
+        "uː": "oo",         // GOOSE: boot, food (long oo)
         
-        // GOOSE vowel
-        "uː": "ooh",    // Long close back rounded
+        "ɔː": "aw",         // THOUGHT: caught, taught
+        "ɔ": "aw",
         
-        // THOUGHT vowel
-        // Long open-mid back rounded
-        "ɔ": "aw",      // Short version
+        "ɜː": "ur",         // NURSE: bird, hurt
+        "ɜ": "ur",
         
-        // NURSE vowel
-        "ɜː": "ur",     // Long open-mid central unrounded
-        // Short version
+        "eː": "ay",
+        "oː": "oh",
         
-        // Other long vowels
-        "eː": "ay",     // Long close-mid front (sometimes for FACE)
-        "oː": "oh",     // Long close-mid back rounded
-        
-        // ═══════════════════════════════════════════════════════════════
         // VOWELS - Diphthongs (Major)
-        // ═══════════════════════════════════════════════════════════════
+        "eɪ": "ay",         // FACE: day, say, make
         
-        // FACE (Day, Say, Make)
-        "eɪ": "ay",
+        "aɪ": "eye",        // PRICE: my, lie, high
         
-        // PRICE (My, Lie, High)
-        "aɪ": "eye",
+        "ɔɪ": "oy",         // CHOICE: boy, join
+        "oɪ": "oy",
         
-        // CHOICE (Boy, Noise, Join)
-        "ɔɪ": "oy",
-        "oɪ": "oy",     // Alternative notation
+        "oʊ": "oh",         // GOAT: go, show (American)
+        "əʊ": "oh",         // GOAT: (British)
         
-        // GOAT (Go, No, Show)
-        "oʊ": "oh",     // American
-        "əʊ": "oh",     // British
+        "aʊ": "ow",         // MOUTH: now, out, how
         
-        // MOUTH (Now, Out, How)
-        "aʊ": "ow",
+        // VOWELS - R-colored Diphthongs
+        "ɪə": "eer",        // NEAR: here, fear
+        "ɪɹ": "eer",
+        "iə": "eer",
+        "iːə": "eer",
+        "iɹ": "eer",
         
-        // ═══════════════════════════════════════════════════════════════
-        // VOWELS - Centering Diphthongs (with R-coloring)
-        // ═══════════════════════════════════════════════════════════════
+        "ɛə": "air",        // SQUARE: hair, there
+        "eə": "air",
+        "ɛɹ": "air",
+        "eɹ": "air",
         
-        // NEAR (Here, Fear, Beer)
-        "ɪə": "eer",
-        "ɪɹ": "eer",    // With explicit R
-        "iə": "eer",    // Alternative
-        "iːə": "eer",   // Long version
-        "iɹ": "eer",    // Short with R
+        "ɛːɹ": "air",
+        "eːɹ": "air",
         
-        // SQUARE (Hair, There, Care)
-        "ɛə": "air",
-        "eə": "air",    // Alternative
-        "ɛɹ": "air",    // With explicit R
-        "eɹ": "air",    // Alternative with R
-        // American (no diphthong, just long vowel)
-        "ɛːɹ": "air",   // American with R
-        "eːɹ": "air",   // Alternative
+        "ʊə": "oor",        // CURE: tour, pure
+        "ʊɹ": "oor",
+        "uə": "oor",
+        "uːɹ": "oor",
         
-        // CURE (Tour, Pure, Sure)
-        "ʊə": "oor",
-        "ʊɹ": "oor",    // With explicit R
-        "uə": "oor",    // Alternative
-        "uːɹ": "oor",   // Alternative with R
+        "ɑːɹ": "ar",        // START: car, far
+        "ɑɹ": "ar",
         
-        // START (Car, Far, Star)
-        "ɑː": "aa",     // Already defined above
-        "ɑːɹ": "ar",    // With R
-        "ɑɹ": "ar",     // Short version with R
+        "ɔːɹ": "or",        // NORTH: or, for
+        "ɔɹ": "or",
+        "oːɹ": "or",
+        "oɹ": "or",
+        "oʊɹ": "or",
         
-        // NORTH/FORCE (Or, For, Your)
-        "ɔːɹ": "or",
-        "ɔɹ": "or",     // Short version
-        "oːɹ": "or",    // Alternative
-        "oɹ": "or",     // Short alternative
-        "oʊɹ": "or",    // American variant
-        
-        // LETTER (unstressed final R)
         "əɹ": "er",
         
-        // ═══════════════════════════════════════════════════════════════
-        // CONSONANTS - Plosives (Stops)
-        // ═══════════════════════════════════════════════════════════════
-        
-        // Voiceless
+        // CONSONANTS - Plosives
         "p": "p",
-        "t": "t",
-        "k": "k",
-        "ʔ": "",        // Glottal stop (silent)
-        
-        // Voiced
         "b": "b",
+        "t": "t",
         "d": "d",
+        "k": "k",
+        "ɡ": "g",
         "g": "g",
-        "ɡ": "g",       // Alternative notation
+        "ʔ": "",            // Glottal stop (silent)
         
-        // ═══════════════════════════════════════════════════════════════
         // CONSONANTS - Fricatives
-        // ═══════════════════════════════════════════════════════════════
-        
-        // Voiceless
         "f": "f",
-        "θ": "th",      // Thin, Think
-        "s": "s",
-        "ʃ": "sh",      // Ship, Cash
-        "h": "h",
-        "x": "kh",      // Loch (rare in English)
-        
-        // Voiced
         "v": "v",
-        "ð": "dh",      // This, That
+        "θ": "th",          // Thin, think (voiceless)
+        "ð": "th",          // This, that (voiced) - same spelling for simplicity
+        "s": "s",
         "z": "z",
-        "ʒ": "zh",      // Measure, Vision
+        "ʃ": "sh",          // Ship, cash
+        "ʒ": "zh",          // Measure, vision
+        "h": "h",
+        "x": "kh",
         
-        // ═══════════════════════════════════════════════════════════════
         // CONSONANTS - Affricates
-        // ═══════════════════════════════════════════════════════════════
+        "tʃ": "ch",         // Church, match
+        "dʒ": "j",          // Judge, age
         
-        "tʃ": "ch",     // Church, Match
-        "dʒ": "j",      // Judge, Age
-        
-        // ═══════════════════════════════════════════════════════════════
         // CONSONANTS - Nasals
-        // ═══════════════════════════════════════════════════════════════
-        
         "m": "m",
         "n": "n",
-        "ŋ": "ng",      // Sing, Think
+        "ŋ": "ng",          // Sing, think
         
-        // ═══════════════════════════════════════════════════════════════
         // CONSONANTS - Approximants
-        // ═══════════════════════════════════════════════════════════════
-        
-        // Liquids
         "l": "l",
-        "ɫ": "l",       // Dark L (as in "ball")
-        "ɬ": "l",       // Voiceless lateral (rare)
+        "ɫ": "l",
+        "ɬ": "l",
         
-        // Rhotics
-        "ɹ": "r",       // Approximant R (most common in English)
-        "r": "r",       // Trilled R
-        "ɾ": "r",       // Tap/Flap (American T)
+        "ɹ": "r",
+        "r": "r",
+        "ɾ": "r",           // Flap/tap
         
-        // Glides
         "w": "w",
-        "j": "y",       // Yes, Yellow
-        "ʍ": "wh",      // Which (for dialects that distinguish from w)
+        "j": "y",
+        "ʍ": "wh",
         
-        // ═══════════════════════════════════════════════════════════════
         // SYLLABIC CONSONANTS
-        // ═══════════════════════════════════════════════════════════════
+        "əl": "ul",
+        "l̩": "ul",
+        "ən": "un",
+        "n̩": "un",
+        "əm": "um",
+        "m̩": "um",
         
-        "əl": "ul",     // Bottle
-        "l̩": "ul",      // Syllabic L
-        "ən": "un",     // Button
-        "n̩": "un",      // Syllabic N
-        "əm": "um",     // Rhythm
-        "m̩": "um",      // Syllabic M
+        // SPECIAL & RARE
+        "ˈ": "",
+        "ˌ": "",
+        "ː": "",
         
-        // ═══════════════════════════════════════════════════════════════
-        // SPECIAL CASES AND VARIANTS
-        // ═══════════════════════════════════════════════════════════════
-        
-        // Stress markers (should be removed in preprocessing, but just in case)
-        "ˈ": "",        // Primary stress
-        "ˌ": "",        // Secondary stress
-        "ː": "",        // Length mark (already handled in preprocessing)
-        
-        // Length variations
-        "aː": "aa",
+        "aː": "ahh",
         "ɛː": "eh",
         "ɪː": "ee",
-        "ɔː": "aw",     // Already defined
-        "ʊː": "ooh",
+        "ʊː": "oo",
+        "ɒː": "aw",
+        "ʊ̈": "uu",
         
-        // Rare/archaic
-        "ɜ": "ur",      // Short NURSE
-        "ɒː": "o",      // Long LOT (rare)
-        "ʊ̈": "oo",      // Centralized FOOT
-        
-        // Non-standard or loan words
-        "y": "ue",      // French-like vowel (rare)
-        "ø": "oe",      // Rounded front vowel (rare)
-        "œ": "oe",      // Open-mid front rounded (rare)
+        "y": "ue",
+        "ø": "oe",
+        "œ": "oe",
     ]
     
-    /// Multi-character IPA sequences that should be matched first (longest first)
+    /// Examples for each phoneme (for UI hints/tooltips)
+    private let phonemeExamples: [String: String] = [
+        "ih": "bit, sit",
+        "eh": "bet, set",
+        "aa": "bat, cat",
+        "ah": "father, hot",
+        "uh": "but, cup",
+        "uu": "put, good",
+        "ee": "beat, see",
+        "oo": "boot, food",
+        "aw": "caught, taught",
+        "ur": "bird, hurt",
+        "ay": "day, say",
+        "eye": "my, lie",
+        "oy": "boy, join",
+        "oh": "go, show",
+        "ow": "now, out",
+        "eer": "here, fear",
+        "air": "hair, there",
+        "oor": "tour, pure",
+        "ar": "car, far",
+        "or": "or, for",
+        "er": "better, father",
+    ]
+    
+    /// Multi-character IPA sequences (longest first for proper matching)
     private lazy var sortedIPAKeys: [String] = {
         return ipaToRespelling.keys.sorted { $0.count > $1.count }
     }()
@@ -271,25 +223,22 @@ public class PronunciationRespeller {
     
     /// Converts a single IPA phoneme to its respelling
     public func convertPhoneme(_ phoneme: String) -> String {
-        // Normalize the input - remove stress marks and diacritics we don't need
         let normalized = phoneme
             .precomposedStringWithCanonicalMapping
-            .replacingOccurrences(of: "ˈ", with: "")   // Primary stress
-            .replacingOccurrences(of: "ˌ", with: "")   // Secondary stress
-            .replacingOccurrences(of: "ˑ", with: "")   // Half-long
-            .replacingOccurrences(of: "̆", with: "")    // Extra-short
-            .replacingOccurrences(of: "̃", with: "")    // Nasalization
-            .replacingOccurrences(of: "̊", with: "")    // Voiceless
-            .replacingOccurrences(of: "̥", with: "")    // Voiceless (alternative)
+            .replacingOccurrences(of: "ˈ", with: "")
+            .replacingOccurrences(of: "ˌ", with: "")
+            .replacingOccurrences(of: "ˑ", with: "")
+            .replacingOccurrences(of: "̆", with: "")
+            .replacingOccurrences(of: "̃", with: "")
+            .replacingOccurrences(of: "̊", with: "")
+            .replacingOccurrences(of: "̥", with: "")
         
-        // Try longest matches first (e.g., "aɪə" before "aɪ")
         for ipaKey in sortedIPAKeys {
             if normalized == ipaKey, let respelling = ipaToRespelling[ipaKey] {
                 return respelling
             }
         }
         
-        // If no exact match, try partial replacement for complex sequences
         var result = normalized
         for ipaKey in sortedIPAKeys {
             if result.contains(ipaKey), let respelling = ipaToRespelling[ipaKey] {
@@ -297,9 +246,7 @@ public class PronunciationRespeller {
             }
         }
         
-        // If still no match, try fallback mappings for common patterns
         if result == normalized {
-            // Handle length marks that might still be there
             if normalized.contains("ː") {
                 let base = normalized.replacingOccurrences(of: "ː", with: "")
                 if let respelling = ipaToRespelling[base] {
@@ -307,9 +254,7 @@ public class PronunciationRespeller {
                 }
             }
             
-            // Handle any remaining combining diacritics
             let stripped = normalized.unicodeScalars.filter { scalar in
-                // Keep only base characters, not combining marks
                 !CharacterSet(charactersIn: "\u{0300}"..."\u{036F}").contains(scalar)
             }
             let strippedString = String(String.UnicodeScalarView(stripped))
@@ -319,9 +264,13 @@ public class PronunciationRespeller {
             }
         }
         
-        // Last resort: return the original if we can't convert it
-        // This helps us identify missing mappings
         return result.isEmpty ? normalized : result
+    }
+    
+    /// Get example words for a phoneme (for UI hints)
+    public func getExample(for phoneme: String) -> String? {
+        let respelled = convertPhoneme(phoneme)
+        return phonemeExamples[respelled]
     }
     
     /// Creates a formatted pronunciation guide for display
