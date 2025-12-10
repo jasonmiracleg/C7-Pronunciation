@@ -1,0 +1,69 @@
+Vocabulary loaded: 392 tokens
+PhonemeRecognizer initialized successfully
+✓ Recognizer initialized successfully
+✓ Recording started
+✓ Recording stopped
+📊 Audio File Debug Info
+========================
+File: recording_1763115996.326941.wav
+Sample Rate: 16000.0 Hz
+Channels: 1
+Duration: 5.634625 seconds
+Total Samples: 90154
+Format: 1
+Signal Analysis:
+----------------
+Max Amplitude: 0.058410645
+Min Amplitude: 0.0
+RMS Energy: 0.0072749904
+Non-zero samples: 96.50930629811212%
+⚠️ Signal is very quiet but detectable.
+
+First 10 samples:
+  [0]: 0.0005493164
+  [1]: 0.00061035156
+  [2]: -0.0004272461
+  [3]: -0.00091552734
+  [4]: -0.00076293945
+  [5]: -0.00045776367
+  [6]: -6.1035156e-05
+  [7]: 0.00024414062
+  [8]: 0.00030517578
+  [9]: 0.00021362305
+
+Starting recognition...
+Starting recognition...
+Loading audio from: recording_1763115996.326941.wav
+  Format: 16000.0Hz, 1 channel(s)
+  Loaded 90154 samples (5.634625s)
+  Signal RMS energy: 0.0072749075
+  Normalized: max amplitude = 1.0
+Audio loaded: 90154 samples (5.634625s)
+  Chunk 1 energy: 0.13183689
+  Padding chunk with 61846 zeros
+  Chunk 2 energy: 0.013179956
+Split into 2 chunks
+Processing chunk 1/2...
+🔍 Chunk max amplitude: 1.0
+Processing chunk 2/2...
+🔍 Chunk max amplitude: 0.10449321
+Loading audio from: recording_1763115996.326941.wav
+  Format: 16000.0Hz, 1 channel(s)
+  Loaded 90154 samples (5.634625s)
+  Signal RMS energy: 0.0072749075
+  Normalized: max amplitude = 1.0
+Audio loaded: 90154 samples (5.634625s)
+  Chunk 1 energy: 0.13183689
+  Padding chunk with 61846 zeros
+  Chunk 2 energy: 0.013179956
+Split into 2 chunks
+Processing chunk 1/2...
+🔍 Chunk max amplitude: 1.0
+Processing chunk 2/2...
+🔍 Chunk max amplitude: 0.10449321
+✓ Recognition complete
+  Duration: 1.07s
+  Result: l e j w ɔ ɑ̃ ɔ̃ ç ʋ ʔ œ̃ rʲ ʊɹ th ɯ ɑu5 ʉ oɜ d[ aɜ kʲ ɬ 1 onɡɜ c S dZ uə5 r̝ yu5 ouɜ ɪu ɪ^ ie N kʰ bʰ r. tsʲ tsː uaiɜ ɛʊ pʰ iou1 ẽ ə ɾ dʰː r l iː j w ɔ ɑ̃ ɔ̃ ç ʋ œ̃ rʲ uoɜ th ɯ ɑu5 ʉ oɜ d[ aɜ kʲ ɬ 1 onɡɜ c S dZ uə5 r̝ yu5 ouɜ ɪu ɪ^ ie N kʰ bʰ r. tsʲ tsː uaiɜ ɛʊ pʰ iou1 dzː œː dʲʲ dʰː a l e j w ɔ aʊ ɔ̃ ç ʋ ʔ œ̃ rʲ ʊɹ th ɯ ɑu5 ʉ oɜ n̩ aɜ kʲ ɬ 1 onɡɜ c S dZ uə5 r̝ yu5 dː ɪu ɪ^ ie N kʰ bʰ r. tsʲ tsː uaiɜ ɛʊ iːː iou1 ẽ œː o̞o̞ dʰː n l e j ʃ ɔ ɑ̃ ɔ̃ ç nʲ ʔ œ̃ rʲ ʊɹ th ɯ ɑu5 ju oɜ d[ aɜ kʲ ɬ iouɜ ei2 c S dZ uə5 r̝ yu5 ouɜ ɪu ɪ^ ie N kʰ ɯɯ t^ː ää tsː uaiɜ ɛʊ pʰ iou1 ẽ œː uo1 dʰː <unk> l e ts. w ɔ ɑ̃ ɔ̃ ç ʋ ʔ œ̃ rʲ ə5 th ħ ɑu5 ʉ oɜ d[ aɜ onɡ2 ɬ 1 onɡɜ c S dZ uə5 r̝ yu5 ouɜ ɪu ɪ^ ie N kʰ bʰ r. tsʲ tsː uaiɜ ɛʊ pʰ iou1 ẽ œː o̞o̞ dʰː l e j w ɔ ɑ̃ ɔ̃ ç ʋ ʔ œ̃ rʲ ʊɹ th ɯ ɑu5 ʉ oɜ d[ aɜ kʲ ɬ 1 onɡɜ c S dZ uə5 r̝ yu5 ouɜ ɪu ɪ^ ie N kʰ bʰ r. tsʲ tsː uaiɜ ɛʊ pʰ iou1 ẽ œː o̞o̞ dʰː <s> l e j w ɔ ɑ̃ ɔ̃ ç ʋ ʔ œ̃ rʲ ʊɹ th ɯ ɑu5 ʉ oɜ d[ aɜ kʲ ɬ 1 onɡɜ c S dZ uə5 r̝ yu5 ouɜ ɪu ɪ^ ie N kʰ bʰ r. tsʲ tsː uaiɜ ɛʊ pʰ iou1 ẽ œː o̞o̞ dʰː <s> l e j w ɔ ɑ̃ ɔ̃ ç ʋ ʔ œ̃ rʲ ʊɹ th ɯ ɑu5 ʉ oɜ d[ aɜ kʲ ɬ 1 onɡɜ c S dZ uə5 r̝ yu5 ouɜ ɪu ɪ^ ie N kʰ bʰ r. tsʲ tsː uaiɜ ɛʊ pʰ iou1 ẽ œː o̞o̞ dʰː <s> l e j w ɔ ɑ̃ ɔ̃ ç ʋ ʔ œ̃ rʲ ʊɹ th ɯ ɑu5 ʉ oɜ d[ aɜ kʲ ɬ 1 onɡɜ c S dZ uə5 r̝ yu5 ouɜ ɪu ɪ^ ie N kʰ bʰ r. tsʲ tsː uaiɜ ɛʊ pʰ iou1 ẽ œː o̞o̞ dʰː <s> l e j w ɔ ɑ̃ ɔ̃ ç ʋ ʔ œ̃ rʲ ʊɹ th ɯ ɑu5 ʉ oɜ d[ aɜ kʲ ɬ 1 onɡɜ c S dZ uə5 r̝ yu5 ouɜ ɪu ɪ^ ie N kʰ bʰ r. tsʲ tsː uaiɜ ɛʊ pʰ iou1 ẽ œː o̞o̞ dʰː
+✓ Recognition complete
+  Duration: 1.07s
+  Result: l e j w ɔ ɑ̃ ɔ̃ ç ʋ ʔ œ̃ rʲ ʊɹ th ɯ ɑu5 ʉ oɜ d[ aɜ kʲ ɬ 1 onɡɜ c S dZ uə5 r̝ yu5 ouɜ ɪu ɪ^ ie N kʰ bʰ r. tsʲ tsː uaiɜ ɛʊ pʰ iou1 ẽ ə ɾ dʰː r l iː j w ɔ ɑ̃ ɔ̃ ç ʋ œ̃ rʲ uoɜ th ɯ ɑu5 ʉ oɜ d[ aɜ kʲ ɬ 1 onɡɜ c S dZ uə5 r̝ yu5 ouɜ ɪu ɪ^ ie N kʰ bʰ r. tsʲ tsː uaiɜ ɛʊ pʰ iou1 dzː œː dʲʲ dʰː a l e j w ɔ aʊ ɔ̃ ç ʋ ʔ œ̃ rʲ ʊɹ th ɯ ɑu5 ʉ oɜ n̩ aɜ kʲ ɬ 1 onɡɜ c S dZ uə5 r̝ yu5 dː ɪu ɪ^ ie N kʰ bʰ r. tsʲ tsː uaiɜ ɛʊ iːː iou1 ẽ œː o̞o̞ dʰː n l e j ʃ ɔ ɑ̃ ɔ̃ ç nʲ ʔ œ̃ rʲ ʊɹ th ɯ ɑu5 ju oɜ d[ aɜ kʲ ɬ iouɜ ei2 c S dZ uə5 r̝ yu5 ouɜ ɪu ɪ^ ie N kʰ ɯɯ t^ː ää tsː uaiɜ ɛʊ pʰ iou1 ẽ œː uo1 dʰː <unk> l e ts. w ɔ ɑ̃ ɔ̃ ç ʋ ʔ œ̃ rʲ ə5 th ħ ɑu5 ʉ oɜ d[ aɜ onɡ2 ɬ 1 onɡɜ c S dZ uə5 r̝ yu5 ouɜ ɪu ɪ^ ie N kʰ bʰ r. tsʲ tsː uaiɜ ɛʊ pʰ iou1 ẽ œː o̞o̞ dʰː l e j w ɔ ɑ̃ ɔ̃ ç ʋ ʔ œ̃ rʲ ʊɹ th ɯ ɑu5 ʉ oɜ d[ aɜ kʲ ɬ 1 onɡɜ c S dZ uə5 r̝ yu5 ouɜ ɪu ɪ^ ie N kʰ bʰ r. tsʲ tsː uaiɜ ɛʊ pʰ iou1 ẽ œː o̞o̞ dʰː <s> l e j w ɔ ɑ̃ ɔ̃ ç ʋ ʔ œ̃ rʲ ʊɹ th ɯ ɑu5 ʉ oɜ d[ aɜ kʲ ɬ 1 onɡɜ c S dZ uə5 r̝ yu5 ouɜ ɪu ɪ^ ie N kʰ bʰ r. tsʲ tsː uaiɜ ɛʊ pʰ iou1 ẽ œː o̞o̞ dʰː <s> l e j w ɔ ɑ̃ ɔ̃ ç ʋ ʔ œ̃ rʲ ʊɹ th ɯ ɑu5 ʉ oɜ d[ aɜ kʲ ɬ 1 onɡɜ c S dZ uə5 r̝ yu5 ouɜ ɪu ɪ^ ie N kʰ bʰ r. tsʲ tsː uaiɜ ɛʊ pʰ iou1 ẽ œː o̞o̞ dʰː <s> l e j w ɔ ɑ̃ ɔ̃ ç ʋ ʔ œ̃ rʲ ʊɹ th ɯ ɑu5 ʉ oɜ d[ aɜ kʲ ɬ 1 onɡɜ c S dZ uə5 r̝ yu5 ouɜ ɪu ɪ^ ie N kʰ bʰ r. tsʲ tsː uaiɜ ɛʊ pʰ iou1 ẽ œː o̞o̞ dʰː <s> l e j w ɔ ɑ̃ ɔ̃ ç ʋ ʔ œ̃ rʲ ʊɹ th ɯ ɑu5 ʉ oɜ d[ aɜ kʲ ɬ 1 onɡɜ c S dZ uə5 r̝ yu5 ouɜ ɪu ɪ^ ie N kʰ bʰ r. tsʲ tsː uaiɜ ɛʊ pʰ iou1 ẽ œː o̞o̞ dʰː

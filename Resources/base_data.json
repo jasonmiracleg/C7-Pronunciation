@@ -1,0 +1,2078 @@
+{
+    "formal": [
+        {
+            "text": "I sincerely apologize for any inconvenience caused.",
+            "phonemes": "aɪ sɪnsɪɹli ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd"
+        },
+        {
+            "text": "Please let me know if you need further assistance.",
+            "phonemes": "pliːz lɛt miː noʊ ɪf juː niːd fɜːðɚ ɐsɪstəns"
+        },
+        {
+            "text": "I believe this project holds significant potential.",
+            "phonemes": "aɪ bᵻliːv ðɪs pɹɑːdʒɛkt hoʊldz sɪɡnɪfɪkənt pətɛnʃəl"
+        },
+        {
+            "text": "Your assistance in this matter is greatly appreciated.",
+            "phonemes": "jʊɹ ɐsɪstəns ɪn ðɪs mæɾɚ ɪz ɡɹeɪtli ɐpɹiːʃɪeɪɾᵻd"
+        },
+        {
+            "text": "We appreciate your strict adherence to guidelines.",
+            "phonemes": "wiː ɐpɹiːʃɪeɪt jʊɹ stɹɪkt ɐdhɪɹəns tuː ɡaɪdlaɪnz"
+        },
+        {
+            "text": "Kindly submit your feedback via the provided form.",
+            "phonemes": "kaɪndli səbmɪt jʊɹ fiːdbæk vaɪə ðə pɹəvaɪdᵻd fɔːɹm"
+        },
+        {
+            "text": "Would you kindly demonstrate the proper procedure?",
+            "phonemes": "wʊd juː kaɪndli dɛmənstɹeɪt ðə pɹɑːpɚ pɹəsiːdʒɚ"
+        },
+        {
+            "text": "Would you prefer a virtual or in person meeting?",
+            "phonemes": "wʊd juː pɹɪfɜː eɪ vɜːtʃuːəl ɔːɹ ɪn pɜːsən miːɾɪŋ"
+        },
+        {
+            "text": "Your suggestions are being implemented as we speak.",
+            "phonemes": "jʊɹ sədʒɛstʃənz ɑːɹ biːɪŋ ɪmplɪməntᵻd æz wiː spiːk"
+        },
+        {
+            "text": "I would advise reviewing the instructions thoroughly.",
+            "phonemes": "aɪ wʊd ɐdvaɪz ɹᵻvjuːɪŋ ðə ɪnstɹʌkʃənz θʌɹoʊli"
+        },
+        {
+            "text": "She executed her duties with remarkable efficiency.",
+            "phonemes": "ʃiː ɛksᵻkjuːɾᵻd hɜː duːɾiz wɪð ɹᵻmɑːɹkəbəl ɪfɪʃənsi"
+        },
+        {
+            "text": "Would you like to be included in the email thread?",
+            "phonemes": "wʊd juː laɪk tuː biː ɪŋkluːdᵻd ɪn ðə iːmeɪl θɹɛd"
+        },
+        {
+            "text": "Could you please forward me the relevant documents?",
+            "phonemes": "kʊd juː pliːz fɔːɹwɚd miː ðə ɹɛlᵻvənt dɑːkjumənts"
+        },
+        {
+            "text": "Your consistent support has propelled our success.",
+            "phonemes": "jʊɹ kənsɪstənt səpɔːɹt hæz pɹəpɛld aʊɚ səksɛs"
+        },
+        {
+            "text": "She carefully documented every step of the process.",
+            "phonemes": "ʃiː kɛɹfəli dɑːkjuməntᵻd ɛvɹi stɛp ʌv ðə pɹɑːsɛs"
+        },
+        {
+            "text": "Let us maintain open dialogue throughout the project.",
+            "phonemes": "lɛt ʌs meɪnteɪn oʊpən daɪəlɑːɡ θɹuːaʊt ðə pɹɑːdʒɛkt"
+        },
+        {
+            "text": "Please ensure all meetings are scheduled appropriately",
+            "phonemes": "pliːz ɛnʃʊɹ ɔːl miːɾɪŋz ɑːɹ skɛdʒuːld ɐpɹoʊpɹɪətli"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the change",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə tʃeɪndʒ"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by my absence",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ maɪ æbsəns"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the scheduling",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə skɛdʒuːlɪŋ"
+        },
+        {
+            "text": "I apologize for any misunderstanding in the meeting",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni mɪsʌndɚstændɪŋ ɪn ðə miːɾɪŋ"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the oversight",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə oʊvɚsaɪt"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the reschedule",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə ɹᵻskɛdʒuːl"
+        },
+        {
+            "text": "I apologize for any confusion caused by the update",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni kənfjuːʒən kɔːzd baɪ ðə ʌpdeɪt"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the delay",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə dᵻleɪ"
+        },
+        {
+            "text": "I apologize for the oversight in the documentation",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ðə oʊvɚsaɪt ɪn ðə dɑːkjumənteɪʃən"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the error",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə ɛɹɚ"
+        },
+        {
+            "text": "I apologize for any confusion caused by the instructions",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni kənfjuːʒən kɔːzd baɪ ðə ɪnstɹʌkʃənz"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the technical issues",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə tɛknɪkəl ɪʃuːz"
+        },
+        {
+            "text": "I would like to discuss the project's success metrics",
+            "phonemes": "aɪ wʊd laɪk tuː dɪskʌs ðə pɹɑːdʒɛkts səksɛs mɛtɹɪks"
+        },
+        {
+            "text": "I would like to request feedback on the recent changes",
+            "phonemes": "aɪ wʊd laɪk tuː ɹᵻkwɛst fiːdbæk ɔn ðə ɹiːsənt tʃeɪndʒᵻz"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the rescheduling",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə ɹᵻskɛdʒuːlɪŋ"
+        },
+        {
+            "text": "I regret any inconvenience caused by the schedule change",
+            "phonemes": "aɪ ɹᵻɡɹɛt ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə skɛdʒuːl tʃeɪndʒ"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the system maintenance",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə sɪstəm meɪntənəns"
+        },
+        {
+            "text": "We are committed to providing exceptional customer service",
+            "phonemes": "wiː ɑːɹ kəmɪɾᵻd tuː pɹəvaɪdɪŋ ɛksɛpʃənəl kʌstəmɚ sɜːvɪs"
+        },
+        {
+            "text": "I regret any inconvenience caused by the operational delays",
+            "phonemes": "aɪ ɹᵻɡɹɛt ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə ɑːpɚɹeɪʃənəl dᵻleɪz"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the policy changes",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə pɑːlɪsi tʃeɪndʒᵻz"
+        },
+        {
+            "text": "I would like to discuss the project's implementation strategy",
+            "phonemes": "aɪ wʊd laɪk tuː dɪskʌs ðə pɹɑːdʒɛkts ɪmplɪmənteɪʃən stɹæɾədʒi"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the operational changes",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə ɑːpɚɹeɪʃənəl tʃeɪndʒᵻz"
+        },
+        {
+            "text": "Please ensure all reports are submitted accurately",
+            "phonemes": "pliːz ɛnʃʊɹ ɔːl ɹᵻpɔːɹts ɑːɹ səbmɪɾᵻd ækjʊɹətli"
+        },
+        {
+            "text": "We are committed to achieving operational excellence",
+            "phonemes": "wiː ɑːɹ kəmɪɾᵻd tuː ɐtʃiːvɪŋ ɑːpɚɹeɪʃənəl ɛksələns"
+        },
+        {
+            "text": "I regret any inconvenience caused by the reschedule",
+            "phonemes": "aɪ ɹᵻɡɹɛt ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə ɹᵻskɛdʒuːl"
+        },
+        {
+            "text": "I would like to discuss the project’s resource allocation",
+            "phonemes": "aɪ wʊd laɪk tuː dɪskʌs ðə pɹɑːdʒɛkt ɛs ɹᵻsɔːɹs æləkeɪʃən"
+        },
+        {
+            "text": "I regret any inconvenience caused by the project delay",
+            "phonemes": "aɪ ɹᵻɡɹɛt ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə pɹɑːdʒɛkt dᵻleɪ"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the system upgrade",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə sɪstəm ʌpɡɹeɪd"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the policy update",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə pɑːlɪsi ʌpdeɪt"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the shipment delay",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə ʃɪpmənt dᵻleɪ"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the system issues",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə sɪstəm ɪʃuːz"
+        },
+        {
+            "text": "I would like to discuss the project’s key deliverables",
+            "phonemes": "aɪ wʊd laɪk tuː dɪskʌs ðə pɹɑːdʒɛkt ɛs kiː dᵻlɪvɚɹəbəlz"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the technical errors",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə tɛknɪkəl ɛɹɚz"
+        },
+        {
+            "text": "We are committed to fostering a collaborative environment",
+            "phonemes": "wiː ɑːɹ kəmɪɾᵻd tuː fɑːstɚɹɪŋ eɪ kəlæbɹətɪv ɛnvaɪɹənmənt"
+        },
+        {
+            "text": "I regret any inconvenience caused by the schedule change",
+            "phonemes": "aɪ ɹᵻɡɹɛt ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə skɛdʒuːl tʃeɪndʒ"
+        },
+        {
+            "text": "I would like to discuss the project's strategic goals",
+            "phonemes": "aɪ wʊd laɪk tuː dɪskʌs ðə pɹɑːdʒɛkts stɹətiːdʒɪk ɡoʊlz"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the system upgrade",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə sɪstəm ʌpɡɹeɪd"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the policy update",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə pɑːlɪsi ʌpdeɪt"
+        },
+        {
+            "text": "I would like to discuss the project's key deliverables",
+            "phonemes": "aɪ wʊd laɪk tuː dɪskʌs ðə pɹɑːdʒɛkts kiː dᵻlɪvɚɹəbəlz"
+        },
+        {
+            "text": "Could you provide an update on the project's status",
+            "phonemes": "kʊd juː pɹəvaɪd æn ʌpdeɪt ɔn ðə pɹɑːdʒɛkts stæɾəs"
+        },
+        {
+            "text": "Your efforts have significantly contributed to our success",
+            "phonemes": "jʊɹ ɛfɚts hæv sɪɡnɪfɪkəntli kəntɹɪbjuɾᵻd tuː aʊɚ səksɛs"
+        },
+        {
+            "text": "Your innovative ideas have propelled the project forward",
+            "phonemes": "jʊɹ ɪnəveɪɾɪv aɪdiəz hæv pɹəpɛld ðə pɹɑːdʒɛkt fɔːɹwɚd"
+        },
+        {
+            "text": "Could you draft the initial proposal",
+            "phonemes": "kʊd juː dɹæft ðə ɪnɪʃəl pɹəpoʊzəl"
+        },
+        {
+            "text": "Your proactive approach has benefited the entire team",
+            "phonemes": "jʊɹ pɹoʊæktɪv ɐpɹoʊtʃ hæz bɛnɪfɪɾᵻd ðə ɛntaɪɚ tiːm"
+        },
+        {
+            "text": "We are committed to fostering a collaborative environment",
+            "phonemes": "wiː ɑːɹ kəmɪɾᵻd tuː fɑːstɚɹɪŋ eɪ kəlæbɹətɪv ɛnvaɪɹənmənt"
+        },
+        {
+            "text": "Your dedication to the team is inspiring",
+            "phonemes": "jʊɹ dɛdɪkeɪʃən tuː ðə tiːm ɪz ɪnspaɪɚɹɪŋ"
+        },
+        {
+            "text": "We are implementing new strategies to enhance productivity",
+            "phonemes": "wiː ɑːɹ ɪmplɪməntɪŋ nuː stɹæɾədʒiz tuː ɛnhæns pɹɑːdəktɪvᵻɾi"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the changes",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə tʃeɪndʒᵻz"
+        },
+        {
+            "text": "I apologize for any delays in the project timeline",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni dᵻleɪz ɪn ðə pɹɑːdʒɛkt taɪmlaɪn"
+        },
+        {
+            "text": "Your enthusiasm has boosted team morale",
+            "phonemes": "jʊɹ ɛnθuːziæzəm hæz buːstᵻd tiːm mɚɹæl"
+        },
+        {
+            "text": "Please ensure all tasks are completed by the deadline",
+            "phonemes": "pliːz ɛnʃʊɹ ɔːl tæsks ɑːɹ kəmpliːɾᵻd baɪ ðə dɛdlaɪn"
+        },
+        {
+            "text": "Your initiative has led to significant improvements",
+            "phonemes": "jʊɹ ɪnɪʃiətɪv hæz lɛd tuː sɪɡnɪfɪkənt ɪmpɹuːvmənts"
+        },
+        {
+            "text": "We are expanding our team to accommodate growth",
+            "phonemes": "wiː ɑːɹ ɛkspændɪŋ aʊɚ tiːm tuː ɐkɑːmədeɪt ɡɹoʊθ"
+        },
+        {
+            "text": "We are enhancing our training programs to better support employees",
+            "phonemes": "wiː ɑːɹ ɛnhænsɪŋ aʊɚ tɹeɪnɪŋ pɹoʊɡɹæmz tuː bɛɾɚ səpɔːɹt ɛmplɔɪiːz"
+        },
+        {
+            "text": "We must adhere to the project's ethical guidelines",
+            "phonemes": "wiː mʌst ɐdhɪɹ tuː ðə pɹɑːdʒɛkts ɛθɪkəl ɡaɪdlaɪnz"
+        },
+        {
+            "text": "Please review the client's feedback and respond accordingly",
+            "phonemes": "pliːz ɹᵻvjuː ðə klaɪənts fiːdbæk ænd ɹᵻspɑːnd ɐkɔːɹdɪŋli"
+        },
+        {
+            "text": "Could you finalize the report by the end of the week",
+            "phonemes": "kʊd juː faɪnəlaɪz ðə ɹᵻpɔːɹt baɪ ðə ɛnd ʌv ðə wiːk"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the rescheduling",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə ɹᵻskɛdʒuːlɪŋ"
+        },
+        {
+            "text": "We are launching a feedback system to gather employee opinions",
+            "phonemes": "wiː ɑːɹ lɑːntʃɪŋ eɪ fiːdbæk sɪstəm tuː ɡæðɚ ɛmplɔɪiː əpɪniənz"
+        },
+        {
+            "text": "Please ensure all safety protocols are followed strictly",
+            "phonemes": "pliːz ɛnʃʊɹ ɔːl seɪfti pɹoʊɾəkɑːlz ɑːɹ fɑːloʊd stɹɪktli"
+        },
+        {
+            "text": "Your expertise has greatly benefited the project",
+            "phonemes": "jʊɹ ɛkspɚtiːz hæz ɡɹeɪtli bɛnɪfɪɾᵻd ðə pɹɑːdʒɛkt"
+        },
+        {
+            "text": "We must address these issues to ensure project success",
+            "phonemes": "wiː mʌst ɐdɹɛs ðiːz ɪʃuːz tuː ɛnʃʊɹ pɹɑːdʒɛkt səksɛs"
+        },
+        {
+            "text": "I apologize for any misunderstanding caused by my previous email",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni mɪsʌndɚstændɪŋ kɔːzd baɪ maɪ pɹiːviəs iːmeɪl"
+        },
+        {
+            "text": "Your dedication to meeting deadlines is impressive",
+            "phonemes": "jʊɹ dɛdɪkeɪʃən tuː miːɾɪŋ dɛdlaɪnz ɪz ɪmpɹɛsɪv"
+        },
+        {
+            "text": "We must ensure all team members are informed of the changes",
+            "phonemes": "wiː mʌst ɛnʃʊɹ ɔːl tiːm mɛmbɚz ɑːɹ ɪnfɔːɹmd ʌv ðə tʃeɪndʒᵻz"
+        },
+        {
+            "text": "Your positive attitude has a significant impact on the team",
+            "phonemes": "jʊɹ pɑːzᵻtɪv æɾɪtuːd hæz eɪ sɪɡnɪfɪkənt ɪmpækt ɔn ðə tiːm"
+        },
+        {
+            "text": "Thank you for your thoroughness in completing the tasks",
+            "phonemes": "θæŋk juː fɔːɹ jʊɹ θʌɹoʊnəs ɪn kəmpliːɾɪŋ ðə tæsks"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the system update",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə sɪstəm ʌpdeɪt"
+        },
+        {
+            "text": "We must adhere to the highest standards of quality",
+            "phonemes": "wiː mʌst ɐdhɪɹ tuː ðə haɪɪst stændɚdz ʌv kwɔlᵻɾi"
+        },
+        {
+            "text": "Could you prepare a summary of the meeting outcomes",
+            "phonemes": "kʊd juː pɹɪpɛɹ eɪ sʌmɚɹi ʌv ðə miːɾɪŋ aʊtkʌmz"
+        },
+        {
+            "text": "We are implementing new tools to improve efficiency",
+            "phonemes": "wiː ɑːɹ ɪmplɪməntɪŋ nuː tuːlz tuː ɪmpɹuːv ɪfɪʃənsi"
+        },
+        {
+            "text": "Your commitment to the project is highly valued",
+            "phonemes": "jʊɹ kəmɪtmənt tuː ðə pɹɑːdʒɛkt ɪz haɪli væljud"
+        },
+        {
+            "text": "We must address the resource allocation to meet our targets",
+            "phonemes": "wiː mʌst ɐdɹɛs ðə ɹᵻsɔːɹs æləkeɪʃən tuː miːt aʊɚ tɑːɹɡɪts"
+        },
+        {
+            "text": "Could you assist with the performance metrics analysis",
+            "phonemes": "kʊd juː ɐsɪst wɪð ðə pɚfɔːɹməns mɛtɹɪks ɐnæləsɪs"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the unexpected changes",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə ʌnɛkspɛktᵻd tʃeɪndʒᵻz"
+        },
+        {
+            "text": "We are committed to providing exceptional value to our clients",
+            "phonemes": "wiː ɑːɹ kəmɪɾᵻd tuː pɹəvaɪdɪŋ ɛksɛpʃənəl vælju tuː aʊɚ klaɪənts"
+        },
+        {
+            "text": "Could you finalize the training materials for the workshop",
+            "phonemes": "kʊd juː faɪnəlaɪz ðə tɹeɪnɪŋ mətɪɹiəlz fɔːɹ ðə wɜːkʃɑːp"
+        },
+        {
+            "text": "Your ability to handle multiple tasks efficiently is impressive",
+            "phonemes": "jʊɹ ɐbɪləɾi tuː hændəl mʌltɪpəl tæsks ɪfɪʃəntli ɪz ɪmpɹɛsɪv"
+        },
+        {
+            "text": "We must ensure all contracts are thoroughly reviewed",
+            "phonemes": "wiː mʌst ɛnʃʊɹ ɔːl kɑːntɹækts ɑːɹ θʌɹoʊli ɹᵻvjuːd"
+        },
+        {
+            "text": "Please coordinate with the IT department for technical support",
+            "phonemes": "pliːz koʊɔːɹdᵻnət wɪð ðə ɪt dᵻpɑːɹtmənt fɔːɹ tɛknɪkəl səpɔːɹt"
+        },
+        {
+            "text": "Your proactive engagement has enhanced our team dynamics",
+            "phonemes": "jʊɹ pɹoʊæktɪv ɛŋɡeɪdʒmənt hæz ɛnhænst aʊɚ tiːm daɪnæmɪks"
+        },
+        {
+            "text": "We are launching a new initiative to boost employee morale",
+            "phonemes": "wiː ɑːɹ lɑːntʃɪŋ eɪ nuː ɪnɪʃiətɪv tuː buːst ɛmplɔɪiː mɚɹæl"
+        },
+        {
+            "text": "Thank you for your outstanding contributions to the project",
+            "phonemes": "θæŋk juː fɔːɹ jʊɹ aʊtstændɪŋ kɑːntɹɪbjuːʃənz tuː ðə pɹɑːdʒɛkt"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the delivery delay",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə dᵻlɪvɚɹi dᵻleɪ"
+        },
+        {
+            "text": "Could you handle the documentation for the new process",
+            "phonemes": "kʊd juː hændəl ðə dɑːkjumənteɪʃən fɔːɹ ðə nuː pɹɑːsɛs"
+        },
+        {
+            "text": "Your commitment to excellence sets a great example for the team",
+            "phonemes": "jʊɹ kəmɪtmənt tuː ɛksələns sɛts eɪ ɡɹeɪt ɛɡzæmpəl fɔːɹ ðə tiːm"
+        },
+        {
+            "text": "We are improving our internal communication channels",
+            "phonemes": "wiː ɑːɹ ɪmpɹuːvɪŋ aʊɚ ɪntɜːnəl kəmjuːnɪkeɪʃən tʃænəlz"
+        },
+        {
+            "text": "Please ensure all reports are submitted accurately and on time",
+            "phonemes": "pliːz ɛnʃʊɹ ɔːl ɹᵻpɔːɹts ɑːɹ səbmɪɾᵻd ækjʊɹətli ænd ɔn taɪm"
+        },
+        {
+            "text": "We must address the client's concerns to ensure satisfaction",
+            "phonemes": "wiː mʌst ɐdɹɛs ðə klaɪənts kənsɜːnz tuː ɛnʃʊɹ sæɾɪsfækʃən"
+        },
+        {
+            "text": "Could you prepare the financial projections for next quarter",
+            "phonemes": "kʊd juː pɹɪpɛɹ ðə faɪnænʃəl pɹədʒɛkʃənz fɔːɹ nɛkst kwɔːɹɾɚ"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the staffing changes",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə stæfɪŋ tʃeɪndʒᵻz"
+        },
+        {
+            "text": "We are committed to delivering projects on schedule",
+            "phonemes": "wiː ɑːɹ kəmɪɾᵻd tuː dᵻlɪvɚɹɪŋ pɹɑːdʒɛkts ɔn skɛdʒuːl"
+        },
+        {
+            "text": "Could you assist with the market research analysis",
+            "phonemes": "kʊd juː ɐsɪst wɪð ðə mɑːɹkɪt ɹᵻsɜːtʃ ɐnæləsɪs"
+        },
+        {
+            "text": "Please review the updated meeting minutes and provide feedback",
+            "phonemes": "pliːz ɹᵻvjuː ðə ʌpdeɪɾᵻd miːɾɪŋ mɪnɪts ænd pɹəvaɪd fiːdbæk"
+        },
+        {
+            "text": "Your innovative solutions have greatly benefited our operations",
+            "phonemes": "jʊɹ ɪnəveɪɾɪv səluːʃənz hæv ɡɹeɪtli bɛnɪfɪɾᵻd aʊɚ ɑːpɚɹeɪʃənz"
+        },
+        {
+            "text": "We are launching a new training program next month",
+            "phonemes": "wiː ɑːɹ lɑːntʃɪŋ eɪ nuː tɹeɪnɪŋ pɹoʊɡɹæm nɛkst mʌnθ"
+        },
+        {
+            "text": "Could you handle the client satisfaction surveys",
+            "phonemes": "kʊd juː hændəl ðə klaɪənt sæɾɪsfækʃən sɜːveɪz"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the system maintenance",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə sɪstəm meɪntənəns"
+        },
+        {
+            "text": "We must prioritize this project to meet our strategic goals",
+            "phonemes": "wiː mʌst pɹaɪɔːɹɪtaɪz ðɪs pɹɑːdʒɛkt tuː miːt aʊɚ stɹətiːdʒɪk ɡoʊlz"
+        },
+        {
+            "text": "Your proactive stance has prevented potential issues",
+            "phonemes": "jʊɹ pɹoʊæktɪv stæns hæz pɹɪvɛntᵻd pətɛnʃəl ɪʃuːz"
+        },
+        {
+            "text": "We are enhancing our product features based on user feedback",
+            "phonemes": "wiː ɑːɹ ɛnhænsɪŋ aʊɚ pɹɑːdʌkt fiːtʃɚz beɪst ɔn juːzɚ fiːdbæk"
+        },
+        {
+            "text": "Please ensure all team members are aware of the new protocols",
+            "phonemes": "pliːz ɛnʃʊɹ ɔːl tiːm mɛmbɚz ɑːɹ ɐwɛɹ ʌv ðə nuː pɹoʊɾəkɑːlz"
+        },
+        {
+            "text": "We must address the operational inefficiencies immediately",
+            "phonemes": "wiː mʌst ɐdɹɛs ðə ɑːpɚɹeɪʃənəl ɪnɪfɪʃənsiz ɪmiːdɪətli"
+        },
+        {
+            "text": "Could you prepare the agenda for the upcoming conference",
+            "phonemes": "kʊd juː pɹɪpɛɹ ðə ɐdʒɛndə fɔːɹ ðə ʌpkʌmɪŋ kɑːnfɹəns"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the unexpected downtime",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə ʌnɛkspɛktᵻd daʊntaɪm"
+        },
+        {
+            "text": "Could you assist with the technical support requests",
+            "phonemes": "kʊd juː ɐsɪst wɪð ðə tɛknɪkəl səpɔːɹt ɹᵻkwɛsts"
+        },
+        {
+            "text": "Your ability to lead the team during challenging times is commendable",
+            "phonemes": "jʊɹ ɐbɪləɾi tuː liːd ðə tiːm dʊɹɹɪŋ tʃæləndʒɪŋ taɪmz ɪz kəmɛndəbəl"
+        },
+        {
+            "text": "Please review the attached specifications and provide feedback",
+            "phonemes": "pliːz ɹᵻvjuː ðə ɐtætʃt spɛsɪfɪkeɪʃənz ænd pɹəvaɪd fiːdbæk"
+        },
+        {
+            "text": "Your proactive measures have enhanced our operational efficiency",
+            "phonemes": "jʊɹ pɹoʊæktɪv mɛʒɚz hæv ɛnhænst aʊɚ ɑːpɚɹeɪʃənəl ɪfɪʃənsi"
+        },
+        {
+            "text": "We are launching a new customer loyalty program",
+            "phonemes": "wiː ɑːɹ lɑːntʃɪŋ eɪ nuː kʌstəmɚ lɔɪəlɾi pɹoʊɡɹæm"
+        },
+        {
+            "text": "Could you handle the follow up emails to the clients",
+            "phonemes": "kʊd juː hændəl ðə fɑːloʊ ʌp iːmeɪlz tuː ðə klaɪənts"
+        },
+        {
+            "text": "Thank you for your exceptional project management skills",
+            "phonemes": "θæŋk juː fɔːɹ jʊɹ ɛksɛpʃənəl pɹɑːdʒɛkt mænɪdʒmənt skɪlz"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the policy enforcement",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə pɑːlɪsi ɛnfɔːɹsmənt"
+        },
+        {
+            "text": "We must maintain high levels of customer satisfaction",
+            "phonemes": "wiː mʌst meɪnteɪn haɪ lɛvəlz ʌv kʌstəmɚ sæɾɪsfækʃən"
+        },
+        {
+            "text": "Your dedication to meeting project deadlines is impressive",
+            "phonemes": "jʊɹ dɛdɪkeɪʃən tuː miːɾɪŋ pɹɑːdʒɛkt dɛdlaɪnz ɪz ɪmpɹɛsɪv"
+        },
+        {
+            "text": "Could you prepare the quarterly financial report",
+            "phonemes": "kʊd juː pɹɪpɛɹ ðə kwɔːɹɾɚli faɪnænʃəl ɹᵻpɔːɹt"
+        },
+        {
+            "text": "Thank you for your unwavering commitment to the team",
+            "phonemes": "θæŋk juː fɔːɹ jʊɹ ʌnweɪvɚɹɪŋ kəmɪtmənt tuː ðə tiːm"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the last minute changes",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə læst mɪnɪt tʃeɪndʒᵻz"
+        },
+        {
+            "text": "We are enhancing our employee training programs",
+            "phonemes": "wiː ɑːɹ ɛnhænsɪŋ aʊɚ ɛmplɔɪiː tɹeɪnɪŋ pɹoʊɡɹæmz"
+        },
+        {
+            "text": "Your meticulous approach has improved our workflow efficiency",
+            "phonemes": "jʊɹ mɛtɪkjʊləs ɐpɹoʊtʃ hæz ɪmpɹuːvd aʊɚ wɜːkfloʊ ɪfɪʃənsi"
+        },
+        {
+            "text": "We must adhere to the updated compliance standards",
+            "phonemes": "wiː mʌst ɐdhɪɹ tuː ðə ʌpdeɪɾᵻd kəmplaɪəns stændɚdz"
+        },
+        {
+            "text": "Please review the proposed changes and share your thoughts",
+            "phonemes": "pliːz ɹᵻvjuː ðə pɹəpoʊzd tʃeɪndʒᵻz ænd ʃɛɹ jʊɹ θɔːts"
+        },
+        {
+            "text": "Your leadership has been pivotal in navigating the project challenges",
+            "phonemes": "jʊɹ liːdɚʃɪp hæz bɪn pɪvəɾəl ɪn nævɪɡeɪɾɪŋ ðə pɹɑːdʒɛkt tʃælɪndʒᵻz"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the resource limitations",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə ɹᵻsɔːɹs lɪmɪteɪʃənz"
+        },
+        {
+            "text": "We must ensure that all project milestones are met",
+            "phonemes": "wiː mʌst ɛnʃʊɹ ðæt ɔːl pɹɑːdʒɛkt maɪlstoʊnz ɑːɹ mɛt"
+        },
+        {
+            "text": "Could you prepare the detailed project timeline",
+            "phonemes": "kʊd juː pɹɪpɛɹ ðə diːteɪld pɹɑːdʒɛkt taɪmlaɪn"
+        },
+        {
+            "text": "Your dedication to achieving excellence is inspiring",
+            "phonemes": "jʊɹ dɛdɪkeɪʃən tuː ɐtʃiːvɪŋ ɛksələns ɪz ɪnspaɪɚɹɪŋ"
+        },
+        {
+            "text": "Please ensure all team members are trained on the new software",
+            "phonemes": "pliːz ɛnʃʊɹ ɔːl tiːm mɛmbɚz ɑːɹ tɹeɪnd ɔn ðə nuː sɔftwɛɹ"
+        },
+        {
+            "text": "We must address the budget constraints effectively",
+            "phonemes": "wiː mʌst ɐdɹɛs ðə bʌdʒɪt kənstɹeɪnts ɪfɛktɪvli"
+        },
+        {
+            "text": "Could you assist with the customer feedback analysis",
+            "phonemes": "kʊd juː ɐsɪst wɪð ðə kʌstəmɚ fiːdbæk ɐnæləsɪs"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the scheduling conflicts",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə skɛdʒuːlɪŋ kɑːnflɪkts"
+        },
+        {
+            "text": "Your ability to manage multiple tasks efficiently is impressive",
+            "phonemes": "jʊɹ ɐbɪləɾi tuː mænɪdʒ mʌltɪpəl tæsks ɪfɪʃəntli ɪz ɪmpɹɛsɪv"
+        },
+        {
+            "text": "Please review the updated project scope and provide feedback",
+            "phonemes": "pliːz ɹᵻvjuː ðə ʌpdeɪɾᵻd pɹɑːdʒɛkt skoʊp ænd pɹəvaɪd fiːdbæk"
+        },
+        {
+            "text": "We are enhancing our customer engagement strategies",
+            "phonemes": "wiː ɑːɹ ɛnhænsɪŋ aʊɚ kʌstəmɚ ɛŋɡeɪdʒmənt stɹæɾədʒiz"
+        },
+        {
+            "text": "Could you assist with the performance evaluation process",
+            "phonemes": "kʊd juː ɐsɪst wɪð ðə pɚfɔːɹməns ɪvæljueɪʃən pɹɑːsɛs"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the operational changes",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə ɑːpɚɹeɪʃənəl tʃeɪndʒᵻz"
+        },
+        {
+            "text": "Could you prepare the summary report for the board meeting",
+            "phonemes": "kʊd juː pɹɪpɛɹ ðə sʌmɚɹi ɹᵻpɔːɹt fɔːɹ ðə bɔːɹd miːɾɪŋ"
+        },
+        {
+            "text": "Your dedication to the project has not gone unnoticed",
+            "phonemes": "jʊɹ dɛdɪkeɪʃən tuː ðə pɹɑːdʒɛkt hæz nɑːt ɡɔn ʌnnoʊɾɪst"
+        },
+        {
+            "text": "We are launching a new employee recognition program",
+            "phonemes": "wiː ɑːɹ lɑːntʃɪŋ eɪ nuː ɛmplɔɪiː ɹɛkəɡnɪʃən pɹoʊɡɹæm"
+        },
+        {
+            "text": "Your problem solving abilities have greatly benefited the team",
+            "phonemes": "jʊɹ pɹɑːbləm sɑːlvɪŋ ɐbɪləɾiz hæv ɡɹeɪtli bɛnɪfɪɾᵻd ðə tiːm"
+        },
+        {
+            "text": "Thank you for your exceptional teamwork and collaboration",
+            "phonemes": "θæŋk juː fɔːɹ jʊɹ ɛksɛpʃənəl tiːmwɜːk ænd kəlæbɚɹeɪʃən"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the unexpected changes",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə ʌnɛkspɛktᵻd tʃeɪndʒᵻz"
+        },
+        {
+            "text": "We must ensure that all project deliverables are met",
+            "phonemes": "wiː mʌst ɛnʃʊɹ ðæt ɔːl pɹɑːdʒɛkt dᵻlɪvɚɹəbəlz ɑːɹ mɛt"
+        },
+        {
+            "text": "Please review the attached guidelines and follow them accordingly",
+            "phonemes": "pliːz ɹᵻvjuː ðə ɐtætʃt ɡaɪdlaɪnz ænd fɑːloʊ ðɛm ɐkɔːɹdɪŋli"
+        },
+        {
+            "text": "Your proactive approach has streamlined our operations",
+            "phonemes": "jʊɹ pɹoʊæktɪv ɐpɹoʊtʃ hæz stɹiːmlaɪnd aʊɚ ɑːpɚɹeɪʃənz"
+        },
+        {
+            "text": "We are launching a new employee wellness program",
+            "phonemes": "wiː ɑːɹ lɑːntʃɪŋ eɪ nuː ɛmplɔɪiː wɛlnəs pɹoʊɡɹæm"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the policy updates",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə pɑːlɪsi ʌpdeɪts"
+        },
+        {
+            "text": "We must prioritize customer satisfaction in all our endeavors",
+            "phonemes": "wiː mʌst pɹaɪɔːɹɪtaɪz kʌstəmɚ sæɾɪsfækʃən ɪn ɔːl aʊɚ ɛndɛvɚz"
+        },
+        {
+            "text": "Could you prepare the agenda for the upcoming seminar",
+            "phonemes": "kʊd juː pɹɪpɛɹ ðə ɐdʒɛndə fɔːɹ ðə ʌpkʌmɪŋ sɛmɪnɑːɹ"
+        },
+        {
+            "text": "Your leadership during the project was exceptional",
+            "phonemes": "jʊɹ liːdɚʃɪp dʊɹɹɪŋ ðə pɹɑːdʒɛkt wʌz ɛksɛpʃənəl"
+        },
+        {
+            "text": "We are enhancing our training modules to better serve employees",
+            "phonemes": "wiː ɑːɹ ɛnhænsɪŋ aʊɚ tɹeɪnɪŋ mɑːdʒuːlz tuː bɛɾɚ sɜːv ɛmplɔɪiːz"
+        },
+        {
+            "text": "Your commitment to excellence drives our success",
+            "phonemes": "jʊɹ kəmɪtmənt tuː ɛksələns dɹaɪvz aʊɚ səksɛs"
+        },
+        {
+            "text": "Could you assist with the product launch preparations",
+            "phonemes": "kʊd juː ɐsɪst wɪð ðə pɹɑːdʌkt lɑːntʃ pɹɛpɚɹeɪʃənz"
+        },
+        {
+            "text": "Thank you for your exceptional dedication to the team",
+            "phonemes": "θæŋk juː fɔːɹ jʊɹ ɛksɛpʃənəl dɛdɪkeɪʃən tuː ðə tiːm"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the system upgrades",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə sɪstəm ʌpɡɹeɪdz"
+        },
+        {
+            "text": "Could you handle the client onboarding documentation",
+            "phonemes": "kʊd juː hændəl ðə klaɪənt ɑːnbɔːɹdɪŋ dɑːkjumənteɪʃən"
+        },
+        {
+            "text": "We must ensure that all project requirements are met",
+            "phonemes": "wiː mʌst ɛnʃʊɹ ðæt ɔːl pɹɑːdʒɛkt ɹᵻkwaɪɚmənts ɑːɹ mɛt"
+        },
+        {
+            "text": "Please review the updated financial guidelines and implement them accordingly",
+            "phonemes": "pliːz ɹᵻvjuː ðə ʌpdeɪɾᵻd faɪnænʃəl ɡaɪdlaɪnz ænd ɪmplɪmənt ðɛm ɐkɔːɹdɪŋli"
+        },
+        {
+            "text": "We are launching a new customer feedback initiative",
+            "phonemes": "wiː ɑːɹ lɑːntʃɪŋ eɪ nuː kʌstəmɚ fiːdbæk ɪnɪʃiətɪv"
+        },
+        {
+            "text": "Could you assist with the operational efficiency analysis",
+            "phonemes": "kʊd juː ɐsɪst wɪð ðə ɑːpɚɹeɪʃənəl ɪfɪʃənsi ɐnæləsɪs"
+        },
+        {
+            "text": "Thank you for your outstanding commitment to the project",
+            "phonemes": "θæŋk juː fɔːɹ jʊɹ aʊtstændɪŋ kəmɪtmənt tuː ðə pɹɑːdʒɛkt"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the unexpected delays",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə ʌnɛkspɛktᵻd dᵻleɪz"
+        },
+        {
+            "text": "We are committed to enhancing our employee engagement strategies",
+            "phonemes": "wiː ɑːɹ kəmɪɾᵻd tuː ɛnhænsɪŋ aʊɚ ɛmplɔɪiː ɛŋɡeɪdʒmənt stɹæɾədʒiz"
+        },
+        {
+            "text": "Could you handle the client follow up communications",
+            "phonemes": "kʊd juː hændəl ðə klaɪənt fɑːloʊ ʌp kəmjuːnɪkeɪʃənz"
+        },
+        {
+            "text": "Please review the attached guidelines and adhere to them strictly",
+            "phonemes": "pliːz ɹᵻvjuː ðə ɐtætʃt ɡaɪdlaɪnz ænd ɐdhɪɹ tuː ðɛm stɹɪktli"
+        },
+        {
+            "text": "We are launching a new internal communication tool",
+            "phonemes": "wiː ɑːɹ lɑːntʃɪŋ eɪ nuː ɪntɜːnəl kəmjuːnɪkeɪʃən tuːl"
+        },
+        {
+            "text": "Could you assist with the financial auditing process",
+            "phonemes": "kʊd juː ɐsɪst wɪð ðə faɪnænʃəl ɔːdɪɾɪŋ pɹɑːsɛs"
+        },
+        {
+            "text": "We are committed to providing top notch customer service",
+            "phonemes": "wiː ɑːɹ kəmɪɾᵻd tuː pɹəvaɪdɪŋ tɑːp nɑːtʃ kʌstəmɚ sɜːvɪs"
+        },
+        {
+            "text": "Please ensure all team members are informed of the new procedures",
+            "phonemes": "pliːz ɛnʃʊɹ ɔːl tiːm mɛmbɚz ɑːɹ ɪnfɔːɹmd ʌv ðə nuː pɹəsiːdʒɚz"
+        },
+        {
+            "text": "Your proactive approach has significantly improved our workflow",
+            "phonemes": "jʊɹ pɹoʊæktɪv ɐpɹoʊtʃ hæz sɪɡnɪfɪkəntli ɪmpɹuːvd aʊɚ wɜːkfloʊ"
+        },
+        {
+            "text": "Could you assist with the client satisfaction survey analysis",
+            "phonemes": "kʊd juː ɐsɪst wɪð ðə klaɪənt sæɾɪsfækʃən sɜːveɪ ɐnæləsɪs"
+        },
+        {
+            "text": "Thank you for your unwavering commitment to excellence",
+            "phonemes": "θæŋk juː fɔːɹ jʊɹ ʌnweɪvɚɹɪŋ kəmɪtmənt tuː ɛksələns"
+        },
+        {
+            "text": "Your meticulous attention to detail has enhanced our project quality",
+            "phonemes": "jʊɹ mɛtɪkjʊləs ɐtɛnʃən tuː diːteɪl hæz ɛnhænst aʊɚ pɹɑːdʒɛkt kwɔlᵻɾi"
+        },
+        {
+            "text": "Please ensure all documents are filed appropriately.",
+            "phonemes": "pliːz ɛnʃʊɹ ɔːl dɑːkjumənts ɑːɹ faɪld ɐpɹoʊpɹɪətli"
+        },
+        {
+            "text": "We are pleased to announce the launch of our new product.",
+            "phonemes": "wiː ɑːɹ pliːzd tuː ɐnaʊns ðə lɑːntʃ ʌv aʊɚ nuː pɹɑːdʌkt"
+        },
+        {
+            "text": "Could you provide your availability for a meeting next week?",
+            "phonemes": "kʊd juː pɹəvaɪd jʊɹ ɐveɪləbɪlᵻɾi fɔːɹ eɪ miːɾɪŋ nɛkst wiːk"
+        },
+        {
+            "text": "Please adhere to the company’s confidentiality policies.",
+            "phonemes": "pliːz ɐdhɪɹ tuː ðə kʌmpəni ɛs kɑːnfɪdɛnʃɪælᵻɾi pɑːlɪsiz"
+        },
+        {
+            "text": "I apologize for the delay in processing your request.",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ðə dᵻleɪ ɪn pɹɑːsɛsɪŋ jʊɹ ɹᵻkwɛst"
+        },
+        {
+            "text": "We are committed to providing exceptional customer service.",
+            "phonemes": "wiː ɑːɹ kəmɪɾᵻd tuː pɹəvaɪdɪŋ ɛksɛpʃənəl kʌstəmɚ sɜːvɪs"
+        },
+        {
+            "text": "Could you assist with the preparation of the annual report?",
+            "phonemes": "kʊd juː ɐsɪst wɪð ðə pɹɛpɚɹeɪʃən ʌv ðə ænjuəl ɹᵻpɔːɹt"
+        },
+        {
+            "text": "Please confirm receipt of this email at your earliest convenience.",
+            "phonemes": "pliːz kənfɜːm ɹᵻsiːt ʌv ðɪs iːmeɪl æt jʊɹ ɜːlɪɪst kənviːnɪəns"
+        },
+        {
+            "text": "We need to address the upcoming project deadlines.",
+            "phonemes": "wiː niːd tuː ɐdɹɛs ðə ʌpkʌmɪŋ pɹɑːdʒɛkt dɛdlaɪnz"
+        },
+        {
+            "text": "We highly value your contributions to the team.",
+            "phonemes": "wiː haɪli vælju jʊɹ kɑːntɹɪbjuːʃənz tuː ðə tiːm"
+        },
+        {
+            "text": "Could you provide a detailed overview of the project plan?",
+            "phonemes": "kʊd juː pɹəvaɪd eɪ diːteɪld oʊvɚvjuː ʌv ðə pɹɑːdʒɛkt plæn"
+        },
+        {
+            "text": "Please ensure all team members are informed of the changes.",
+            "phonemes": "pliːz ɛnʃʊɹ ɔːl tiːm mɛmbɚz ɑːɹ ɪnfɔːɹmd ʌv ðə tʃeɪndʒᵻz"
+        },
+        {
+            "text": "We are enhancing our operational procedures to improve efficiency.",
+            "phonemes": "wiː ɑːɹ ɛnhænsɪŋ aʊɚ ɑːpɚɹeɪʃənəl pɹəsiːdʒɚz tuː ɪmpɹuːv ɪfɪʃənsi"
+        },
+        {
+            "text": "Could you oversee the implementation of the new system?",
+            "phonemes": "kʊd juː oʊvɚsiː ðə ɪmplɪmənteɪʃən ʌv ðə nuː sɪstəm"
+        },
+        {
+            "text": "I apologize for any confusion caused by my previous message.",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni kənfjuːʒən kɔːzd baɪ maɪ pɹiːviəs mɛsɪdʒ"
+        },
+        {
+            "text": "Please review the attached proposal and provide your feedback.",
+            "phonemes": "pliːz ɹᵻvjuː ðə ɐtætʃt pɹəpoʊzəl ænd pɹəvaɪd jʊɹ fiːdbæk"
+        },
+        {
+            "text": "We are scheduling a meeting to discuss the project milestones.",
+            "phonemes": "wiː ɑːɹ skɛdʒuːlɪŋ eɪ miːɾɪŋ tuː dɪskʌs ðə pɹɑːdʒɛkt maɪlstoʊnz"
+        },
+        {
+            "text": "Could you please update the client on the current status?",
+            "phonemes": "kʊd juː pliːz ʌpdeɪt ðə klaɪənt ɔn ðə kɜːɹənt stæɾəs"
+        },
+        {
+            "text": "I appreciate your willingness to assist with this task.",
+            "phonemes": "aɪ ɐpɹiːʃɪeɪt jʊɹ wɪlɪŋnəs tuː ɐsɪst wɪð ðɪs tæsk"
+        },
+        {
+            "text": "We are committed to fostering a collaborative work environment.",
+            "phonemes": "wiː ɑːɹ kəmɪɾᵻd tuː fɑːstɚɹɪŋ eɪ kəlæbɹətɪv wɜːk ɛnvaɪɹənmənt"
+        },
+        {
+            "text": "Could you provide an update on the project’s progress?",
+            "phonemes": "kʊd juː pɹəvaɪd æn ʌpdeɪt ɔn ðə pɹɑːdʒɛkt ɛs pɹɑːɡɹɛs"
+        },
+        {
+            "text": "We are pleased with the outcomes of the recent meeting.",
+            "phonemes": "wiː ɑːɹ pliːzd wɪð ðə aʊtkʌmz ʌv ðə ɹiːsənt miːɾɪŋ"
+        },
+        {
+            "text": "Could you assist with the coordination of the event?",
+            "phonemes": "kʊd juː ɐsɪst wɪð ðə koʊɔːɹdᵻneɪʃən ʌv ðə ᵻvɛnt"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the technical issues.",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə tɛknɪkəl ɪʃuːz"
+        },
+        {
+            "text": "Please provide your input on the new strategy.",
+            "phonemes": "pliːz pɹəvaɪd jʊɹ ɪnpʊt ɔn ðə nuː stɹæɾədʒi"
+        },
+        {
+            "text": "We need to finalize the budget by the end of the week.",
+            "phonemes": "wiː niːd tuː faɪnəlaɪz ðə bʌdʒɪt baɪ ðə ɛnd ʌv ðə wiːk"
+        },
+        {
+            "text": "I regret any inconvenience caused by the schedule change.",
+            "phonemes": "aɪ ɹᵻɡɹɛt ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə skɛdʒuːl tʃeɪndʒ"
+        },
+        {
+            "text": "We are enhancing our digital infrastructure to support growth.",
+            "phonemes": "wiː ɑːɹ ɛnhænsɪŋ aʊɚ dɪdʒɪɾəl ɪnfɹəstɹʌktʃɚ tuː səpɔːɹt ɡɹoʊθ"
+        },
+        {
+            "text": "Could you provide a summary of the meeting minutes?",
+            "phonemes": "kʊd juː pɹəvaɪd eɪ sʌmɚɹi ʌv ðə miːɾɪŋ mɪnɪts"
+        },
+        {
+            "text": "Please adhere to the company’s ethical guidelines.",
+            "phonemes": "pliːz ɐdhɪɹ tuː ðə kʌmpəni ɛs ɛθɪkəl ɡaɪdlaɪnz"
+        },
+        {
+            "text": "I apologize for any misunderstanding during our last conversation.",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni mɪsʌndɚstændɪŋ dʊɹɹɪŋ aʊɚ læst kɑːnvɚseɪʃən"
+        },
+        {
+            "text": "Could you assist with the development of the new software?",
+            "phonemes": "kʊd juː ɐsɪst wɪð ðə dɪvɛləpmənt ʌv ðə nuː sɔftwɛɹ"
+        },
+        {
+            "text": "Your contributions have significantly impacted our success.",
+            "phonemes": "jʊɹ kɑːntɹɪbjuːʃənz hæv sɪɡnɪfɪkəntli ɪmpæktᵻd aʊɚ səksɛs"
+        },
+        {
+            "text": "I regret any inconvenience caused by the operational changes.",
+            "phonemes": "aɪ ɹᵻɡɹɛt ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə ɑːpɚɹeɪʃənəl tʃeɪndʒᵻz"
+        },
+        {
+            "text": "Thank you for your exceptional dedication to the project.",
+            "phonemes": "θæŋk juː fɔːɹ jʊɹ ɛksɛpʃənəl dɛdɪkeɪʃən tuː ðə pɹɑːdʒɛkt"
+        },
+        {
+            "text": "Please review the updated policy document and adhere to it.",
+            "phonemes": "pliːz ɹᵻvjuː ðə ʌpdeɪɾᵻd pɑːlɪsi dɑːkjumənt ænd ɐdhɪɹ tuː ɪt"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the system maintenance.",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə sɪstəm meɪntənəns"
+        },
+        {
+            "text": "Could you assist with the client onboarding documentation?",
+            "phonemes": "kʊd juː ɐsɪst wɪð ðə klaɪənt ɑːnbɔːɹdɪŋ dɑːkjumənteɪʃən"
+        },
+        {
+            "text": "Please review the attached guidelines and provide your feedback.",
+            "phonemes": "pliːz ɹᵻvjuː ðə ɐtætʃt ɡaɪdlaɪnz ænd pɹəvaɪd jʊɹ fiːdbæk"
+        },
+        {
+            "text": "We are launching a new internal communication tool.",
+            "phonemes": "wiː ɑːɹ lɑːntʃɪŋ eɪ nuː ɪntɜːnəl kəmjuːnɪkeɪʃən tuːl"
+        },
+        {
+            "text": "Could you assist with the financial auditing process?",
+            "phonemes": "kʊd juː ɐsɪst wɪð ðə faɪnænʃəl ɔːdɪɾɪŋ pɹɑːsɛs"
+        },
+        {
+            "text": "Thank you for your outstanding project management skills.",
+            "phonemes": "θæŋk juː fɔːɹ jʊɹ aʊtstændɪŋ pɹɑːdʒɛkt mænɪdʒmənt skɪlz"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the policy enforcement.",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə pɑːlɪsi ɛnfɔːɹsmənt"
+        },
+        {
+            "text": "We must maintain high levels of customer satisfaction.",
+            "phonemes": "wiː mʌst meɪnteɪn haɪ lɛvəlz ʌv kʌstəmɚ sæɾɪsfækʃən"
+        },
+        {
+            "text": "Your dedication to meeting project deadlines is impressive.",
+            "phonemes": "jʊɹ dɛdɪkeɪʃən tuː miːɾɪŋ pɹɑːdʒɛkt dɛdlaɪnz ɪz ɪmpɹɛsɪv"
+        },
+        {
+            "text": "Thank you for your unwavering commitment to the team.",
+            "phonemes": "θæŋk juː fɔːɹ jʊɹ ʌnweɪvɚɹɪŋ kəmɪtmənt tuː ðə tiːm"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the unexpected changes.",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə ʌnɛkspɛktᵻd tʃeɪndʒᵻz"
+        },
+        {
+            "text": "We are enhancing our employee training programs.",
+            "phonemes": "wiː ɑːɹ ɛnhænsɪŋ aʊɚ ɛmplɔɪiː tɹeɪnɪŋ pɹoʊɡɹæmz"
+        },
+        {
+            "text": "Your meticulous attention to detail has enhanced our workflow efficiency.",
+            "phonemes": "jʊɹ mɛtɪkjʊləs ɐtɛnʃən tuː diːteɪl hæz ɛnhænst aʊɚ wɜːkfloʊ ɪfɪʃənsi"
+        },
+        {
+            "text": "We must adhere to the updated compliance standards.",
+            "phonemes": "wiː mʌst ɐdhɪɹ tuː ðə ʌpdeɪɾᵻd kəmplaɪəns stændɚdz"
+        },
+        {
+            "text": "Please review the proposed changes and share your thoughts.",
+            "phonemes": "pliːz ɹᵻvjuː ðə pɹəpoʊzd tʃeɪndʒᵻz ænd ʃɛɹ jʊɹ θɔːts"
+        },
+        {
+            "text": "Your leadership has been pivotal in navigating the project challenges.",
+            "phonemes": "jʊɹ liːdɚʃɪp hæz bɪn pɪvəɾəl ɪn nævɪɡeɪɾɪŋ ðə pɹɑːdʒɛkt tʃælɪndʒᵻz"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the resource limitations.",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə ɹᵻsɔːɹs lɪmɪteɪʃənz"
+        },
+        {
+            "text": "We must ensure that all project milestones are met.",
+            "phonemes": "wiː mʌst ɛnʃʊɹ ðæt ɔːl pɹɑːdʒɛkt maɪlstoʊnz ɑːɹ mɛt"
+        },
+        {
+            "text": "Could you prepare the detailed project timeline?",
+            "phonemes": "kʊd juː pɹɪpɛɹ ðə diːteɪld pɹɑːdʒɛkt taɪmlaɪn"
+        },
+        {
+            "text": "We are launching a new employee wellness program.",
+            "phonemes": "wiː ɑːɹ lɑːntʃɪŋ eɪ nuː ɛmplɔɪiː wɛlnəs pɹoʊɡɹæm"
+        },
+        {
+            "text": "Your commitment to excellence drives our success.",
+            "phonemes": "jʊɹ kəmɪtmənt tuː ɛksələns dɹaɪvz aʊɚ səksɛs"
+        },
+        {
+            "text": "Could you assist with the product launch preparations?",
+            "phonemes": "kʊd juː ɐsɪst wɪð ðə pɹɑːdʌkt lɑːntʃ pɹɛpɚɹeɪʃənz"
+        },
+        {
+            "text": "Thank you for your exceptional dedication to the team.",
+            "phonemes": "θæŋk juː fɔːɹ jʊɹ ɛksɛpʃənəl dɛdɪkeɪʃən tuː ðə tiːm"
+        },
+        {
+            "text": "Please ensure all team members are informed of the new protocols.",
+            "phonemes": "pliːz ɛnʃʊɹ ɔːl tiːm mɛmbɚz ɑːɹ ɪnfɔːɹmd ʌv ðə nuː pɹoʊɾəkɑːlz"
+        },
+        {
+            "text": "Your proactive engagement has enhanced our team dynamics.",
+            "phonemes": "jʊɹ pɹoʊæktɪv ɛŋɡeɪdʒmənt hæz ɛnhænst aʊɚ tiːm daɪnæmɪks"
+        },
+        {
+            "text": "We are launching a new customer feedback initiative.",
+            "phonemes": "wiː ɑːɹ lɑːntʃɪŋ eɪ nuː kʌstəmɚ fiːdbæk ɪnɪʃiətɪv"
+        },
+        {
+            "text": "Could you assist with the operational efficiency analysis?",
+            "phonemes": "kʊd juː ɐsɪst wɪð ðə ɑːpɚɹeɪʃənəl ɪfɪʃənsi ɐnæləsɪs"
+        },
+        {
+            "text": "Thank you for your outstanding commitment to the project.",
+            "phonemes": "θæŋk juː fɔːɹ jʊɹ aʊtstændɪŋ kəmɪtmənt tuː ðə pɹɑːdʒɛkt"
+        },
+        {
+            "text": "I apologize for any inconvenience caused by the unexpected delays.",
+            "phonemes": "aɪ ɐpɑːlədʒaɪz fɔːɹ ɛni ɪŋkənviːnɪəns kɔːzd baɪ ðə ʌnɛkspɛktᵻd dᵻleɪz"
+        },
+        {
+            "text": "We are committed to enhancing our employee engagement strategies.",
+            "phonemes": "wiː ɑːɹ kəmɪɾᵻd tuː ɛnhænsɪŋ aʊɚ ɛmplɔɪiː ɛŋɡeɪdʒmənt stɹæɾədʒiz"
+        },
+        {
+            "text": "Could you handle the client follow up communications?",
+            "phonemes": "kʊd juː hændəl ðə klaɪənt fɑːloʊ ʌp kəmjuːnɪkeɪʃənz"
+        },
+        {
+            "text": "Please review the attached guidelines and adhere to them strictly.",
+            "phonemes": "pliːz ɹᵻvjuː ðə ɐtætʃt ɡaɪdlaɪnz ænd ɐdhɪɹ tuː ðɛm stɹɪktli"
+        },
+        {
+            "text": "Could you assist with the product launch preparations?",
+            "phonemes": "kʊd juː ɐsɪst wɪð ðə pɹɑːdʌkt lɑːntʃ pɹɛpɚɹeɪʃənz"
+        }
+    ],
+    "informal": [
+        {
+            "text": "Sorry for the hassle.",
+            "phonemes": "sɑːɹi fɔːɹ ðə hæsəl"
+        },
+        {
+            "text": "Let me know if you need help.",
+            "phonemes": "lɛt miː noʊ ɪf juː niːd hɛlp"
+        },
+        {
+            "text": "I think this could be huge.",
+            "phonemes": "aɪ θɪŋk ðɪs kʊd biː hjuːdʒ"
+        },
+        {
+            "text": "Thanks for lending a hand with this.",
+            "phonemes": "θæŋks fɔːɹ lɛndɪŋ eɪ hænd wɪð ðɪs"
+        },
+        {
+            "text": "Thanks for sticking to the rules.",
+            "phonemes": "θæŋks fɔːɹ stɪkɪŋ tuː ðə ɹuːlz"
+        },
+        {
+            "text": "\"\"\"Fill out the form, okay?\"\"\"",
+            "phonemes": "fɪl aʊt ðə fɔːɹm oʊkeɪ"
+        },
+        {
+            "text": "Show me how to do it.",
+            "phonemes": "ʃoʊ miː haʊ tuː duː ɪt"
+        },
+        {
+            "text": "You cool with an online chat or do it face to face?",
+            "phonemes": "juː kuːl wɪð æn ɑːnlaɪn tʃæt ɔːɹ duː ɪt feɪs tuː feɪs"
+        },
+        {
+            "text": "We're using your ideas right now!",
+            "phonemes": "wɪɹ juːzɪŋ jʊɹ aɪdiəz ɹaɪt naʊ"
+        },
+        {
+            "text": "Better read the directions carefully.",
+            "phonemes": "bɛɾɚ ɹiːd ðə dᵻɹɛkʃənz kɛɹfəli"
+        },
+        {
+            "text": "\"\"\"She got stuff done, fast.\"\"\"",
+            "phonemes": "ʃiː ɡɑːt stʌf dʌn fæst"
+        },
+        {
+            "text": "Should I loop you in via email?",
+            "phonemes": "ʃʊd aɪ luːp juː ɪn vaɪə iːmeɪl"
+        },
+        {
+            "text": "\"\"\"Shoot me the files, will ya?\"\"\"",
+            "phonemes": "ʃuːt miː ðə faɪlz wɪl jɐ"
+        },
+        {
+            "text": "You've really helped us level up!",
+            "phonemes": "juːv ɹiəli hɛlpt ʌs lɛvəl ʌp"
+        },
+        {
+            "text": "She wrote down everything.",
+            "phonemes": "ʃiː ɹoʊt daʊn ɛvɹɪθɪŋ"
+        },
+        {
+            "text": "Keep talking to each other while we do this.",
+            "phonemes": "kiːp tɔːkɪŋ tuː iːtʃ ʌðɚ waɪl wiː duː ðɪs"
+        },
+        {
+            "text": "Schedule meetings correctly",
+            "phonemes": "skɛdʒuːl miːɾɪŋz kɚɹɛktli"
+        },
+        {
+            "text": "Sorry for the change trouble",
+            "phonemes": "sɑːɹi fɔːɹ ðə tʃeɪndʒ tɹʌbəl"
+        },
+        {
+            "text": "Sorry for being away",
+            "phonemes": "sɑːɹi fɔːɹ biːɪŋ ɐweɪ"
+        },
+        {
+            "text": "Sorry for the scheduling trouble",
+            "phonemes": "sɑːɹi fɔːɹ ðə skɛdʒuːlɪŋ tɹʌbəl"
+        },
+        {
+            "text": "Sorry for the meeting mix up",
+            "phonemes": "sɑːɹi fɔːɹ ðə miːɾɪŋ mɪks ʌp"
+        },
+        {
+            "text": "Sorry for the oversight trouble",
+            "phonemes": "sɑːɹi fɔːɹ ðə oʊvɚsaɪt tɹʌbəl"
+        },
+        {
+            "text": "Sorry for rescheduling trouble",
+            "phonemes": "sɑːɹi fɔːɹ ɹᵻskɛdʒuːlɪŋ tɹʌbəl"
+        },
+        {
+            "text": "Sorry for the update confusion",
+            "phonemes": "sɑːɹi fɔːɹ ðə ʌpdeɪt kənfjuːʒən"
+        },
+        {
+            "text": "Sorry for the delay trouble",
+            "phonemes": "sɑːɹi fɔːɹ ðə dᵻleɪ tɹʌbəl"
+        },
+        {
+            "text": "Sorry for missing something in the docs",
+            "phonemes": "sɑːɹi fɔːɹ mɪsɪŋ sʌmθɪŋ ɪn ðə dɑːks"
+        },
+        {
+            "text": "Sorry for the error trouble",
+            "phonemes": "sɑːɹi fɔːɹ ðə ɛɹɚ tɹʌbəl"
+        },
+        {
+            "text": "Sorry for the instruction mix up",
+            "phonemes": "sɑːɹi fɔːɹ ðə ɪnstɹʌkʃən mɪks ʌp"
+        },
+        {
+            "text": "Sorry for the tech trouble",
+            "phonemes": "sɑːɹi fɔːɹ ðə tɛk tɹʌbəl"
+        },
+        {
+            "text": "Let’s talk about success metrics",
+            "phonemes": "lɛt ɛs tɔːk ɐbaʊt səksɛs mɛtɹɪks"
+        },
+        {
+            "text": "Can you give feedback on the changes",
+            "phonemes": "kæn juː ɡɪv fiːdbæk ɔn ðə tʃeɪndʒᵻz"
+        },
+        {
+            "text": "Sorry we had to reschedule",
+            "phonemes": "sɑːɹi wiː hæd tuː ɹᵻskɛdʒuːl"
+        },
+        {
+            "text": "Sorry the schedule change caused trouble",
+            "phonemes": "sɑːɹi ðə skɛdʒuːl tʃeɪndʒ kɔːzd tɹʌbəl"
+        },
+        {
+            "text": "Sorry the maintenance caused trouble",
+            "phonemes": "sɑːɹi ðə meɪntənəns kɔːzd tɹʌbəl"
+        },
+        {
+            "text": "We offer excellent customer service",
+            "phonemes": "wiː ɔfɚ ɛksələnt kʌstəmɚ sɜːvɪs"
+        },
+        {
+            "text": "Sorry the delays caused trouble",
+            "phonemes": "sɑːɹi ðə dᵻleɪz kɔːzd tɹʌbəl"
+        },
+        {
+            "text": "Sorry the policy changes caused trouble",
+            "phonemes": "sɑːɹi ðə pɑːlɪsi tʃeɪndʒᵻz kɔːzd tɹʌbəl"
+        },
+        {
+            "text": "Let’s talk about implementation",
+            "phonemes": "lɛt ɛs tɔːk ɐbaʊt ɪmplɪmənteɪʃən"
+        },
+        {
+            "text": "Sorry the operational changes caused trouble",
+            "phonemes": "sɑːɹi ðə ɑːpɚɹeɪʃənəl tʃeɪndʒᵻz kɔːzd tɹʌbəl"
+        },
+        {
+            "text": "Submit correct reports",
+            "phonemes": "səbmɪt kɚɹɛkt ɹᵻpɔːɹts"
+        },
+        {
+            "text": "We strive for top operations",
+            "phonemes": "wiː stɹaɪv fɔːɹ tɑːp ɑːpɚɹeɪʃənz"
+        },
+        {
+            "text": "Sorry for rescheduling trouble",
+            "phonemes": "sɑːɹi fɔːɹ ɹᵻskɛdʒuːlɪŋ tɹʌbəl"
+        },
+        {
+            "text": "Let’s talk about resources",
+            "phonemes": "lɛt ɛs tɔːk ɐbaʊt ɹᵻsɔːɹsᵻz"
+        },
+        {
+            "text": "Sorry the project is late",
+            "phonemes": "sɑːɹi ðə pɹɑːdʒɛkt ɪz leɪt"
+        },
+        {
+            "text": "Sorry the upgrade caused trouble",
+            "phonemes": "sɑːɹi ðə ʌpɡɹeɪd kɔːzd tɹʌbəl"
+        },
+        {
+            "text": "Sorry for the policy update trouble",
+            "phonemes": "sɑːɹi fɔːɹ ðə pɑːlɪsi ʌpdeɪt tɹʌbəl"
+        },
+        {
+            "text": "Sorry the shipment is late",
+            "phonemes": "sɑːɹi ðə ʃɪpmənt ɪz leɪt"
+        },
+        {
+            "text": "Sorry for the system issues",
+            "phonemes": "sɑːɹi fɔːɹ ðə sɪstəm ɪʃuːz"
+        },
+        {
+            "text": "Let’s talk about project goals",
+            "phonemes": "lɛt ɛs tɔːk ɐbaʊt pɹɑːdʒɛkt ɡoʊlz"
+        },
+        {
+            "text": "Sorry for the tech errors",
+            "phonemes": "sɑːɹi fɔːɹ ðə tɛk ɛɹɚz"
+        },
+        {
+            "text": "We’re building teamwork",
+            "phonemes": "wiː ɹiː bɪldɪŋ tiːmwɜːk"
+        },
+        {
+            "text": "Sorry for the schedule change trouble",
+            "phonemes": "sɑːɹi fɔːɹ ðə skɛdʒuːl tʃeɪndʒ tɹʌbəl"
+        },
+        {
+            "text": "Let’s talk about goals",
+            "phonemes": "lɛt ɛs tɔːk ɐbaʊt ɡoʊlz"
+        },
+        {
+            "text": "Sorry for the upgrade trouble",
+            "phonemes": "sɑːɹi fɔːɹ ðə ʌpɡɹeɪd tɹʌbəl"
+        },
+        {
+            "text": "Sorry for the policy trouble",
+            "phonemes": "sɑːɹi fɔːɹ ðə pɑːlɪsi tɹʌbəl"
+        },
+        {
+            "text": "Let’s talk about project goals",
+            "phonemes": "lɛt ɛs tɔːk ɐbaʊt pɹɑːdʒɛkt ɡoʊlz"
+        },
+        {
+            "text": "What's the latest on the project?",
+            "phonemes": "wʌts ðə leɪɾɪst ɔn ðə pɹɑːdʒɛkt"
+        },
+        {
+            "text": "You've been killing it and helping us win!",
+            "phonemes": "juːv bɪn kɪlɪŋ ɪt ænd hɛlpɪŋ ʌs wɪn"
+        },
+        {
+            "text": "Your cool ideas are pushing the project ahead!",
+            "phonemes": "jʊɹ kuːl aɪdiəz ɑːɹ pʊʃɪŋ ðə pɹɑːdʒɛkt ɐhɛd"
+        },
+        {
+            "text": "Can you put together the first draft of the proposal?",
+            "phonemes": "kæn juː pʊt təɡɛðɚ ðə fɜːst dɹæft ʌv ðə pɹəpoʊzəl"
+        },
+        {
+            "text": "Your initiative has helped everyone out!",
+            "phonemes": "jʊɹ ɪnɪʃiətɪv hæz hɛlpt ɛvɹɪwʌn aʊt"
+        },
+        {
+            "text": "We're dedicated to building a team oriented workspace.",
+            "phonemes": "wɪɹ dɛdᵻkeɪɾᵻd tuː bɪldɪŋ eɪ tiːm ɔːɹiəntᵻd wɜːkspeɪs"
+        },
+        {
+            "text": "You're really inspiring with how dedicated you are!",
+            "phonemes": "jʊɹ ɹiəli ɪnspaɪɚɹɪŋ wɪð haʊ dɛdᵻkeɪɾᵻd juː ɑːɹ"
+        },
+        {
+            "text": "We're rolling out new strategies to boost productivity.",
+            "phonemes": "wɪɹ ɹoʊlɪŋ aʊt nuː stɹæɾədʒiz tuː buːst pɹɑːdəktɪvᵻɾi"
+        },
+        {
+            "text": "Sorry the changes caused trouble.",
+            "phonemes": "sɑːɹi ðə tʃeɪndʒᵻz kɔːzd tɹʌbəl"
+        },
+        {
+            "text": "Sorry for the timeline hold ups.",
+            "phonemes": "sɑːɹi fɔːɹ ðə taɪmlaɪn hoʊld ʌps"
+        },
+        {
+            "text": "Your energy is really lifting the team's spirits!",
+            "phonemes": "jʊɹ ɛnɚdʒi ɪz ɹiəli lɪftɪŋ ðə tiːmz spɪɹɪts"
+        },
+        {
+            "text": "Finish all the tasks before the deadline.",
+            "phonemes": "fɪnɪʃ ɔːl ðə tæsks bᵻfɔːɹ ðə dɛdlaɪn"
+        },
+        {
+            "text": "Your taking charge has made things way better!",
+            "phonemes": "jʊɹ teɪkɪŋ tʃɑːɹdʒ hæz meɪd θɪŋz weɪ bɛɾɚ"
+        },
+        {
+            "text": "We're growing and adding more people to the team!",
+            "phonemes": "wɪɹ ɡɹoʊɪŋ ænd ædɪŋ mɔːɹ piːpəl tuː ðə tiːm"
+        },
+        {
+            "text": "We're upgrading our training to help everyone out more.",
+            "phonemes": "wɪɹ ʌpɡɹeɪdɪŋ aʊɚ tɹeɪnɪŋ tuː hɛlp ɛvɹɪwʌn aʊt mɔːɹ"
+        },
+        {
+            "text": "Stick to the ethical rules for the project.",
+            "phonemes": "stɪk tuː ðə ɛθɪkəl ɹuːlz fɔːɹ ðə pɹɑːdʒɛkt"
+        },
+        {
+            "text": "Check out the client's feedback and reply as needed.",
+            "phonemes": "tʃɛk aʊt ðə klaɪənts fiːdbæk ænd ɹᵻplaɪ æz niːdᵻd"
+        },
+        {
+            "text": "Can you finish the report by Friday?",
+            "phonemes": "kæn juː fɪnɪʃ ðə ɹᵻpɔːɹt baɪ fɹaɪdeɪ"
+        },
+        {
+            "text": "Sorry for the schedule change trouble.",
+            "phonemes": "sɑːɹi fɔːɹ ðə skɛdʒuːl tʃeɪndʒ tɹʌbəl"
+        },
+        {
+            "text": "We're starting a feedback tool to hear what everyone thinks!",
+            "phonemes": "wɪɹ stɑːɹɾɪŋ eɪ fiːdbæk tuːl tuː hɪɹ wʌt ɛvɹɪwʌn θɪŋks"
+        },
+        {
+            "text": "Make sure everyone follows the safety rules to the letter.",
+            "phonemes": "meɪk ʃʊɹ ɛvɹɪwʌn fɑːloʊz ðə seɪfti ɹuːlz tuː ðə lɛɾɚ"
+        },
+        {
+            "text": "Your skills have really helped the project thrive!",
+            "phonemes": "jʊɹ skɪlz hæv ɹiəli hɛlpt ðə pɹɑːdʒɛkt θɹaɪv"
+        },
+        {
+            "text": "Let’s fix these problems to make the project a win.",
+            "phonemes": "lɛt ɛs fɪks ðiːz pɹɑːbləmz tuː meɪk ðə pɹɑːdʒɛkt eɪ wɪn"
+        },
+        {
+            "text": "Sorry if my last email confused you.",
+            "phonemes": "sɑːɹi ɪf maɪ læst iːmeɪl kənfjuːzd juː"
+        },
+        {
+            "text": "You're really awesome at hitting deadlines!",
+            "phonemes": "jʊɹ ɹiəli ɔːsʌm æt hɪɾɪŋ dɛdlaɪnz"
+        },
+        {
+            "text": "Make sure everyone on the team knows about the changes.",
+            "phonemes": "meɪk ʃʊɹ ɛvɹɪwʌn ɔn ðə tiːm noʊz ɐbaʊt ðə tʃeɪndʒᵻz"
+        },
+        {
+            "text": "Your good vibes really lift the team's spirits!",
+            "phonemes": "jʊɹ ɡʊd vaɪbz ɹiəli lɪft ðə tiːmz spɪɹɪts"
+        },
+        {
+            "text": "Thanks for being so thorough with the tasks!",
+            "phonemes": "θæŋks fɔːɹ biːɪŋ soʊ θʌɹoʊ wɪð ðə tæsks"
+        },
+        {
+            "text": "Sorry the system update caused trouble.",
+            "phonemes": "sɑːɹi ðə sɪstəm ʌpdeɪt kɔːzd tɹʌbəl"
+        },
+        {
+            "text": "Stick to the top quality standards.",
+            "phonemes": "stɪk tuː ðə tɑːp kwɔlᵻɾi stændɚdz"
+        },
+        {
+            "text": "Can you put together a recap of what we decided in the meeting?",
+            "phonemes": "kæn juː pʊt təɡɛðɚ eɪ ɹᵻkæp ʌv wʌt wiː dᵻsaɪdᵻd ɪn ðə miːɾɪŋ"
+        },
+        {
+            "text": "We’re rolling out new tools to make things run smoother!",
+            "phonemes": "wiː ɹiː ɹoʊlɪŋ aʊt nuː tuːlz tuː meɪk θɪŋz ɹʌn smuːðɚ"
+        },
+        {
+            "text": "We really value how committed you are to the project!",
+            "phonemes": "wiː ɹiəli vælju haʊ kəmɪɾᵻd juː ɑːɹ tuː ðə pɹɑːdʒɛkt"
+        },
+        {
+            "text": "Let’s sort out the resources so we can hit our goals.",
+            "phonemes": "lɛt ɛs sɔːɹt aʊt ðə ɹᵻsɔːɹsᵻz soʊ wiː kæn hɪt aʊɚ ɡoʊlz"
+        },
+        {
+            "text": "Can you help analyze the performance numbers?",
+            "phonemes": "kæn juː hɛlp ænɐlaɪz ðə pɚfɔːɹməns nʌmbɚz"
+        },
+        {
+            "text": "Sorry for the sudden changes causing trouble.",
+            "phonemes": "sɑːɹi fɔːɹ ðə sʌdən tʃeɪndʒᵻz kɔːzɪŋ tɹʌbəl"
+        },
+        {
+            "text": "We're dedicated to giving our clients outstanding value!",
+            "phonemes": "wɪɹ dɛdᵻkeɪɾᵻd tuː ɡɪvɪŋ aʊɚ klaɪənts aʊtstændɪŋ vælju"
+        },
+        {
+            "text": "Can you finish the training docs for the workshop?",
+            "phonemes": "kæn juː fɪnɪʃ ðə tɹeɪnɪŋ dɑːks fɔːɹ ðə wɜːkʃɑːp"
+        },
+        {
+            "text": "You're really good at juggling tasks efficiently!",
+            "phonemes": "jʊɹ ɹiəli ɡʊd æt dʒʌɡlɪŋ tæsks ɪfɪʃəntli"
+        },
+        {
+            "text": "Make sure we review all contracts carefully.",
+            "phonemes": "meɪk ʃʊɹ wiː ɹᵻvjuː ɔːl kɑːntɹækts kɛɹfəli"
+        },
+        {
+            "text": "Sync up with IT if you need tech help.",
+            "phonemes": "sɪŋk ʌp wɪð ɪt ɪf juː niːd tɛk hɛlp"
+        },
+        {
+            "text": "Your active participation has made the team vibe better!",
+            "phonemes": "jʊɹ æktɪv pɑːɹtɪsɪpeɪʃən hæz meɪd ðə tiːm vaɪb bɛɾɚ"
+        },
+        {
+            "text": "We're starting a new project to lift everyone's spirits!",
+            "phonemes": "wɪɹ stɑːɹɾɪŋ eɪ nuː pɹɑːdʒɛkt tuː lɪft ɛvɹɪwʌnz spɪɹɪts"
+        },
+        {
+            "text": "Thanks for your awesome input on the project!",
+            "phonemes": "θæŋks fɔːɹ jʊɹ ɔːsʌm ɪnpʊt ɔn ðə pɹɑːdʒɛkt"
+        },
+        {
+            "text": "Sorry the delivery was late and caused trouble.",
+            "phonemes": "sɑːɹi ðə dᵻlɪvɚɹi wʌz leɪt ænd kɔːzd tɹʌbəl"
+        },
+        {
+            "text": "Can you take care of the paperwork for the new process?",
+            "phonemes": "kæn juː teɪk kɛɹ ʌv ðə peɪpɚwɜːk fɔːɹ ðə nuː pɹɑːsɛs"
+        },
+        {
+            "text": "Your dedication to excellence is inspiring the whole team!",
+            "phonemes": "jʊɹ dɛdɪkeɪʃən tuː ɛksələns ɪz ɪnspaɪɚɹɪŋ ðə hoʊl tiːm"
+        },
+        {
+            "text": "We're upgrading how we communicate internally!",
+            "phonemes": "wɪɹ ʌpɡɹeɪdɪŋ haʊ wiː kəmjuːnᵻkeɪt ɪntɜːnəli"
+        },
+        {
+            "text": "Make sure you send the reports correctly and by the deadline.",
+            "phonemes": "meɪk ʃʊɹ juː sɛnd ðə ɹᵻpɔːɹts kɚɹɛktli ænd baɪ ðə dɛdlaɪn"
+        },
+        {
+            "text": "Let’s tackle the client’s worries to keep them happy.",
+            "phonemes": "lɛt ɛs tækəl ðə klaɪənt ɛs wʌɹiz tuː kiːp ðɛm hæpi"
+        },
+        {
+            "text": "Can you get the financial forecasts ready for next quarter?",
+            "phonemes": "kæn juː ɡɛt ðə faɪnænʃəl fɔːɹkæsts ɹɛdi fɔːɹ nɛkst kwɔːɹɾɚ"
+        },
+        {
+            "text": "Sorry the staffing changes caused trouble.",
+            "phonemes": "sɑːɹi ðə stæfɪŋ tʃeɪndʒᵻz kɔːzd tɹʌbəl"
+        },
+        {
+            "text": "We're dedicated to finishing projects on time!",
+            "phonemes": "wɪɹ dɛdᵻkeɪɾᵻd tuː fɪnɪʃɪŋ pɹɑːdʒɛkts ɔn taɪm"
+        },
+        {
+            "text": "Can you help analyze the market research?",
+            "phonemes": "kæn juː hɛlp ænɐlaɪz ðə mɑːɹkɪt ɹᵻsɜːtʃ"
+        },
+        {
+            "text": "Check out the new meeting notes and let me know what you think.",
+            "phonemes": "tʃɛk aʊt ðə nuː miːɾɪŋ noʊts ænd lɛt miː noʊ wʌt juː θɪŋk"
+        },
+        {
+            "text": "Your creative fixes have really helped our operations!",
+            "phonemes": "jʊɹ kɹiːeɪɾɪv fɪksᵻz hæv ɹiəli hɛlpt aʊɚ ɑːpɚɹeɪʃənz"
+        },
+        {
+            "text": "We're starting a fresh training program next month!",
+            "phonemes": "wɪɹ stɑːɹɾɪŋ eɪ fɹɛʃ tɹeɪnɪŋ pɹoʊɡɹæm nɛkst mʌnθ"
+        },
+        {
+            "text": "Can you manage the customer satisfaction surveys?",
+            "phonemes": "kæn juː mænɪdʒ ðə kʌstəmɚ sæɾɪsfækʃən sɜːveɪz"
+        },
+        {
+            "text": "Sorry the system maintenance caused trouble.",
+            "phonemes": "sɑːɹi ðə sɪstəm meɪntənəns kɔːzd tɹʌbəl"
+        },
+        {
+            "text": "Let’s make this project a top priority to hit our goals.",
+            "phonemes": "lɛt ɛs meɪk ðɪs pɹɑːdʒɛkt eɪ tɑːp pɹaɪɔːɹᵻɾi tuː hɪt aʊɚ ɡoʊlz"
+        },
+        {
+            "text": "Your initiative stopped some problems before they happened!",
+            "phonemes": "jʊɹ ɪnɪʃiətɪv stɑːpt sʌm pɹɑːbləmz bᵻfɔːɹ ðeɪ hæpənd"
+        },
+        {
+            "text": "We’re upgrading our product features thanks to what users told us!",
+            "phonemes": "wiː ɹiː ʌpɡɹeɪdɪŋ aʊɚ pɹɑːdʌkt fiːtʃɚz θæŋks tuː wʌt juːzɚz toʊld ʌs"
+        },
+        {
+            "text": "Make sure everyone knows about the new rules.",
+            "phonemes": "meɪk ʃʊɹ ɛvɹɪwʌn noʊz ɐbaʊt ðə nuː ɹuːlz"
+        },
+        {
+            "text": "Let’s fix the workflow problems right now.",
+            "phonemes": "lɛt ɛs fɪks ðə wɜːkfloʊ pɹɑːbləmz ɹaɪt naʊ"
+        },
+        {
+            "text": "Can you set up the schedule for the next conference?",
+            "phonemes": "kæn juː sɛt ʌp ðə skɛdʒuːl fɔːɹ ðə nɛkst kɑːnfɹəns"
+        },
+        {
+            "text": "Sorry the unexpected downtime caused trouble.",
+            "phonemes": "sɑːɹi ðə ʌnɛkspɛktᵻd daʊntaɪm kɔːzd tɹʌbəl"
+        },
+        {
+            "text": "Can you help handle the tech support requests?",
+            "phonemes": "kæn juː hɛlp hændəl ðə tɛk səpɔːɹt ɹᵻkwɛsts"
+        },
+        {
+            "text": "You did an awesome job leading the team when things got tough!",
+            "phonemes": "juː dɪd æn ɔːsʌm dʒɑːb liːdɪŋ ðə tiːm wɛn θɪŋz ɡɑːt tʌf"
+        },
+        {
+            "text": "Check out the specs I sent and let me know your thoughts.",
+            "phonemes": "tʃɛk aʊt ðə spɛks aɪ sɛnt ænd lɛt miː noʊ jʊɹ θɔːts"
+        },
+        {
+            "text": "Your quick actions have made our operations more efficient!",
+            "phonemes": "jʊɹ kwɪk ækʃənz hæv meɪd aʊɚ ɑːpɚɹeɪʃənz mɔːɹ ɪfɪʃənt"
+        },
+        {
+            "text": "We're starting a fresh loyalty program for customers!",
+            "phonemes": "wɪɹ stɑːɹɾɪŋ eɪ fɹɛʃ lɔɪəlɾi pɹoʊɡɹæm fɔːɹ kʌstəmɚz"
+        },
+        {
+            "text": "Can you take care of sending follow up emails to the clients?",
+            "phonemes": "kæn juː teɪk kɛɹ ʌv sɛndɪŋ fɑːloʊ ʌp iːmeɪlz tuː ðə klaɪənts"
+        },
+        {
+            "text": "Thanks for managing the project so well!",
+            "phonemes": "θæŋks fɔːɹ mænɪdʒɪŋ ðə pɹɑːdʒɛkt soʊ wɛl"
+        },
+        {
+            "text": "Sorry the policy enforcement caused trouble.",
+            "phonemes": "sɑːɹi ðə pɑːlɪsi ɛnfɔːɹsmənt kɔːzd tɹʌbəl"
+        },
+        {
+            "text": "Keep our customer satisfaction levels high.",
+            "phonemes": "kiːp aʊɚ kʌstəmɚ sæɾɪsfækʃən lɛvəlz haɪ"
+        },
+        {
+            "text": "You're really awesome at hitting project deadlines!",
+            "phonemes": "jʊɹ ɹiəli ɔːsʌm æt hɪɾɪŋ pɹɑːdʒɛkt dɛdlaɪnz"
+        },
+        {
+            "text": "Can you get the quarterly financial report ready?",
+            "phonemes": "kæn juː ɡɛt ðə kwɔːɹɾɚli faɪnænʃəl ɹᵻpɔːɹt ɹɛdi"
+        },
+        {
+            "text": "Thanks for always being committed to the team!",
+            "phonemes": "θæŋks fɔːɹ ɔːlweɪz biːɪŋ kəmɪɾᵻd tuː ðə tiːm"
+        },
+        {
+            "text": "Sorry the last minute changes caused trouble.",
+            "phonemes": "sɑːɹi ðə læst mɪnɪt tʃeɪndʒᵻz kɔːzd tɹʌbəl"
+        },
+        {
+            "text": "We're upgrading our training programs for employees!",
+            "phonemes": "wɪɹ ʌpɡɹeɪdɪŋ aʊɚ tɹeɪnɪŋ pɹoʊɡɹæmz fɔːɹ ɛmplɔɪiːz"
+        },
+        {
+            "text": "Your detailed methods have made our workflow way better!",
+            "phonemes": "jʊɹ diːteɪld mɛθədz hæv meɪd aʊɚ wɜːkfloʊ weɪ bɛɾɚ"
+        },
+        {
+            "text": "Stick to the new compliance rules.",
+            "phonemes": "stɪk tuː ðə nuː kəmplaɪəns ɹuːlz"
+        },
+        {
+            "text": "Check out the suggested changes and let me know what you think.",
+            "phonemes": "tʃɛk aʊt ðə sədʒɛstᵻd tʃeɪndʒᵻz ænd lɛt miː noʊ wʌt juː θɪŋk"
+        },
+        {
+            "text": "Your leadership has been key in overcoming the project hurdles!",
+            "phonemes": "jʊɹ liːdɚʃɪp hæz bɪn kiː ɪn oʊvɚkʌmɪŋ ðə pɹɑːdʒɛkt hɜːdəlz"
+        },
+        {
+            "text": "Sorry the limited resources caused trouble.",
+            "phonemes": "sɑːɹi ðə lɪmɪɾᵻd ɹᵻsɔːɹsᵻz kɔːzd tɹʌbəl"
+        },
+        {
+            "text": "Make sure we hit all the project milestones.",
+            "phonemes": "meɪk ʃʊɹ wiː hɪt ɔːl ðə pɹɑːdʒɛkt maɪlstoʊnz"
+        },
+        {
+            "text": "Can you set up a detailed timeline for the project?",
+            "phonemes": "kæn juː sɛt ʌp eɪ diːteɪld taɪmlaɪn fɔːɹ ðə pɹɑːdʒɛkt"
+        },
+        {
+            "text": "Your commitment to excellence is really inspiring!",
+            "phonemes": "jʊɹ kəmɪtmənt tuː ɛksələns ɪz ɹiəli ɪnspaɪɚɹɪŋ"
+        },
+        {
+            "text": "Make sure everyone learns how to use the new software.",
+            "phonemes": "meɪk ʃʊɹ ɛvɹɪwʌn lɜːnz haʊ tuː juːs ðə nuː sɔftwɛɹ"
+        },
+        {
+            "text": "Let’s handle the budget limits smartly.",
+            "phonemes": "lɛt ɛs hændəl ðə bʌdʒɪt lɪmɪts smɑːɹtli"
+        },
+        {
+            "text": "Can you help analyze the customer feedback?",
+            "phonemes": "kæn juː hɛlp ænɐlaɪz ðə kʌstəmɚ fiːdbæk"
+        },
+        {
+            "text": "Sorry the schedule conflicts caused trouble.",
+            "phonemes": "sɑːɹi ðə skɛdʒuːl kɑːnflɪkts kɔːzd tɹʌbəl"
+        },
+        {
+            "text": "You're really good at juggling multiple tasks efficiently!",
+            "phonemes": "jʊɹ ɹiəli ɡʊd æt dʒʌɡlɪŋ mʌltɪpəl tæsks ɪfɪʃəntli"
+        },
+        {
+            "text": "Check out the new project scope and let me know your thoughts.",
+            "phonemes": "tʃɛk aʊt ðə nuː pɹɑːdʒɛkt skoʊp ænd lɛt miː noʊ jʊɹ θɔːts"
+        },
+        {
+            "text": "We're upgrading how we interact with customers!",
+            "phonemes": "wɪɹ ʌpɡɹeɪdɪŋ haʊ wiː ɪntɚɹækt wɪð kʌstəmɚz"
+        },
+        {
+            "text": "Can you help with evaluating performance?",
+            "phonemes": "kæn juː hɛlp wɪð ɪvæljueɪɾɪŋ pɚfɔːɹməns"
+        },
+        {
+            "text": "Sorry the operational changes caused trouble.",
+            "phonemes": "sɑːɹi ðə ɑːpɚɹeɪʃənəl tʃeɪndʒᵻz kɔːzd tɹʌbəl"
+        },
+        {
+            "text": "Can you put together the summary for the board?",
+            "phonemes": "kæn juː pʊt təɡɛðɚ ðə sʌmɚɹi fɔːɹ ðə bɔːɹd"
+        },
+        {
+            "text": "\" We see how dedicated you are to the project, and we appreciate it!\"",
+            "phonemes": "wiː siː haʊ dɛdᵻkeɪɾᵻd juː ɑːɹ tuː ðə pɹɑːdʒɛkt ænd wiː ɐpɹiːʃɪeɪt ɪt"
+        },
+        {
+            "text": "We're starting a fresh program to recognize employee efforts!",
+            "phonemes": "wɪɹ stɑːɹɾɪŋ eɪ fɹɛʃ pɹoʊɡɹæm tuː ɹɛkəɡnaɪz ɛmplɔɪiː ɛfɚts"
+        },
+        {
+            "text": "Your ability to solve problems has really helped the team!",
+            "phonemes": "jʊɹ ɐbɪləɾi tuː sɑːlv pɹɑːbləmz hæz ɹiəli hɛlpt ðə tiːm"
+        },
+        {
+            "text": "Thanks for being an awesome team player!",
+            "phonemes": "θæŋks fɔːɹ biːɪŋ æn ɔːsʌm tiːm pleɪɚ"
+        },
+        {
+            "text": "Sorry the unexpected changes caused trouble.",
+            "phonemes": "sɑːɹi ðə ʌnɛkspɛktᵻd tʃeɪndʒᵻz kɔːzd tɹʌbəl"
+        },
+        {
+            "text": "Make sure we achieve all the project goals.",
+            "phonemes": "meɪk ʃʊɹ wiː ɐtʃiːv ɔːl ðə pɹɑːdʒɛkt ɡoʊlz"
+        },
+        {
+            "text": "Check out the guidelines I sent and stick to them.",
+            "phonemes": "tʃɛk aʊt ðə ɡaɪdlaɪnz aɪ sɛnt ænd stɪk tuː ðɛm"
+        },
+        {
+            "text": "Your initiative has made our operations smoother!",
+            "phonemes": "jʊɹ ɪnɪʃiətɪv hæz meɪd aʊɚ ɑːpɚɹeɪʃənz smuːðɚ"
+        },
+        {
+            "text": "We're starting a fresh wellness program for employees!",
+            "phonemes": "wɪɹ stɑːɹɾɪŋ eɪ fɹɛʃ wɛlnəs pɹoʊɡɹæm fɔːɹ ɛmplɔɪiːz"
+        },
+        {
+            "text": "Sorry the policy updates caused trouble.",
+            "phonemes": "sɑːɹi ðə pɑːlɪsi ʌpdeɪts kɔːzd tɹʌbəl"
+        },
+        {
+            "text": "Let’s make sure customer satisfaction is our top priority.",
+            "phonemes": "lɛt ɛs meɪk ʃʊɹ kʌstəmɚ sæɾɪsfækʃən ɪz aʊɚ tɑːp pɹaɪɔːɹᵻɾi"
+        },
+        {
+            "text": "Can you set up the agenda for the seminar?",
+            "phonemes": "kæn juː sɛt ʌp ðə ɐdʒɛndə fɔːɹ ðə sɛmɪnɑːɹ"
+        },
+        {
+            "text": "You led the project exceptionally well!",
+            "phonemes": "juː lɛd ðə pɹɑːdʒɛkt ɛksɛpʃənəli wɛl"
+        },
+        {
+            "text": "We're upgrading our training to help employees more effectively!",
+            "phonemes": "wɪɹ ʌpɡɹeɪdɪŋ aʊɚ tɹeɪnɪŋ tuː hɛlp ɛmplɔɪiːz mɔːɹ ɪfɛktɪvli"
+        },
+        {
+            "text": "Your dedication to excellence is what makes us successful!",
+            "phonemes": "jʊɹ dɛdɪkeɪʃən tuː ɛksələns ɪz wʌt meɪks ʌs səksɛsfəl"
+        },
+        {
+            "text": "Can you help get ready for the product launch?",
+            "phonemes": "kæn juː hɛlp ɡɛt ɹɛdi fɔːɹ ðə pɹɑːdʌkt lɑːntʃ"
+        },
+        {
+            "text": "Thanks for being so dedicated to the team!",
+            "phonemes": "θæŋks fɔːɹ biːɪŋ soʊ dɛdᵻkeɪɾᵻd tuː ðə tiːm"
+        },
+        {
+            "text": "Sorry the system upgrades caused trouble.",
+            "phonemes": "sɑːɹi ðə sɪstəm ʌpɡɹeɪdz kɔːzd tɹʌbəl"
+        },
+        {
+            "text": "Can you take care of the paperwork for new clients?",
+            "phonemes": "kæn juː teɪk kɛɹ ʌv ðə peɪpɚwɜːk fɔːɹ nuː klaɪənts"
+        },
+        {
+            "text": "Make sure we satisfy all the project needs.",
+            "phonemes": "meɪk ʃʊɹ wiː sæɾɪsfaɪ ɔːl ðə pɹɑːdʒɛkt niːdz"
+        },
+        {
+            "text": "Check out the new financial rules and follow them.",
+            "phonemes": "tʃɛk aʊt ðə nuː faɪnænʃəl ɹuːlz ænd fɑːloʊ ðɛm"
+        },
+        {
+            "text": "We're starting a fresh way to get customer feedback!",
+            "phonemes": "wɪɹ stɑːɹɾɪŋ eɪ fɹɛʃ weɪ tuː ɡɛt kʌstəmɚ fiːdbæk"
+        },
+        {
+            "text": "Can you help analyze how efficient our operations are?",
+            "phonemes": "kæn juː hɛlp ænɐlaɪz haʊ ɪfɪʃənt aʊɚ ɑːpɚɹeɪʃənz ɑːɹ"
+        },
+        {
+            "text": "Thanks for being so committed to the project!",
+            "phonemes": "θæŋks fɔːɹ biːɪŋ soʊ kəmɪɾᵻd tuː ðə pɹɑːdʒɛkt"
+        },
+        {
+            "text": "Sorry the unexpected delays caused trouble.",
+            "phonemes": "sɑːɹi ðə ʌnɛkspɛktᵻd dᵻleɪz kɔːzd tɹʌbəl"
+        },
+        {
+            "text": "We're dedicated to boosting how we engage with employees!",
+            "phonemes": "wɪɹ dɛdᵻkeɪɾᵻd tuː buːstɪŋ haʊ wiː ɛŋɡeɪdʒ wɪð ɛmplɔɪiːz"
+        },
+        {
+            "text": "Can you take care of following up with the clients?",
+            "phonemes": "kæn juː teɪk kɛɹ ʌv fɑːloʊɪŋ ʌp wɪð ðə klaɪənts"
+        },
+        {
+            "text": "Check out the guidelines I sent and follow them closely.",
+            "phonemes": "tʃɛk aʊt ðə ɡaɪdlaɪnz aɪ sɛnt ænd fɑːloʊ ðɛm kloʊsli"
+        },
+        {
+            "text": "We're starting a fresh tool for internal communication!",
+            "phonemes": "wɪɹ stɑːɹɾɪŋ eɪ fɹɛʃ tuːl fɔːɹ ɪntɜːnəl kəmjuːnɪkeɪʃən"
+        },
+        {
+            "text": "Can you help with the financial audit?",
+            "phonemes": "kæn juː hɛlp wɪð ðə faɪnænʃəl ɔːdɪt"
+        },
+        {
+            "text": "We're dedicated to offering excellent customer service!",
+            "phonemes": "wɪɹ dɛdᵻkeɪɾᵻd tuː ɔfɚɹɪŋ ɛksələnt kʌstəmɚ sɜːvɪs"
+        },
+        {
+            "text": "Make sure everyone knows about the new procedures.",
+            "phonemes": "meɪk ʃʊɹ ɛvɹɪwʌn noʊz ɐbaʊt ðə nuː pɹəsiːdʒɚz"
+        },
+        {
+            "text": "Your initiative has really boosted our workflow!",
+            "phonemes": "jʊɹ ɪnɪʃiətɪv hæz ɹiəli buːstᵻd aʊɚ wɜːkfloʊ"
+        },
+        {
+            "text": "Can you help analyze the customer satisfaction survey?",
+            "phonemes": "kæn juː hɛlp ænɐlaɪz ðə kʌstəmɚ sæɾɪsfækʃən sɜːveɪ"
+        },
+        {
+            "text": "Thanks for always being committed to excellence!",
+            "phonemes": "θæŋks fɔːɹ ɔːlweɪz biːɪŋ kəmɪɾᵻd tuː ɛksələns"
+        },
+        {
+            "text": "Your careful eye for detail has boosted our project quality!",
+            "phonemes": "jʊɹ kɛɹfəl aɪ fɔːɹ diːteɪl hæz buːstᵻd aʊɚ pɹɑːdʒɛkt kwɔlᵻɾi"
+        },
+        {
+            "text": "Make sure you file all the papers right.",
+            "phonemes": "meɪk ʃʊɹ juː faɪl ɔːl ðə peɪpɚz ɹaɪt"
+        },
+        {
+            "text": "Exciting news—we're dropping a new product!",
+            "phonemes": "ɛksaɪɾɪŋ nuːz wɪɹ dɹɑːpɪŋ eɪ nuː pɹɑːdʌkt"
+        },
+        {
+            "text": "When are you free to meet next week?",
+            "phonemes": "wɛn ɑːɹ juː fɹiː tuː miːt nɛkst wiːk"
+        },
+        {
+            "text": "Keep our secrets, okay?",
+            "phonemes": "kiːp aʊɚ siːkɹᵻts oʊkeɪ"
+        },
+        {
+            "text": "Sorry for taking so long with your request.",
+            "phonemes": "sɑːɹi fɔːɹ teɪkɪŋ soʊ lɔŋ wɪð jʊɹ ɹᵻkwɛst"
+        },
+        {
+            "text": "We're all about giving awesome customer service!",
+            "phonemes": "wɪɹ ɔːl ɐbaʊt ɡɪvɪŋ ɔːsʌm kʌstəmɚ sɜːvɪs"
+        },
+        {
+            "text": "Can you help put together the yearly report?",
+            "phonemes": "kæn juː hɛlp pʊt təɡɛðɚ ðə jɪɹli ɹᵻpɔːɹt"
+        },
+        {
+            "text": "Let me know you got this email ASAP.",
+            "phonemes": "lɛt miː noʊ juː ɡɑːt ðɪs iːmeɪl eɪɛseɪpiː"
+        },
+        {
+            "text": "Let's tackle the project deadlines coming up.",
+            "phonemes": "lɛts tækəl ðə pɹɑːdʒɛkt dɛdlaɪnz kʌmɪŋ ʌp"
+        },
+        {
+            "text": "We really appreciate everything you do for the team.",
+            "phonemes": "wiː ɹiəli ɐpɹiːʃɪeɪt ɛvɹɪθɪŋ juː duː fɔːɹ ðə tiːm"
+        },
+        {
+            "text": "Can you give a detailed rundown of the project plan?",
+            "phonemes": "kæn juː ɡɪv eɪ diːteɪld ɹʌndaʊn ʌv ðə pɹɑːdʒɛkt plæn"
+        },
+        {
+            "text": "Make sure everyone on the team knows about the changes.",
+            "phonemes": "meɪk ʃʊɹ ɛvɹɪwʌn ɔn ðə tiːm noʊz ɐbaʊt ðə tʃeɪndʒᵻz"
+        },
+        {
+            "text": "We're upgrading our processes to work more efficiently.",
+            "phonemes": "wɪɹ ʌpɡɹeɪdɪŋ aʊɚ pɹɑːsɛsᵻz tuː wɜːk mɔːɹ ɪfɪʃəntli"
+        },
+        {
+            "text": "Can you manage setting up the new system?",
+            "phonemes": "kæn juː mænɪdʒ sɛɾɪŋ ʌp ðə nuː sɪstəm"
+        },
+        {
+            "text": "Sorry if my last message was confusing.",
+            "phonemes": "sɑːɹi ɪf maɪ læst mɛsɪdʒ wʌz kənfjuːzɪŋ"
+        },
+        {
+            "text": "Check out the attached proposal and let me know what you think.",
+            "phonemes": "tʃɛk aʊt ðə ɐtætʃt pɹəpoʊzəl ænd lɛt miː noʊ wʌt juː θɪŋk"
+        },
+        {
+            "text": "We're setting up a meeting to talk about the project goals.",
+            "phonemes": "wɪɹ sɛɾɪŋ ʌp eɪ miːɾɪŋ tuː tɔːk ɐbaʊt ðə pɹɑːdʒɛkt ɡoʊlz"
+        },
+        {
+            "text": "Can you let the client know what's up with the status?",
+            "phonemes": "kæn juː lɛt ðə klaɪənt noʊ wʌts ʌp wɪð ðə stæɾəs"
+        },
+        {
+            "text": "Thanks for being willing to help with this task!",
+            "phonemes": "θæŋks fɔːɹ biːɪŋ wɪlɪŋ tuː hɛlp wɪð ðɪs tæsk"
+        },
+        {
+            "text": "We're dedicated to building a team oriented workspace.",
+            "phonemes": "wɪɹ dɛdᵻkeɪɾᵻd tuː bɪldɪŋ eɪ tiːm ɔːɹiəntᵻd wɜːkspeɪs"
+        },
+        {
+            "text": "What's the latest on the project's progress?",
+            "phonemes": "wʌts ðə leɪɾɪst ɔn ðə pɹɑːdʒɛkts pɹɑːɡɹɛs"
+        },
+        {
+            "text": "We’re happy with how the meeting went.",
+            "phonemes": "wiː ɹiː hæpi wɪð haʊ ðə miːɾɪŋ wɛnt"
+        },
+        {
+            "text": "Can you help organize the event?",
+            "phonemes": "kæn juː hɛlp ɔːɹɡənaɪz ðə ᵻvɛnt"
+        },
+        {
+            "text": "Sorry the tech issues caused trouble.",
+            "phonemes": "sɑːɹi ðə tɛk ɪʃuːz kɔːzd tɹʌbəl"
+        },
+        {
+            "text": "Let us know what you think about the new strategy.",
+            "phonemes": "lɛt ʌs noʊ wʌt juː θɪŋk ɐbaʊt ðə nuː stɹæɾədʒi"
+        },
+        {
+            "text": "Let's wrap up the budget by Friday.",
+            "phonemes": "lɛts ɹæp ʌp ðə bʌdʒɪt baɪ fɹaɪdeɪ"
+        },
+        {
+            "text": "Sorry the schedule change caused trouble.",
+            "phonemes": "sɑːɹi ðə skɛdʒuːl tʃeɪndʒ kɔːzd tɹʌbəl"
+        },
+        {
+            "text": "We're upgrading our digital systems to help us grow!",
+            "phonemes": "wɪɹ ʌpɡɹeɪdɪŋ aʊɚ dɪdʒɪɾəl sɪstəmz tuː hɛlp ʌs ɡɹoʊ"
+        },
+        {
+            "text": "Can you give a recap of the meeting notes?",
+            "phonemes": "kæn juː ɡɪv eɪ ɹᵻkæp ʌv ðə miːɾɪŋ noʊts"
+        },
+        {
+            "text": "Stick to the ethical rules, please.",
+            "phonemes": "stɪk tuː ðə ɛθɪkəl ɹuːlz pliːz"
+        },
+        {
+            "text": "Sorry if our last talk was confusing.",
+            "phonemes": "sɑːɹi ɪf aʊɚ læst tɔːk wʌz kənfjuːzɪŋ"
+        },
+        {
+            "text": "Can you help develop the new software?",
+            "phonemes": "kæn juː hɛlp dɪvɛləp ðə nuː sɔftwɛɹ"
+        },
+        {
+            "text": "You've been killing it and helping us win!",
+            "phonemes": "juːv bɪn kɪlɪŋ ɪt ænd hɛlpɪŋ ʌs wɪn"
+        },
+        {
+            "text": "Sorry the operational changes caused trouble.",
+            "phonemes": "sɑːɹi ðə ɑːpɚɹeɪʃənəl tʃeɪndʒᵻz kɔːzd tɹʌbəl"
+        },
+        {
+            "text": "Thanks for being so dedicated to the project!",
+            "phonemes": "θæŋks fɔːɹ biːɪŋ soʊ dɛdᵻkeɪɾᵻd tuː ðə pɹɑːdʒɛkt"
+        },
+        {
+            "text": "Check out the new policy doc and follow it.",
+            "phonemes": "tʃɛk aʊt ðə nuː pɑːlɪsi dɑːk ænd fɑːloʊ ɪt"
+        },
+        {
+            "text": "Sorry the system maintenance caused trouble.",
+            "phonemes": "sɑːɹi ðə sɪstəm meɪntənəns kɔːzd tɹʌbəl"
+        },
+        {
+            "text": "Can you help with the paperwork for new clients?",
+            "phonemes": "kæn juː hɛlp wɪð ðə peɪpɚwɜːk fɔːɹ nuː klaɪənts"
+        },
+        {
+            "text": "Check out the guidelines I sent and let me know what you think.",
+            "phonemes": "tʃɛk aʊt ðə ɡaɪdlaɪnz aɪ sɛnt ænd lɛt miː noʊ wʌt juː θɪŋk"
+        },
+        {
+            "text": "We're starting a fresh tool for internal communication!",
+            "phonemes": "wɪɹ stɑːɹɾɪŋ eɪ fɹɛʃ tuːl fɔːɹ ɪntɜːnəl kəmjuːnɪkeɪʃən"
+        },
+        {
+            "text": "Can you help with the financial audit?",
+            "phonemes": "kæn juː hɛlp wɪð ðə faɪnænʃəl ɔːdɪt"
+        },
+        {
+            "text": "Thanks for managing the project so well!",
+            "phonemes": "θæŋks fɔːɹ mænɪdʒɪŋ ðə pɹɑːdʒɛkt soʊ wɛl"
+        },
+        {
+            "text": "Sorry the policy enforcement caused trouble.",
+            "phonemes": "sɑːɹi ðə pɑːlɪsi ɛnfɔːɹsmənt kɔːzd tɹʌbəl"
+        },
+        {
+            "text": "Keep our customer satisfaction levels high.",
+            "phonemes": "kiːp aʊɚ kʌstəmɚ sæɾɪsfækʃən lɛvəlz haɪ"
+        },
+        {
+            "text": "You're really awesome at hitting project deadlines!",
+            "phonemes": "jʊɹ ɹiəli ɔːsʌm æt hɪɾɪŋ pɹɑːdʒɛkt dɛdlaɪnz"
+        },
+        {
+            "text": "Thanks for always being committed to the team!",
+            "phonemes": "θæŋks fɔːɹ ɔːlweɪz biːɪŋ kəmɪɾᵻd tuː ðə tiːm"
+        },
+        {
+            "text": "Sorry the unexpected changes caused trouble.",
+            "phonemes": "sɑːɹi ðə ʌnɛkspɛktᵻd tʃeɪndʒᵻz kɔːzd tɹʌbəl"
+        },
+        {
+            "text": "We're upgrading our training programs for employees!",
+            "phonemes": "wɪɹ ʌpɡɹeɪdɪŋ aʊɚ tɹeɪnɪŋ pɹoʊɡɹæmz fɔːɹ ɛmplɔɪiːz"
+        },
+        {
+            "text": "Your careful eye for detail has boosted our workflow!",
+            "phonemes": "jʊɹ kɛɹfəl aɪ fɔːɹ diːteɪl hæz buːstᵻd aʊɚ wɜːkfloʊ"
+        },
+        {
+            "text": "Stick to the new compliance rules.",
+            "phonemes": "stɪk tuː ðə nuː kəmplaɪəns ɹuːlz"
+        },
+        {
+            "text": "Check out the suggested changes and let me know what you think.",
+            "phonemes": "tʃɛk aʊt ðə sədʒɛstᵻd tʃeɪndʒᵻz ænd lɛt miː noʊ wʌt juː θɪŋk"
+        },
+        {
+            "text": "You’ve inspired everyone with how you lead!",
+            "phonemes": "juː viː ɪnspaɪɚd ɛvɹɪwʌn wɪð haʊ juː liːd"
+        },
+        {
+            "text": "Sorry the limited resources caused trouble.",
+            "phonemes": "sɑːɹi ðə lɪmɪɾᵻd ɹᵻsɔːɹsᵻz kɔːzd tɹʌbəl"
+        },
+        {
+            "text": "Make sure we hit all the project milestones.",
+            "phonemes": "meɪk ʃʊɹ wiː hɪt ɔːl ðə pɹɑːdʒɛkt maɪlstoʊnz"
+        },
+        {
+            "text": "Can you set up a detailed timeline for the project?",
+            "phonemes": "kæn juː sɛt ʌp eɪ diːteɪld taɪmlaɪn fɔːɹ ðə pɹɑːdʒɛkt"
+        },
+        {
+            "text": "We're starting a fresh wellness program for employees!",
+            "phonemes": "wɪɹ stɑːɹɾɪŋ eɪ fɹɛʃ wɛlnəs pɹoʊɡɹæm fɔːɹ ɛmplɔɪiːz"
+        },
+        {
+            "text": "Your dedication to excellence is really driving our success!",
+            "phonemes": "jʊɹ dɛdɪkeɪʃən tuː ɛksələns ɪz ɹiəli dɹaɪvɪŋ aʊɚ səksɛs"
+        },
+        {
+            "text": "Can you help get ready for the product launch?",
+            "phonemes": "kæn juː hɛlp ɡɛt ɹɛdi fɔːɹ ðə pɹɑːdʌkt lɑːntʃ"
+        },
+        {
+            "text": "Thanks for being so dedicated to the team!",
+            "phonemes": "θæŋks fɔːɹ biːɪŋ soʊ dɛdᵻkeɪɾᵻd tuː ðə tiːm"
+        },
+        {
+            "text": "Make sure everyone knows about the new protocols.",
+            "phonemes": "meɪk ʃʊɹ ɛvɹɪwʌn noʊz ɐbaʊt ðə nuː pɹoʊɾəkɑːlz"
+        },
+        {
+            "text": "Your active participation has made the team vibe better!",
+            "phonemes": "jʊɹ æktɪv pɑːɹtɪsɪpeɪʃən hæz meɪd ðə tiːm vaɪb bɛɾɚ"
+        },
+        {
+            "text": "We're starting a fresh way to get customer feedback!",
+            "phonemes": "wɪɹ stɑːɹɾɪŋ eɪ fɹɛʃ weɪ tuː ɡɛt kʌstəmɚ fiːdbæk"
+        },
+        {
+            "text": "Can you help analyze how efficient our operations are?",
+            "phonemes": "kæn juː hɛlp ænɐlaɪz haʊ ɪfɪʃənt aʊɚ ɑːpɚɹeɪʃənz ɑːɹ"
+        },
+        {
+            "text": "Thanks for being so committed to the project!",
+            "phonemes": "θæŋks fɔːɹ biːɪŋ soʊ kəmɪɾᵻd tuː ðə pɹɑːdʒɛkt"
+        },
+        {
+            "text": "Sorry the unexpected delays caused trouble.",
+            "phonemes": "sɑːɹi ðə ʌnɛkspɛktᵻd dᵻleɪz kɔːzd tɹʌbəl"
+        },
+        {
+            "text": "We're dedicated to boosting how we engage with employees!",
+            "phonemes": "wɪɹ dɛdᵻkeɪɾᵻd tuː buːstɪŋ haʊ wiː ɛŋɡeɪdʒ wɪð ɛmplɔɪiːz"
+        },
+        {
+            "text": "Can you take care of following up with the clients?",
+            "phonemes": "kæn juː teɪk kɛɹ ʌv fɑːloʊɪŋ ʌp wɪð ðə klaɪənts"
+        },
+        {
+            "text": "Check out the guidelines I sent and follow them closely.",
+            "phonemes": "tʃɛk aʊt ðə ɡaɪdlaɪnz aɪ sɛnt ænd fɑːloʊ ðɛm kloʊsli"
+        },
+        {
+            "text": "Can you help get ready for the product launch!",
+            "phonemes": "kæn juː hɛlp ɡɛt ɹɛdi fɔːɹ ðə pɹɑːdʌkt lɑːntʃ"
+        }
+    ]
+}
